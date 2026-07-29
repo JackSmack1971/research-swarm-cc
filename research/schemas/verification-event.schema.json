@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "verification-event.schema.json",
+  "title": "Append-only verification event",
+  "description": "Each object records one immutable verification attempt and is appended to the event ledger; it is never edited in place.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["verification_event_id", "claim_id", "occurred_at", "outcome", "rationale", "checked_source_ids"],
+  "properties": {
+    "verification_event_id": { "type": "string", "pattern": "^ver_[A-Za-z0-9][A-Za-z0-9_-]*$" },
+    "claim_id": { "$ref": "claim.schema.json#/$defs/claimId" },
+    "occurred_at": { "type": "string", "format": "date-time" },
+    "outcome": { "$ref": "#/$defs/outcome" },
+    "rationale": { "type": "string", "minLength": 1 },
+    "checked_source_ids": { "type": "array", "items": { "$ref": "source.schema.json#/$defs/sourceId" } },
+    "qualification": { "type": "string", "minLength": 1 }
+  },
+  "$defs": { "outcome": { "enum": ["confirmed", "confirmed_with_qualification", "demoted", "contradicted", "unverifiable", "discarded"] } }
+}

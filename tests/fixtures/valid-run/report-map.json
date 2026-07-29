@@ -1,0 +1,4 @@
+{
+  "report_map_id": "rmap_fixture",
+  "report_units": [{ "report_unit_id": "rpt_fixture", "section": "Key Findings", "claim_ids": ["clm_fixture"] }]
+}

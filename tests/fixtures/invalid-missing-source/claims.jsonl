@@ -1,0 +1,1 @@
+{"claim_id":"clm_fixture","statement":"A claim cites no known source.","scope":"Fixture.","claim_type":"fact","materiality":"high","confidence":"high","confidence_rationale":"The definitive authority is sufficient for this publication fact.","supporting_evidence":[{"source_id":"src_missing","locator":"Record heading","relationship":"supports"}],"counter_evidence":[]}

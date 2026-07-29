@@ -1,0 +1,8 @@
+{
+  "run_id": "run_fixture",
+  "created_at": "2026-07-28T00:00:00Z",
+  "run_directory": "tests/fixtures/valid-run",
+  "plan_id": "plan_fixture",
+  "counts": { "sources": 1, "claims": 1, "retained_claims": 1, "discarded_claims": 0, "verification_events": 1, "conflicts": 0, "report_units": 1 },
+  "paths": { "plan": "plan.json", "sources": "sources.jsonl", "claims": "claims.jsonl", "discarded_claims": "discarded-claims.jsonl", "verification_events": "verification-events.jsonl", "conflicts": "conflicts.json", "report": "report.md", "report_map": "report-map.json", "validation": "validation.json" }
+}

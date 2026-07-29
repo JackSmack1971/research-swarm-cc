@@ -1,0 +1,1 @@
+{"claim_id":"clm_fixture","statement":"The fixture authority published the record.","scope":"Fixture.","claim_type":"fact","materiality":"medium","confidence":"medium","confidence_rationale":"One source.","supporting_evidence":[{"source_id":"src_fixture","locator":"Record heading","relationship":"supports"}],"counter_evidence":[]}

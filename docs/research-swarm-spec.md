@@ -1,4 +1,4 @@
-# Codex Build Blueprint: Claude Code Deep Research Swarm
+# Claude Code Deep Research Swarm — Implementation Specification
 
 ## 1. Your role
 
@@ -75,7 +75,7 @@ Do not add:
 
 ## 3.2 Orchestration
 
-Use a Claude Code dynamic workflow as the actual orchestrator.
+Use a JavaScript dynamic workflow, running entirely inside Claude Code, as the actual orchestrator.
 
 Do not create an “orchestrator agent” that manually decides every transition. The JavaScript workflow owns:
 
@@ -88,6 +88,8 @@ Do not create an “orchestrator agent” that manually decides every transition
 * final return value.
 
 Custom agents define reusable roles, but the workflow script owns control flow.
+
+Claude Code 2.1.154 and later documents this native workflow interface. Milestone 2 must still confirm it is enabled locally and must verify the remaining unresolved routing question: whether a workflow `agent()` call can directly select a named project agent from `.claude/agents/`. Do not substitute an external runtime.
 
 ## 3.3 Shared state
 
@@ -129,6 +131,7 @@ Create or merge the following structure:
 │   ├── research-normalizer.md
 │   ├── research-verifier.md
 │   ├── research-adjudicator.md
+│   ├── research-semantic-validator.md
 │   ├── research-synthesizer.md
 │   └── research-persistence-writer.md
 ├── rules/
@@ -498,7 +501,23 @@ The report must be readable without exposing internal agent prompts.
 
 Do not place internal claim IDs throughout the prose unless needed for audit readability. Store detailed mappings in `report-map.json`.
 
-## 7.7 Research persistence writer
+## 7.7 Research semantic validator
+
+File:
+
+```text
+.claude/agents/research-semantic-validator.md
+```
+
+Responsibilities:
+
+* inspect the drafted report only against the adjudicated ledger and report map;
+* identify unsupported assertions, missing support mappings, concealed material conflicts, overstatement, and unlabeled inference;
+* return a structured pass/fail result with targeted repair instructions.
+
+It must not research, alter the ledger, write shared artifacts, or resolve factual conflicts. It is semantic review, not deterministic structural validation.
+
+## 7.8 Research persistence writer
 
 File:
 
@@ -561,6 +580,10 @@ Required conceptual fields:
 Allow `published_at` to be null only when the source genuinely provides no date.
 
 At least one of `url` or `doi` must be present.
+
+## 8.1a Research plan
+
+The canonical research plan contains `query`, `interpreted_scope`, `assumptions`, `initial_depth`, `depth_rationale`, uniquely identified `subquestions`, `high_risk_areas`, `required_source_types`, `escalation_triggers`, `worker_count`, and `verification_policy`. It is immutable after persistence; any repair records its targeted reason in the manifest.
 
 ## 8.2 Claim
 
@@ -650,6 +673,14 @@ Example:
 
 An inference entry must identify its premise claim IDs.
 
+## 8.5 Conflict
+
+A conflict record has a unique `conflict_id`, competing claim IDs, their supporting and counter-evidence source IDs, the likely reason for disagreement, materiality, current disposition, and practical implication. The adjudicator may classify a conflict but may not erase credible counter-evidence.
+
+## 8.6 Run manifest
+
+The manifest has a run identifier, UTC creation time, input configuration, workflow and Claude Code version metadata when available, artifact filenames, validation status, repair-round count, and final counts for sources, retained claims, discarded claims, verification events, and unresolved conflicts. It identifies the archived run directory and does not contain raw transcripts or secrets.
+
 ---
 
 # 9. Research depth policy
@@ -673,6 +704,10 @@ Target:
 * one or two workers;
 * narrow source collection;
 * verification only for critical, high-risk, conflicting, quantitative, or weakly sourced claims.
+
+## Auto
+
+Start from the planner's bounded assessment of query breadth, stakes, freshness, and expected conflict. Select Light, Standard, or Deep; escalation triggers may only increase the selected depth. Record the selected depth and rationale in the research plan and manifest.
 
 ## Standard
 
@@ -979,7 +1014,7 @@ When validation fails after the allowed repair rounds, return a transparent fail
 
 ## 11.4 Custom-agent routing compatibility
 
-Do not invent an undocumented `agent()` option for selecting a custom agent.
+The documented workflow interface does not establish an `agent()` option for selecting a named project custom agent. Do not invent one.
 
 Use this implementation rule:
 
@@ -1154,6 +1189,8 @@ Add:
 }
 ```
 
+This setting is advisory, not a hard concurrency cap. It is supported in settings files by Claude Code 2.1.219 and later.
+
 Do not delete or reorder unrelated settings unnecessarily.
 
 Do not enable bypass-permissions mode.
@@ -1282,6 +1319,9 @@ The build is complete only when all of these are true:
 * no OpenAI runtime integration was added;
 * no external orchestration framework was added;
 * no placeholders, TODOs, or pseudocode remain in required files.
+* all eight custom roles, including the semantic validator, are defined;
+* canonical research-plan, source, claim, verification-event, conflict, report-map, and manifest contracts are present;
+* Auto, Light, Standard, and Deep mode behavior is documented.
 
 ---
 

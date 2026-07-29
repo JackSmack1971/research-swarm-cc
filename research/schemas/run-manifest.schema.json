@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "run-manifest.schema.json",
+  "title": "Archived research-run manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["run_id", "created_at", "run_directory", "plan_id", "counts", "paths"],
+  "properties": {
+    "run_id": { "type": "string", "pattern": "^run_[A-Za-z0-9][A-Za-z0-9_-]*$" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "run_directory": { "type": "string", "minLength": 1 },
+    "plan_id": { "$ref": "research-plan.schema.json#/$defs/planId" },
+    "counts": { "$ref": "#/$defs/counts" },
+    "paths": { "$ref": "#/$defs/paths" }
+  },
+  "$defs": {
+    "counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sources", "claims", "retained_claims", "discarded_claims", "verification_events", "conflicts", "report_units"],
+      "properties": {
+        "sources": { "type": "integer", "minimum": 0 },
+        "claims": { "type": "integer", "minimum": 0 },
+        "retained_claims": { "type": "integer", "minimum": 0 },
+        "discarded_claims": { "type": "integer", "minimum": 0 },
+        "verification_events": { "type": "integer", "minimum": 0 },
+        "conflicts": { "type": "integer", "minimum": 0 },
+        "report_units": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "paths": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["plan", "sources", "claims", "discarded_claims", "verification_events", "conflicts", "report", "report_map", "validation"],
+      "properties": {
+        "plan": { "type": "string", "minLength": 1 },
+        "sources": { "type": "string", "minLength": 1 },
+        "claims": { "type": "string", "minLength": 1 },
+        "discarded_claims": { "type": "string", "minLength": 1 },
+        "verification_events": { "type": "string", "minLength": 1 },
+        "conflicts": { "type": "string", "minLength": 1 },
+        "report": { "type": "string", "minLength": 1 },
+        "report_map": { "type": "string", "minLength": 1 },
+        "validation": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

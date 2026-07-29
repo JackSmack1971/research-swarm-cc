@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "claim-bundle.schema.json",
+  "title": "Worker claim bundle",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["bundle_id", "subquestion_id", "sources", "claims"],
+  "properties": {
+    "bundle_id": { "type": "string", "pattern": "^bundle_[A-Za-z0-9][A-Za-z0-9_-]*$" },
+    "subquestion_id": { "type": "string", "pattern": "^sq_[A-Za-z0-9][A-Za-z0-9_-]*$" },
+    "sources": { "type": "array", "items": { "$ref": "source.schema.json" } },
+    "claims": { "type": "array", "items": { "$ref": "claim.schema.json" } }
+  }
+}

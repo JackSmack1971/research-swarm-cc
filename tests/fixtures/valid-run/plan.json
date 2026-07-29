@@ -1,0 +1,14 @@
+{
+  "plan_id": "plan_fixture",
+  "query": "What does the fixture authority report?",
+  "interpreted_scope": "A deterministic validation fixture.",
+  "assumptions": [],
+  "initial_depth": "standard",
+  "depth_rationale": "One scoped claim is sufficient for structural validation.",
+  "subquestions": [{ "subquestion_id": "sq_fixture", "question": "What is the published result?" }],
+  "high_risk_areas": [],
+  "required_source_types": ["primary_data"],
+  "escalation_triggers": [],
+  "worker_count": 1,
+  "verification_policy": "risk-based"
+}

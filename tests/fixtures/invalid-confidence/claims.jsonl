@@ -1,0 +1,1 @@
+{"claim_id":"clm_fixture","statement":"A weakly supported claim.","scope":"Fixture.","claim_type":"fact","materiality":"high","confidence":"high","confidence_rationale":"One secondary source supports it.","supporting_evidence":[{"source_id":"src_fixture","locator":"Analysis","relationship":"supports"}],"counter_evidence":[]}
