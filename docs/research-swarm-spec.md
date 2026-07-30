@@ -111,9 +111,9 @@ Use all three layers:
 
 ## 3.5 Dependencies
 
-Use Node.js built-in modules only.
+Use Node.js built-in modules only, except that Milestones 12–20 authorize Ajv 8 as the sole new dependency for JSON Schema contract enforcement. Ajv is not an orchestration dependency.
 
-Do not add npm dependencies unless the repository already has an approved validation dependency that can be reused without changing application behavior.
+Do not add any other npm dependency unless the repository already has an approved validation dependency that can be reused without changing application behavior.
 
 Use the built-in `node:test` test runner.
 
@@ -1357,3 +1357,15 @@ End with:
 ```
 
 Do not merely describe what should be built. Create the complete implementation.
+
+---
+
+# 20. Audit-run-1 remediation authorization
+
+Milestone 12 is documentation-only. Its remediation matrix in `docs/audit-run-1-remediation-plan.md` is binding for Milestones 13–20. Every audit finding must be implemented, documented as a rationale-backed deviation, or retained as an explicitly unresolved platform limitation; no recommendation may be silently rejected.
+
+The runtime remains the native Claude Code dynamic workflow. Per-role write isolation is behavioral—not hard permission isolation—until Claude Code documents named-agent routing or per-call tool restrictions. This limitation must be described accurately in user-facing documentation.
+
+Canonical JSON Schema files are the single contract source. Ajv 8 is approved as the sole new dependency and may be used only to enforce those schemas. Workflow inline schemas and schema-derived validator constants must be generated from the canonical schemas and checked for drift.
+
+Milestones that alter archive contracts must preserve existing fixtures and archived runs, or provide and validate an explicit migration. Milestone 20 must execute the complete offline regression suite and one Claude Code smoke test when the runtime is available; otherwise it must record the exact unavailable-runtime evidence without claiming a smoke result.

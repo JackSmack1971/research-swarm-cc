@@ -5,6 +5,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { readJsonl } from '../scripts/lib/jsonl.mjs';
 import { validateResearchRun } from '../scripts/lib/research-validation.mjs';
+import { generateResearchContracts } from '../scripts/generate-research-contracts.mjs';
 
 const fixtures = path.join(process.cwd(), 'tests', 'fixtures');
 const fixture = (name) => path.join(fixtures, name);
@@ -26,6 +27,26 @@ async function copiedValid(t) {
 
 async function markInvalid(directory) {
   await writeJson(path.join(directory, 'validation.json'), { valid: false });
+}
+
+async function mutateSource(t, mutate) {
+  const directory = await copiedValid(t);
+  const file = path.join(directory, 'sources.jsonl');
+  const source = (await readJsonl(file)).records[0];
+  mutate(source);
+  await writeFile(file, `${JSON.stringify(source)}\n`);
+  await markInvalid(directory);
+  return validateResearchRun(directory);
+}
+
+async function mutateClaim(t, mutate) {
+  const directory = await copiedValid(t);
+  const file = path.join(directory, 'claims.jsonl');
+  const claim = (await readJsonl(file)).records[0];
+  mutate(claim);
+  await writeFile(file, `${JSON.stringify(claim)}\n`);
+  await markInvalid(directory);
+  return validateResearchRun(directory);
 }
 
 test('a valid run and definitive-primary sufficiency rationale pass', async () => {
@@ -57,6 +78,72 @@ test('a weak single-source high-confidence claim fails', async () => {
   const result = await validateResearchRun(fixture('invalid-confidence'));
   assert.equal(result.valid, false);
   assert.ok(hasRule(result, 'claim.confidence.high'));
+});
+
+test('an invalid source type fails its canonical schema', async (t) => {
+  const result = await mutateSource(t, (source) => { source.source_type = 'blogish'; });
+  assert.equal(result.valid, false);
+  assert.ok(hasRule(result, 'schema.enum'));
+});
+
+test('an unexpected source property fails its canonical schema', async (t) => {
+  const result = await mutateSource(t, (source) => { source.unexpected = true; });
+  assert.equal(result.valid, false);
+  assert.ok(hasRule(result, 'schema.additionalProperties'));
+});
+
+test('invalid date, date-time, URL, and DOI formats fail canonical schemas', async (t) => {
+  for (const [field, value] of [['publication_date', '2026-02-30'], ['access_date', '2026/07/28'], ['url', 'not a URL'], ['doi', 'doi:bad']]) {
+    const result = await mutateSource(t, (source) => { source[field] = value; });
+    assert.equal(result.valid, false, field);
+    assert.ok(hasRule(result, field === 'doi' ? 'schema.pattern' : 'schema.format'), field);
+  }
+  const directory = await copiedValid(t);
+  const file = path.join(directory, 'verification-events.jsonl');
+  const event = (await readJsonl(file)).records[0];
+  event.occurred_at = '2026-07-28T25:00:00Z';
+  await writeFile(file, `${JSON.stringify(event)}\n`);
+  await markInvalid(directory);
+  const result = await validateResearchRun(directory);
+  assert.equal(result.valid, false);
+  assert.ok(hasRule(result, 'schema.format'));
+});
+
+test('publication-date conditionals and claim conditional fields fail canonical schemas', async (t) => {
+  const missingReason = await mutateSource(t, (source) => { source.publication_date = null; });
+  assert.equal(missingReason.valid, false);
+  assert.ok(hasRule(missingReason, 'schema.required'));
+  const forbiddenReason = await mutateSource(t, (source) => { source.publication_date_unavailable_reason = 'not needed'; });
+  assert.equal(forbiddenReason.valid, false);
+  assert.ok(hasRule(forbiddenReason, 'schema.not'));
+  const claim = await mutateClaim(t, (record) => { record.premise_claim_ids = ['clm_fixture']; });
+  assert.equal(claim.valid, false);
+  assert.ok(hasRule(claim, 'schema.not'));
+});
+
+test('generation rejects stale workflow contracts, missing references, and duplicate schema IDs', async (t) => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'research-contracts-'));
+  const schemas = path.join(directory, 'schemas');
+  const workflow = path.join(directory, 'research-swarm.js');
+  const registry = path.join(directory, 'research-contracts.generated.mjs');
+  await cp(path.join(process.cwd(), 'research', 'schemas'), schemas, { recursive: true });
+  await cp(path.join(process.cwd(), '.claude', 'workflows', 'research-swarm.js'), workflow);
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  await generateResearchContracts({ schemaDirectory: schemas, workflowPath: workflow, registryPath: registry });
+  await writeFile(workflow, (await readFile(workflow, 'utf8')).replace('const sourceSchema', 'const staleSourceSchema'));
+  await assert.rejects(generateResearchContracts({ schemaDirectory: schemas, workflowPath: workflow, registryPath: registry, check: true }), /stale/);
+  const claimFile = path.join(schemas, 'claim.schema.json');
+  const claimSchema = await readJson(claimFile);
+  claimSchema.$defs.evidence.properties.source_id.$ref = 'missing.schema.json#/$defs/sourceId';
+  await writeJson(claimFile, claimSchema);
+  await assert.rejects(generateResearchContracts({ schemaDirectory: schemas, workflowPath: workflow, registryPath: registry }), /Missing schema reference/);
+  claimSchema.$defs.evidence.properties.source_id.$ref = 'source.schema.json#/$defs/sourceId';
+  await writeJson(claimFile, claimSchema);
+  const sourceFile = path.join(schemas, 'source.schema.json');
+  const sourceSchema = await readJson(sourceFile);
+  sourceSchema.$id = claimSchema.$id;
+  await writeJson(sourceFile, sourceSchema);
+  await assert.rejects(generateResearchContracts({ schemaDirectory: schemas, workflowPath: workflow, registryPath: registry }), /Duplicate schema ID/);
 });
 
 test('duplicate IDs fail', async (t) => {

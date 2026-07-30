@@ -56,7 +56,7 @@ Do not add:
 * GitHub Issues as the active blackboard;
 * an external orchestration framework.
 
-Use Node.js built-in modules only unless the existing repository already contains an approved dependency that directly fits the requirement.
+Use Node.js built-in modules only unless the existing repository already contains an approved dependency that directly fits the requirement. Milestones 12–20 additionally authorize Ajv 8 as the sole new dependency, exclusively for JSON Schema contract enforcement; it must not be used for orchestration.
 
 ## Milestone protocol
 
@@ -170,6 +170,12 @@ A milestone is complete only when:
 
 Do not claim Claude Code runtime testing occurred unless the workflow was actually executed in Claude Code.
 
+## Authorized remediation milestones
+
+Milestone 12 is documentation-only authorization and planning for the audit in `docs/audit-run-1.md`. Milestones 13–20 are authorized in this order: ledger integrity, verifier-evidence integration, canonical-contract enforcement and report anchoring, runtime hardening, verification-policy merging and depth escalation, targeted repairs, failure diagnostics, and compatibility plus final smoke testing.
+
+Native Claude Code dynamic workflows remain the runtime. Until Claude Code documents named-agent routing or per-call tool restrictions, per-role write isolation is behavioral rather than hard permission isolation. Canonical JSON Schemas are the contract source; workflow inline schemas must be generated from them. Existing fixtures and archived-run compatibility must be preserved or explicitly migrated and documented before a breaking change lands.
+
 ## Required milestone response
 
 End every milestone response with:
@@ -199,11 +205,12 @@ Confirm that no later milestone was started.
 **FILTER:** Record only items categorized as Added, Changed, Deprecated, Removed, Fixed, or Security. Ignore pure internal refactoring, CI tweaks, and test coverage.
 **FORMAT:** Strictly adhere to the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format. Write for a non-technical end-user.
 ### ENFORCEMENT: TASK COMPLETION CHECKLIST
+
 Whenever you conclude a functional change, you are FORBIDDEN from ending the response without outputting the following verification table:
 
-| Requirement | Status (DONE / MISSING / N/A) |
-| :--- | :--- |
-| Code execution verified | [Status] |
-| CHANGELOG.md updated | [Status] |
+| Requirement             | Status (DONE / MISSING / N/A) |
+|:----------------------- |:----------------------------- |
+| Code execution verified | [Status]                      |
+| CHANGELOG.md updated    | [Status]                      |
 
 If `CHANGELOG.md updated` is MISSING, you must immediately halt, read the git diff, and update the changelog before proceeding.

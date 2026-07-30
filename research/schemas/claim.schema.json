@@ -13,6 +13,7 @@
     "materiality": { "$ref": "#/$defs/materiality" },
     "confidence": { "$ref": "#/$defs/confidence" },
     "confidence_rationale": { "type": "string", "minLength": 1 },
+    "discard_reason": { "type": "string", "minLength": 1, "description": "Required by the archived discarded-claims ledger." },
     "supporting_evidence": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/evidence" } },
     "counter_evidence": { "type": "array", "items": { "$ref": "#/$defs/evidence" } },
     "premise_claim_ids": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/claimId" }, "description": "Required for an inference; identifies its premise claims." }

@@ -14,7 +14,7 @@ At that time, no `CLAUDE.md`, `.claude/` configuration, package manifest, lockfi
 
 * Markdown is the only established repository format.
 * `AGENTS.md` is authoritative for the runtime boundary, milestone protocol, evidence invariants, and deterministic Node.js validation requirements.
-* Future implementation uses only approved Claude Code surfaces and Node.js built-ins; no package dependency is currently approved or needed.
+* Future implementation uses approved Claude Code surfaces and Node.js built-ins, except Ajv 8, which Milestone 12 approves solely for JSON Schema contract enforcement.
 * Milestone 1 remains documentation-only.
 
 ## Milestones
@@ -32,6 +32,15 @@ At that time, no `CLAUDE.md`, `.claude/` configuration, package manifest, lockfi
 | 9 | Complete dynamic workflow through verification, repair, and persistence | complete |
 | 10 | Repository integration and documentation | complete |
 | 11 | Integrate documentation, static checks, and acceptance review | incomplete — documented Dynamic Workflow API cannot hard-enforce role-specific archive writes |
+| 12 | Authorize and plan `audit-run-1` remediation | complete |
+| 13 | Canonical-contract enforcement and generated workflow schemas | complete |
+| 14 | Integrate verifier-discovered sources and evidence into the canonical ledger | authorized |
+| 15 | Enforce canonical JSON Schema contracts and anchor report maps to report text | authorized |
+| 16 | Harden behavioral isolation, untrusted-content handling, output paths, and resource limits | authorized |
+| 17 | Merge verification policy and activate post-normalization depth escalation | authorized |
+| 18 | Add bounded targeted ledger, verification, and report repairs | authorized |
+| 19 | Preserve safe, stage-specific failure diagnostics | authorized |
+| 20 | Verify migrations, backward compatibility, and final Claude Code smoke behavior | authorized |
 
 ## Decisions log
 
@@ -55,6 +64,10 @@ At that time, no `CLAUDE.md`, `.claude/` configuration, package manifest, lockfi
 | 2026-07-29 | Milestone 11 tightened the workflow's inline output contracts for source provenance, canonical conflicts, and discarded claims; it also honors `verification: "none"` outside Deep and returns only `report` and `run_directory`. | `.claude/workflows/research-swarm.js`; offline syntax and test checks. |
 | 2026-07-29 | Milestone 11 added canonical ID patterns to every workflow record contract and to deterministic archive validation after a live smoke run exposed noncanonical IDs passing the earlier validator. | `.claude/workflows/research-swarm.js`; `scripts/lib/research-validation.mjs`; `tests/research-validation.test.mjs`. |
 | 2026-07-29 | Do not mark the project complete. Current Dynamic Workflow documentation supports `agent()` and `pipeline()` but does not document selecting a named project agent or a per-call tool restriction. Workflow subagents run in `acceptEdits` mode, so the worker/verifier and archive-only writer guarantees are prompt contracts rather than hard enforcement. | Official Dynamic Workflows and subagent documentation; `.claude/workflows/research-swarm.js`; `.claude/agents/research-*.md`. |
+| 2026-07-29 | Authorize Milestones 12–20 from audit-run-1. Keep native Claude Code dynamic workflows; describe role write isolation as behavioral until named-agent routing or per-call tool restrictions are documented. | Remote `main` `docs/audit-run-1.md`; current workflow documentation and existing risk log. |
+| 2026-07-29 | Approve Ajv 8 as the only new dependency, exclusively to enforce canonical JSON Schemas. Canonical schemas become the contract source and generated workflow inline schemas must be drift-checked. | `docs/audit-run-1-remediation-plan.md`; audit finding “workflow schemas and canonical schemas have already drifted.” |
+| 2026-07-29 | Preserve existing fixtures and archived-run compatibility whenever possible; any contract-breaking change requires a documented, tested migration before Milestone 20 can pass. | `docs/audit-run-1-remediation-plan.md`; audit requirements for complete history and canonical contract enforcement. |
+| 2026-07-29 | The current Milestone 13 goal explicitly assigns canonical-contract enforcement ahead of the prior remediation-table sequence. The earlier table assigned that work to Milestone 15; the current goal supersedes it. Ajv 8 validates every archived canonical record before cross-record checks, and canonical schemas generate the workflow block and validator registry. | `package.json`, `scripts/generate-research-contracts.mjs`, `scripts/lib/research-contracts.generated.mjs`, `scripts/lib/research-validation.mjs`, `.claude/workflows/research-swarm.js`; `npm ci`, contract generation/check, fixture validation, and 18 offline tests. |
 
 ## Claude Code interface findings
 
@@ -101,6 +114,9 @@ Sources: [Dynamic workflows](https://code.claude.com/docs/en/workflows), [Create
 | 2026-07-29 | JSON/settings parse, `claude doctor`, Node syntax checks, `node --test tests/research-validation.test.mjs`, valid and invalid fixture validation, archive-ignore and README cross-reference checks, and `git diff --check` | Passed: settings JSON parses; Claude Code installation is healthy; 12 deterministic tests pass; the valid fixture validates; all three invalid fixtures fail with exit code 1; generated archives are ignored while `.gitkeep` remains; documentation names the implemented files and command. Claude Code workflow execution was not performed. |
 | 2026-07-29 | Full Milestone 11 fixture parse, workflow wrapper syntax check, deterministic validation, static scan, and documentation/API audit | Passed: all 29 JSON and 16 JSONL files parse; workflow parses in the documented async execution shape; 12 Node tests pass; valid fixture passes; named invalid fixtures fail for `claim.evidence.source`, `report_map.claim`, and `claim.confidence.high`; no prohibited markers or whitespace errors. Official documentation confirms the saved-workflow `args`, `agent()`, `pipeline()`, `schema`, agent frontmatter, skills preloading, and `workflowSizeGuideline` interfaces. |
 | 2026-07-29 | Claude Code Light-mode smoke test: `claude --print --output-format json '/research-swarm {"query":"What is the capital of France?","depth":"light","maxWorkers":1,"verification":"none"}'` | The print client timed out after 124 seconds, but the launched background workflow completed. Its persisted trace shows one worker, one verifier, two bounded semantic-repair rounds, and only the persistence writer created archive files. The archive passed the then-current validator. A follow-up audit found that its noncanonical IDs were accepted, so the validator and output schemas were repaired; the generated live archive was removed and the added regression test passes. |
+| 2026-07-29 | Milestone 12 audit-plan cross-check | Passed: restored the missing audit verbatim from remote `main`; every audit heading and recommendation maps once to Milestones 13–20 with acceptance and regression evidence in `docs/audit-run-1-remediation-plan.md`. No workflow, schema, agent, validator, fixture, or runtime code changed. |
+| 2026-07-29 | Context7 Ajv 8 review; remediation mapping assertion; `node --test tests/research-validation.test.mjs`; `node scripts/validate-research-run.mjs tests/fixtures/valid-run`; `git diff --check` | Passed: Context7 documents Ajv's `Ajv2020` entry point for Draft 2020-12; all audit headings and Milestones 13–20 are present in the matrix; 13 deterministic tests pass; the valid fixture validates; and the documentation diff has no whitespace errors. |
+| 2026-07-29 | `npm ci`; `npm run contracts:generate`; `npm run contracts:check`; `npm test`; `node scripts/validate-research-run.mjs tests/fixtures/valid-run`; `node scripts/validate-research-run.mjs tests/fixtures/invalid-missing-source` | Passed: Ajv 8 is the only dependency; generated workflow and registry are current; 18 deterministic tests cover canonical object-shape, formats, conditionals, stale generation, missing references, and duplicate schema IDs; valid fixture passes and the representative invalid fixture exits 1. |
 
 ## Known risks
 
@@ -109,7 +125,11 @@ Sources: [Dynamic workflows](https://code.claude.com/docs/en/workflows), [Create
 * The semantic validator is a structured model-review gate. The deterministic validator proves report-map references and support coverage but cannot parse arbitrary report prose; semantic support remains model-evaluated rather than fully deterministic.
 * The GitHub CLI in this environment does not support the requested `gh issue list --sort` flag; the compatible pre-work scan omits that sort option.
 * The smoke trace showed compliant behavior for that one run, but it cannot establish a universal write restriction because current workflow `agent()` calls still lack documented named-agent routing or per-call tool restrictions.
+* Existing inline workflow schemas, canonical schemas, validator checks, and agent prose can drift until Milestone 15 makes canonical JSON Schemas the generated contract source.
+* Existing archived runs and fixtures predate the Milestones 13–19 archive contract changes. Each contract change must remain compatible or carry an explicit, tested migration; Milestone 20 is the compatibility gate.
+* Verifier-discovered evidence currently lacks a canonical persistence path; discarded-claim verification history, normalization coverage gaps, semantic-review outcomes, and repair events are not yet complete archive artifacts.
+* `outputRoot` is currently caller-controlled, agent fan-out is bounded only indirectly, untrusted source text lacks an explicit prompt-injection rule, planner verification policy is overwritten, escalation triggers are not evaluated, repairs are report-only, and workflow failures omit a safe stage code. These risks remain authorized work, not completed mitigation.
 
 ## Next milestone
 
-No implementation milestone is authorized. Project completion requires a documented Dynamic Workflow mechanism to route `agent()` calls to the restricted project roles or to set per-call tool restrictions.
+Milestone 14 — integrate verifier-discovered sources and evidence into the canonical ledger. Milestones 15–20 remain authorized but must not begin until their predecessor is complete. The dynamic-workflow permission limitation remains an explicit behavioral-isolation constraint, not a completion gate.

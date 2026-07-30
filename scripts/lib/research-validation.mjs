@@ -1,32 +1,46 @@
 import path from 'node:path';
 import { readFile } from 'node:fs/promises';
+import Ajv2020 from 'ajv/dist/2020.js';
 import { readJsonl } from './jsonl.mjs';
+import { canonicalSchemas, enumValues, idPatterns } from './research-contracts.generated.mjs';
 
 const REQUIRED_PATHS = {
   plan: 'plan.json', sources: 'sources.jsonl', claims: 'claims.jsonl',
   discarded_claims: 'discarded-claims.jsonl', verification_events: 'verification-events.jsonl',
   conflicts: 'conflicts.json', report: 'report.md', report_map: 'report-map.json', validation: 'validation.json',
 };
-const MATERIALITY = new Set(['critical', 'high', 'medium', 'low']);
-const CONFIDENCE = new Set(['high', 'medium', 'low']);
-const OUTCOMES = new Set(['confirmed', 'confirmed_with_qualification', 'demoted', 'contradicted', 'unverifiable', 'discarded']);
+const MATERIALITY = new Set(enumValues.materiality);
+const CONFIDENCE = new Set(enumValues.confidence);
+const OUTCOMES = new Set(enumValues.outcome);
 const DEFINITIVE_TYPES = new Set(['primary_data', 'official_record', 'standard', 'filing']);
-const ID_PATTERNS = {
-  run_id: /^run_[A-Za-z0-9][A-Za-z0-9_-]*$/,
-  plan_id: /^plan_[A-Za-z0-9][A-Za-z0-9_-]*$/,
-  source_id: /^src_[A-Za-z0-9][A-Za-z0-9_-]*$/,
-  claim_id: /^clm_[A-Za-z0-9][A-Za-z0-9_-]*$/,
-  verification_event_id: /^ver_[A-Za-z0-9][A-Za-z0-9_-]*$/,
-  conflict_id: /^conf_[A-Za-z0-9][A-Za-z0-9_-]*$/,
-  report_map_id: /^rmap_[A-Za-z0-9][A-Za-z0-9_-]*$/,
-  report_unit_id: /^rpt_[A-Za-z0-9][A-Za-z0-9_-]*$/,
-};
+const ID_PATTERNS = Object.fromEntries(Object.entries(idPatterns).map(([key, pattern]) => [key, new RegExp(pattern)]));
 
 function error(errors, file, entityId, rule, message) {
   errors.push({ file, entity_id: entityId ?? null, rule, message });
 }
 
 function required(value) { return typeof value === 'string' && value.trim() !== ''; }
+
+function isDate(value) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const [year, month, day] = value.split('-').map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day;
+}
+
+function contractValidators() {
+  const ajv = new Ajv2020({ allErrors: true, strict: true, strictRequired: false });
+  ajv.addFormat('date', { type: 'string', validate: isDate });
+  ajv.addFormat('date-time', { type: 'string', validate: (value) => /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.test(value) && isDate(value.slice(0, 10)) && !Number.isNaN(Date.parse(value)) });
+  ajv.addFormat('uri', { type: 'string', validate: (value) => { try { const parsed = new URL(value); return Boolean(parsed.protocol && parsed.hostname); } catch { return false; } } });
+  for (const schema of canonicalSchemas) ajv.addSchema(schema);
+  return Object.fromEntries(canonicalSchemas.map((schema) => [schema.$id, ajv.getSchema(schema.$id)]));
+}
+
+function validateContract(validate, record, file, entityId, errors) {
+  if (!validate || validate(record)) return;
+  for (const issue of validate.errors ?? []) error(errors, file, entityId, `schema.${issue.keyword}`, `${issue.instancePath || '/'} ${issue.message} (${issue.schemaPath}).`);
+}
 
 function unique(records, key, file, errors) {
   const seen = new Set();
@@ -64,6 +78,7 @@ function validatePath(runDirectory, value, key, errors) {
 export async function validateResearchRun(directory) {
   const runDirectory = path.resolve(directory);
   const errors = [];
+  const validators = contractValidators();
   const manifestFile = path.join(runDirectory, 'manifest.json');
   const manifest = await readJson(manifestFile, errors);
   if (!manifest || typeof manifest !== 'object') return { valid: false, run_directory: runDirectory, errors, counts: {} };
@@ -112,6 +127,15 @@ export async function validateResearchRun(directory) {
   unique(Array.isArray(conflicts) ? conflicts : [], 'conflict_id', 'conflicts.json', errors);
   unique(reportMap?.report_units ?? [], 'report_unit_id', 'report-map.json', errors);
 
+  validateContract(validators['run-manifest.schema.json'], manifest, 'manifest.json', manifest.run_id, errors);
+  validateContract(validators['research-plan.schema.json'], plan, 'plan.json', plan?.plan_id, errors);
+  validateContract(validators['report-map.schema.json'], reportMap, 'report-map.json', reportMap?.report_map_id, errors);
+  for (const source of sources) validateContract(validators['source.schema.json'], source, 'sources.jsonl', source?.source_id, errors);
+  for (const claim of claims) validateContract(validators['claim.schema.json'], claim, 'claims.jsonl', claim?.claim_id, errors);
+  for (const claim of discarded) validateContract(validators['claim.schema.json'], claim, 'discarded-claims.jsonl', claim?.claim_id, errors);
+  for (const event of events) validateContract(validators['verification-event.schema.json'], event, 'verification-events.jsonl', event?.verification_event_id, errors);
+  for (const conflict of Array.isArray(conflicts) ? conflicts : []) validateContract(validators['conflict.schema.json'], conflict, 'conflicts.json', conflict?.conflict_id, errors);
+
   for (const source of sources) {
     const id = source?.source_id;
     if (!required(source?.title)) error(errors, 'sources.jsonl', id, 'source.title', 'Source title is required.');
@@ -132,9 +156,6 @@ export async function validateResearchRun(directory) {
     for (const evidence of [...(claim?.supporting_evidence ?? []), ...(claim?.counter_evidence ?? [])]) {
       if (!sourceIds.has(evidence?.source_id)) error(errors, file, id, 'claim.evidence.source', `Unknown source_id ${evidence?.source_id ?? '(missing)'}.`);
       if (!required(evidence?.locator)) error(errors, file, id, 'claim.evidence.locator', 'Evidence locator is required.');
-    }
-    for (const conflictId of claim?.conflicts_with ?? []) {
-      if (!claimIds.has(conflictId) && !discardedIds.has(conflictId)) error(errors, file, id, 'claim.conflict', `Unknown conflicting claim_id ${conflictId}.`);
     }
     if (claim?.claim_type === 'inference' && (!Array.isArray(claim.premise_claim_ids) || claim.premise_claim_ids.length === 0)) error(errors, file, id, 'claim.inference.premises', 'Inference claims require premise_claim_ids.');
     if (claimIds.has(id) && (!Array.isArray(claim?.supporting_evidence) || claim.supporting_evidence.length === 0)) error(errors, file, id, 'claim.evidence', 'Retained claims require supporting evidence.');
