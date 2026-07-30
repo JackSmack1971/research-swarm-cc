@@ -2,7 +2,7 @@
 
 ## Final acceptance review
 
-This Milestone 20 review compares the original Audit Run 1 findings with the current implementation. It does not claim hard role isolation: native Claude Code dynamic workflows still have no documented named-project-agent routing or per-agent tool allowlists, so role write isolation is behavioral rather than technically enforced.
+This Milestones 20–21 review compares the original Audit Run 1 findings with the current implementation. It distinguishes three evidence tiers: deterministic offline code and test checks passed; the workflow serializer and planning-entry blocker are fixed; and valid current-runtime Light and Deep archives remain unverified. It does not claim hard role isolation: native Claude Code dynamic workflows still have no documented named-project-agent routing or per-agent tool allowlists, so role write isolation is behavioral rather than technically enforced.
 
 | Original audit finding | Disposition | Evidence |
 | --- | --- | --- |
@@ -16,10 +16,10 @@ This Milestone 20 review compares the original Audit Run 1 findings with the cur
 | Arbitrary archive root | Implemented | `scripts/lib/research-paths.mjs` and workflow path checks restrict output to `artifacts/research-runs` or safe descendants. |
 | Unbounded fan-out | Implemented | Depth-aware source, claim, verifier, and gap-worker caps are tested in `tests/research-workflow-controls.test.mjs`. |
 | Planner policy and escalation ignored | Implemented | Deterministic policy merging and post-normalization escalation are implemented and tested. |
-| Targeted repairs are report-only | Intentionally deferred | The workflow records ledger, verification, and structural repair classifications, but only report repair executes. Implementing those repair routes would be a new workflow-control change; do not call the project a production beta until an explicitly authorized milestone implements and tests them. |
+| Targeted repairs are report-only | Authorized for Milestone 22 | The workflow records ledger, verification, and structural repair classifications, but only report repair executes. Milestone 22 is authorized to implement and test bounded executable ledger, verification, and structural repair routes. |
 | Failure diagnostics are swallowed | Implemented | Workflow returns only stable stage/code diagnostics with the safe run path state. |
 | Semantic review and repair history are absent | Implemented | `semantic-validation.json` and `repair-events.jsonl` are required archive artifacts and are validated. |
-| Archive compatibility/migration | Intentionally deferred | The tracked corpus has the current valid fixture and intentionally invalid fixtures, but no preserved pre-remediation archive or tested migration. Compatibility with pre-Milestone-13 archives remains unproven. |
+| Archive compatibility/migration | Authorized for Milestone 23 | The tracked corpus has the current valid fixture and intentionally invalid fixtures, but no preserved pre-remediation archive or tested migration. Milestone 23 is authorized to add archive contract versioning and explicit legacy rejection. |
 
 ## Archive and documentation review
 
@@ -29,13 +29,23 @@ Repository searches found no actionable TODO/FIXME markers, stale archive filena
 
 ## Runtime smoke review
 
-Claude Code 2.1.220 is installed and current official workflow documentation was checked. Both bounded smoke invocations reached the `research-swarm` workflow command but could not start it:
+Claude Code 2.1.220 is installed and current official workflow documentation was checked. The original bounded valid invocations reached the `research-swarm` workflow command but did not start; the serializer blocker is now fixed. The following remain unverified runtime-acceptance invocations:
 
 * Light: one worker, one source/claim/target limit, `verification: "none"`.
 * Deep: one worker, one source/claim/target limit, `verification: "all-material"`.
 
-`claude --print --permission-mode dontAsk` denied the Workflow tool. Retrying with `--permission-mode bypassPermissions --dangerously-skip-permissions` failed before launch because the local permission handler reported that the serialized workflow script contained unrenderable control characters. A byte scan found no literal control bytes outside tab, CR, and LF in `.claude/workflows/research-swarm.js`. No archive or workflow trace was created, so there is no runtime evidence for canonical IDs, verifier evidence, discarded-claim linkage, gaps, semantic results, repair events, report anchors, or safe paths in this milestone.
+`claude --print --permission-mode dontAsk` denied the Workflow tool. The bypass retry initially failed before launch because the local permission handler rejected the serialized workflow script for hidden control characters. The workflow had mixed CRLF and LF line endings; normalizing it to LF-only removed every CR byte. A bounded `depth: "invalid"` invocation then launched the exact production workflow, returned its deterministic `PLAN_FAILED` result, spawned zero agents, and created no artifacts. This proves the serializer and planning-entry path, but not a valid Light or Deep archive, so runtime evidence for canonical IDs, verifier evidence, discarded-claim linkage, gaps, semantic results, repair events, report anchors, and safe paths remains incomplete.
 
 ## Conclusion
 
-The deterministic ledger, contract, anchoring, hardening, resource-control, and diagnostic gates pass. This review does **not** certify a production beta: targeted non-report repairs, historic archive compatibility/migration, and successful current-runtime smoke tests remain required. Hard permission isolation remains a documented platform limitation, not a completed control.
+Offline deterministic ledger, contract, anchoring, hardening, resource-control, and diagnostic checks pass. The workflow serializer blocker is fixed, but offline verification and the invalid-depth launch diagnostic do **not** certify a production beta or a valid runtime archive. Milestones 22–24 are authorized for targeted non-report repairs, archive-version policy, and bounded current-runtime Light and Deep acceptance. Hard permission isolation remains a documented platform limitation, not a completed control.
+
+## Residual risks and authorized follow-up
+
+| Milestone | Authorized scope | Acceptance evidence still required |
+| --- | --- | --- |
+| 22 | Execute bounded ledger, verification, and structural repair routes. | Deterministic route and global-cap regression tests. |
+| 23 | Add archive contract versioning and explicit legacy rejection. | Supported-version validation and actionable rejection fixtures. |
+| 24 | Run bounded current-runtime Light and Deep acceptance. | One valid archived run at each depth, inspected and accepted by the deterministic validator. |
+
+Offline tests cannot establish runtime behavior. The serializer diagnostic does not validate worker routing, verification, persistence, report anchors, or archive-safe paths, and neither a valid Light nor Deep archive currently exists. Role write isolation remains behavioral rather than hard permission isolation.

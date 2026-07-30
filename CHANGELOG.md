@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+- Claude Code now launches the research workflow reliably before validating its request.
+- Research workflow files now retain a compatible line format when checked out.
 - Research runs now retain canonical-claim budget gaps through adjudication and archival.
 - Research runs now retain narrowly scoped repair actions and return safe, stage-specific failure diagnostics.
 - Research runs now apply bounded, risk-prioritized research and verification budgets with auditable escalation decisions.

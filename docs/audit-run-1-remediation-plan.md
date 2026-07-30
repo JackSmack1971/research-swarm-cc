@@ -22,9 +22,9 @@ Every audit heading and recommendation is assigned once below. “Accepted limit
 
 | Audit heading or recommendation | Milestone | Acceptance condition | Regression evidence |
 | --- | --- | --- | --- |
-| Overall assessment | 20 | Final acceptance distinguishes verified implementation from remaining platform limitation. | Full regression and smoke-test report. |
-| What is done especially well | 20 | Existing planning, provenance, conflict, bounded repair, and one-writer behavior remain covered. | Legacy fixtures and archive compatibility tests pass. |
-| Highest-priority findings | 20 | The final gate confirms every priority finding below has its milestone evidence. | Requirement-to-evidence completion audit. |
+| Overall assessment | 24 | Final acceptance distinguishes verified implementation from remaining platform limitation. | Full regression and bounded Light/Deep archive report. |
+| What is done especially well | 24 | Existing planning, provenance, conflict, bounded repair, and one-writer behavior remain covered. | Current archive and contract-version acceptance tests pass. |
+| Highest-priority findings | 24 | The final gate confirms every priority finding below has its milestone evidence. | Requirement-to-evidence completion audit. |
 | Role isolation is not real in the running workflow | 16 | README and rules say behavioral isolation; untrusted-content and session allowlist guidance is present. | Static documentation/rule check. |
 | Verifiers cannot contribute new evidence | 14 | Verification events carry new sources/evidence, canonicalized with IDs, locators, provenance, and independence groups before adjudication. | Fixture canonicalizes a verifier-discovered counter-source. |
 | Verification events that discard claims are deleted | 13 | All verification events persist and discarded claims link to their disposition events. | Contradicted discarded-claim archive validates with its event retained. |
@@ -38,11 +38,13 @@ Every audit heading and recommendation is assigned once below. “Accepted limit
 | Smaller logic issues | 17 | Policy and escalation controls below are deterministic; repair and diagnostic controls remain separately gated. | Control-flow regression suite. |
 | Planner verification policy is discarded | 17 | User and planner policies merge by documented deterministic precedence. | Policy-precedence unit tests. |
 | Escalation triggers are dead metadata | 17 | Post-normalization conflicts, gaps, low confidence, missing primary evidence, and risk signals can escalate depth within budgets. | Escalation decision tests. |
-| Repair is report-only | 18 | A repair classifies report, ledger, verification, or structural defect; at most two targeted rounds run. | Stubbed repair-route and cap tests. |
+| Repair is report-only | 22 | A repair executes the applicable report, ledger, verification, or structural route within at most two targeted rounds. | Deterministic repair-route and cap tests. |
 | Failure diagnostics are swallowed | 19 | Safe failure output includes stage and stable code without secrets or full prompts. | Stage-failure payload tests. |
 | Semantic review and repair history are not archived | 13 | Archive persists semantic-validation and repair-event records without altering conclusions. | Fixture validates both history artifacts. |
-| Recommended completion order | 13 | Milestones execute in this plan's dependency order, with Milestone 20 as the final gate. | Progress table and predecessor checks. |
-| Bottom line | 20 | Final assessment confirms complete ledger, coverage propagation, contract enforcement, report anchors, and accurately scoped role isolation. | Full regression plus Claude Code smoke test when available. |
+| Archive compatibility/migration | 23 | Every archive declares a supported contract version; unknown and legacy versions fail explicitly. | Version and rejection fixtures fail deterministically. |
+| Current-runtime acceptance | 24 | Bounded Light and Deep runs produce current-runtime archives that pass deterministic validation. | Persisted archive inspection and validator output. |
+| Recommended completion order | 21 | Milestones execute in this plan's dependency order, with Milestone 24 as the final gate. | Progress table and predecessor checks. |
+| Bottom line | 24 | Final assessment confirms complete ledger, coverage propagation, contract enforcement, report anchors, repair execution, version policy, runtime archives, and accurately scoped role isolation. | Full regression plus bounded Claude Code Light and Deep acceptance. |
 
 ## Milestone dependency order
 
@@ -56,11 +58,15 @@ Every audit heading and recommendation is assigned once below. “Accepted limit
 | 18 | Targeted repairs. | Bounded repair can correct the appropriate evidence or report layer. |
 | 19 | Failure diagnostics. | Failures retain safe, actionable stage/code information. |
 | 20 | Compatibility and final smoke testing. | Fixtures/archived runs are preserved or migrated, all tests pass, and Claude Code smoke behavior is recorded accurately. |
+| 21 | Finalize workflow serialization fix and authorize remaining acceptance milestones. | The tracked workflow is LF-only, the checkout rule is scoped to it, offline verification is recorded separately from runtime evidence, and Milestones 22–24 are authorized. |
+| 22 | Executable non-report repair routes. | Ledger, verification, and structural repairs execute within the existing global two-round cap. |
+| 23 | Archive contract versioning and explicit legacy rejection. | Archives declare a supported version and unsupported legacy or unknown versions fail clearly. |
+| 24 | Bounded current-runtime Light and Deep acceptance. | One bounded Light archive and one bounded Deep archive validate in the current Claude Code runtime. |
 
 ## Deferred platform limitation
 
 Hard named-role tool isolation is deferred only because current documented Claude Code dynamic workflows do not expose named-agent routing or per-call tool restrictions. The project must not describe prompt constraints as technical enforcement. If Claude Code documents either capability, evaluate it as a new explicitly authorized remediation milestone rather than silently changing this plan.
 
-## Milestone 20 acceptance disposition
+## Milestones 20–21 acceptance disposition
 
-See `docs/audit-run-1-remediation-results.md` for the requirement-by-requirement evidence. The deterministic remediation gates pass, but this plan does not authorize a production-beta claim: targeted ledger/verification/structural repairs, pre-remediation archive compatibility or migration evidence, and a successful Claude Code smoke archive remain outstanding. Role isolation remains the documented platform limitation above.
+See `docs/audit-run-1-remediation-results.md` for the requirement-by-requirement evidence. Milestone 20 completed the offline deterministic acceptance review; Milestone 21 fixed the LF-only serializer blocker and launches the production workflow only on an invalid-depth diagnostic. Neither milestone authorizes a production-beta claim or establishes a valid Light or Deep archive. Milestones 22–24 are explicitly authorized in order; no implementation of them belongs to Milestone 21. Role isolation remains the documented platform limitation above.
