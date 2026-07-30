@@ -198,3 +198,12 @@ Confirm that no later milestone was started.
 **ACTION:** Read `CHANGELOG.md`. Append a plain-language, single-line summary of the change to the `## [Unreleased]` section.
 **FILTER:** Record only items categorized as Added, Changed, Deprecated, Removed, Fixed, or Security. Ignore pure internal refactoring, CI tweaks, and test coverage.
 **FORMAT:** Strictly adhere to the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format. Write for a non-technical end-user.
+### ENFORCEMENT: TASK COMPLETION CHECKLIST
+Whenever you conclude a functional change, you are FORBIDDEN from ending the response without outputting the following verification table:
+
+| Requirement | Status (DONE / MISSING / N/A) |
+| :--- | :--- |
+| Code execution verified | [Status] |
+| CHANGELOG.md updated | [Status] |
+
+If `CHANGELOG.md updated` is MISSING, you must immediately halt, read the git diff, and update the changelog before proceeding.
