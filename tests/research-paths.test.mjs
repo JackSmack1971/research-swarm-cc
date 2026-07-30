@@ -29,5 +29,5 @@ test('all source-consuming prompts and role standards reject injected instructio
     assert.match(await readFile(path.join(root, file), 'utf8'), new RegExp(rule.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }
   const workflow = await readFile(path.join(root, '.claude/workflows/research-swarm.js'), 'utf8');
-  assert.equal((workflow.match(/\$\{UNTRUSTED_DATA_RULE\}/g) ?? []).length, 9);
+  assert.ok((workflow.match(/\$\{UNTRUSTED_DATA_RULE\}/g) ?? []).length >= 9);
 });

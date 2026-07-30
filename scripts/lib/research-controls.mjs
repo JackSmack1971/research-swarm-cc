@@ -53,3 +53,35 @@ export function escalationDecision({ depth, claims, conflicts, coverageGaps, sou
   const nextDepth = depth === 'light' ? 'standard' : depth === 'standard' ? 'deep' : 'deep';
   return { escalate: reasons.length > 0 && depth !== 'deep', depth: reasons.length ? nextDepth : depth, policy: reasons.length ? 'all-material' : null, reasons };
 }
+
+const REPAIR_ACTIONS = Object.freeze({
+  unsupported_assertion: 'report_repair', missing_citation: 'report_repair', concealed_conflict: 'report_repair', overstatement: 'report_repair', unlabeled_inference: 'report_repair', unsupported_recommendation: 'report_repair',
+  missing_claim_coverage: 'ledger_repair', malformed_evidence_linkage: 'ledger_repair', incomplete_verification: 'verification_repair', missing_anchor: 'structural_repair'
+});
+const REPAIR_SEVERITY = Object.freeze({ critical: 4, high: 3, medium: 2, low: 1 });
+const REPAIR_PRIORITY = Object.freeze({ ledger_repair: 0, verification_repair: 1, structural_repair: 2, report_repair: 3 });
+
+export function selectRepair(defects, coverageGaps = []) {
+  const candidates = [
+    ...defects.map((defect) => ({ record: defect, action_type: REPAIR_ACTIONS[defect.category] ?? 'report_repair' })),
+    ...coverageGaps.filter((gap) => gap.status !== 'resolved' && gap.status !== 'accepted').map((gap) => ({ record: { ...gap, defect_id: gap.coverage_gap_id, related_claim_ids: gap.related_claim_ids ?? [], related_report_unit_ids: [] }, action_type: 'ledger_repair' }))
+  ];
+  return candidates.sort((left, right) => REPAIR_SEVERITY[right.record.severity] - REPAIR_SEVERITY[left.record.severity]
+    || REPAIR_PRIORITY[left.action_type] - REPAIR_PRIORITY[right.action_type]
+    || left.record.defect_id.localeCompare(right.record.defect_id))[0] ?? null;
+}
+
+export function canLaunchRepairAgent(actionType, limits) {
+  return actionType === 'ledger_repair'
+    ? limits.maxGapFillWorkers > 0 && limits.maxSourcesPerWorker > 0 && limits.maxClaimsPerWorker > 0
+    : actionType === 'verification_repair'
+      ? limits.maxVerifierConcurrency > 0
+      : actionType === 'report_repair';
+}
+
+export function structuralRepair(before, after) {
+  for (const key of ['sources', 'claims', 'verification_events', 'conflicts', 'coverage_gaps', 'report_markdown']) {
+    if (JSON.stringify(before[key]) !== JSON.stringify(after[key])) throw new Error(`Structural repair cannot alter ${key}.`);
+  }
+  return after;
+}

@@ -272,6 +272,14 @@ export async function validateResearchRun(directory) {
     for (const evidence of event?.new_evidence ?? []) if (!sourceIds.has(evidence?.source_id) && !localSourceIds.has(evidence?.source_id)) error(errors, 'verification-events.jsonl', id, 'verification.new_evidence.source', `Unknown verifier evidence source_id ${evidence?.source_id ?? '(missing)'}.`);
   }
   const eventIds = new Set(events.map(({ verification_event_id }) => verification_event_id));
+  for (const repair of repairEvents) {
+    const id = repair?.repair_event_id;
+    for (const claimId of repair?.target_claim_ids ?? []) if (!claimIds.has(claimId) && !discardedIds.has(claimId)) error(errors, 'repair-events.jsonl', id, 'repair_event.claim', `Unknown claim_id ${claimId}.`);
+    for (const sourceId of repair?.target_source_ids ?? []) if (!sourceIds.has(sourceId)) error(errors, 'repair-events.jsonl', id, 'repair_event.source', `Unknown source_id ${sourceId}.`);
+    for (const eventId of repair?.target_verification_event_ids ?? []) if (!eventIds.has(eventId)) error(errors, 'repair-events.jsonl', id, 'repair_event.verification', `Unknown verification_event_id ${eventId}.`);
+    if (repair?.agent_count !== repair?.agents_launched?.length) error(errors, 'repair-events.jsonl', id, 'repair_event.agents', 'agent_count must match agents_launched.');
+    if (repair?.resource_budget_before?.repair_rounds_remaining !== 3 - repair?.repair_round || repair?.resource_budget_after?.repair_rounds_remaining !== 2 - repair?.repair_round) error(errors, 'repair-events.jsonl', id, 'repair_event.budget', 'Repair event budgets must consume exactly one shared round.');
+  }
   for (const claim of discarded) {
     for (const eventId of claim?.verification_event_ids ?? []) if (!eventIds.has(eventId)) error(errors, 'discarded-claims.jsonl', claim?.claim_id, 'discarded_claim.verification_events', `Unknown verification_event_id ${eventId}.`);
   }

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { capClaims, chunk, escalationDecision, limitsFor, mergeVerificationPolicy, rankClaims } from '../scripts/lib/research-controls.mjs';
+import { canLaunchRepairAgent, capClaims, chunk, escalationDecision, limitsFor, mergeVerificationPolicy, rankClaims, selectRepair, structuralRepair } from '../scripts/lib/research-controls.mjs';
 import { readFile } from 'node:fs/promises';
 
 const claim = (claim_id, materiality = 'medium', confidence = 'medium') => ({ claim_id, materiality, confidence, statement: claim_id, supporting_evidence: [{ source_id: 'src_one' }] });
@@ -49,4 +49,29 @@ test('workflow uses one shared repair budget and a sanitized stage diagnostic', 
   for (const action of ['report_repair', 'ledger_repair', 'verification_repair', 'structural_repair']) assert.match(workflow, new RegExp(action));
   assert.match(workflow, /failure: \{ stage, code: FAILURE_CODES\[stage\] \?\? "WORKFLOW_FAILED", archive_exists: "unknown" \}/);
   assert.doesNotMatch(workflow.slice(workflow.lastIndexOf('} catch')), /cause\.message|cause\.stack/);
+});
+
+test('ledger defects outrank report defects, consume the shared rounds, and respect agent resources', () => {
+  const report = { defect_id: 'def_report', category: 'unsupported_assertion', severity: 'high' };
+  const ledger = { defect_id: 'def_ledger', category: 'missing_claim_coverage', severity: 'high' };
+  assert.equal(selectRepair([report, ledger]).action_type, 'ledger_repair');
+  assert.equal(canLaunchRepairAgent('ledger_repair', { maxGapFillWorkers: 1, maxSourcesPerWorker: 1, maxClaimsPerWorker: 1 }), true);
+  assert.equal(canLaunchRepairAgent('ledger_repair', { maxGapFillWorkers: 0, maxSourcesPerWorker: 1, maxClaimsPerWorker: 1 }), false);
+});
+
+test('verification and structural repair preserve research records while allowing bounded route selection', () => {
+  assert.equal(selectRepair([{ defect_id: 'def_verify', category: 'incomplete_verification', severity: 'medium' }]).action_type, 'verification_repair');
+  assert.equal(selectRepair([{ defect_id: 'def_anchor', category: 'missing_anchor', severity: 'medium' }]).action_type, 'structural_repair');
+  const before = { sources: [{ source_id: 'src_one' }], claims: [{ claim_id: 'clm_one' }], verification_events: [{ verification_event_id: 'ver_one' }], conflicts: [], coverage_gaps: [], report_markdown: 'same' };
+  assert.deepEqual(structuralRepair(before, { ...before, manifest_counts: { sources: 1 } }), { ...before, manifest_counts: { sources: 1 } });
+  assert.throws(() => structuralRepair(before, { ...before, claims: [] }), /cannot alter claims/);
+});
+
+test('workflow has separate executable ledger, verification, structural, and affected-only repair routes', async () => {
+  const workflow = await readFile('.claude/workflows/research-swarm.js', 'utf8');
+  for (const route of ['repair.action_type === "ledger_repair"', 'repair.action_type === "verification_repair"', 'repair.action_type === "structural_repair"']) assert.match(workflow, new RegExp(route.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  assert.match(workflow, /normalize ledger repair/);
+  assert.match(workflow, /retain all immutable verification events/);
+  assert.match(workflow, /preserve unrelated retained and discarded claims unchanged/);
+  assert.match(workflow, /The attempted targeted repair failed; the consumed round remains recorded/);
 });

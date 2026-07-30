@@ -434,10 +434,17 @@ export const canonicalSchemas = [
       "action_type",
       "trigger_ids",
       "target_claim_ids",
+      "target_source_ids",
+      "target_verification_event_ids",
       "target_report_unit_ids",
+      "agents_launched",
       "agent_count",
+      "resource_budget_before",
+      "resource_budget_after",
       "action_summary",
-      "outcome"
+      "outcome",
+      "reran_adjudication",
+      "reran_synthesis"
     ],
     "properties": {
       "repair_event_id": {
@@ -475,16 +482,42 @@ export const canonicalSchemas = [
           "$ref": "claim.schema.json#/$defs/claimId"
         }
       },
+      "target_source_ids": {
+        "type": "array",
+        "items": {
+          "$ref": "source.schema.json#/$defs/sourceId"
+        }
+      },
+      "target_verification_event_ids": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "pattern": "^ver_[A-Za-z0-9][A-Za-z0-9_-]*$"
+        }
+      },
       "target_report_unit_ids": {
         "type": "array",
         "items": {
           "$ref": "report-map.schema.json#/$defs/reportUnit/properties/report_unit_id"
         }
       },
+      "agents_launched": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
       "agent_count": {
         "type": "integer",
         "minimum": 0,
-        "maximum": 3
+        "maximum": 4
+      },
+      "resource_budget_before": {
+        "$ref": "#/$defs/resourceBudget"
+      },
+      "resource_budget_after": {
+        "$ref": "#/$defs/resourceBudget"
       },
       "action_summary": {
         "type": "string",
@@ -498,6 +531,48 @@ export const canonicalSchemas = [
           "failed",
           "exhausted"
         ]
+      },
+      "reran_adjudication": {
+        "type": "boolean"
+      },
+      "reran_synthesis": {
+        "type": "boolean"
+      }
+    },
+    "$defs": {
+      "resourceBudget": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "repair_rounds_remaining",
+          "max_sources_per_worker",
+          "max_claims_per_worker",
+          "max_verifier_concurrency",
+          "max_gap_fill_workers"
+        ],
+        "properties": {
+          "repair_rounds_remaining": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2
+          },
+          "max_sources_per_worker": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "max_claims_per_worker": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "max_verifier_concurrency": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "max_gap_fill_workers": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
       }
     }
   },

@@ -388,7 +388,7 @@ test('new archive artifacts, their schemas, and manifest counts are required', a
 
 test('repair events enforce the shared two-round budget and complete audit fields', async (t) => {
   const directory = await copiedValid(t);
-  const event = { repair_event_id: 'rep_fixture', occurred_at: '2026-07-29T00:00:00Z', repair_round: 1, action_type: 'report_repair', trigger_ids: ['def_fixture'], target_claim_ids: ['clm_fixture'], target_report_unit_ids: ['rpt_fixture'], agent_count: 1, action_summary: 'Removed unsupported fixture prose.', outcome: 'completed' };
+  const event = { repair_event_id: 'rep_fixture', occurred_at: '2026-07-29T00:00:00Z', repair_round: 1, action_type: 'report_repair', trigger_ids: ['def_fixture'], target_claim_ids: ['clm_fixture'], target_source_ids: ['src_fixture'], target_verification_event_ids: ['ver_fixture'], target_report_unit_ids: ['rpt_fixture'], agents_launched: ['research synthesizer'], agent_count: 1, resource_budget_before: { repair_rounds_remaining: 2, max_sources_per_worker: 4, max_claims_per_worker: 5, max_verifier_concurrency: 2, max_gap_fill_workers: 1 }, resource_budget_after: { repair_rounds_remaining: 1, max_sources_per_worker: 4, max_claims_per_worker: 5, max_verifier_concurrency: 2, max_gap_fill_workers: 1 }, action_summary: 'Removed unsupported fixture prose.', outcome: 'completed', reran_adjudication: false, reran_synthesis: true };
   await writeFile(path.join(directory, 'repair-events.jsonl'), `${JSON.stringify(event)}\n`);
   const manifest = await readJson(path.join(directory, 'manifest.json')); manifest.counts.repair_events = 1; await writeJson(path.join(directory, 'manifest.json'), manifest);
   assert.equal((await validateResearchRun(directory)).valid, true);

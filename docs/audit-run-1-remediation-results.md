@@ -16,7 +16,7 @@ This Milestones 20–21 review compares the original Audit Run 1 findings with t
 | Arbitrary archive root | Implemented | `scripts/lib/research-paths.mjs` and workflow path checks restrict output to `artifacts/research-runs` or safe descendants. |
 | Unbounded fan-out | Implemented | Depth-aware source, claim, verifier, and gap-worker caps are tested in `tests/research-workflow-controls.test.mjs`. |
 | Planner policy and escalation ignored | Implemented | Deterministic policy merging and post-normalization escalation are implemented and tested. |
-| Targeted repairs are report-only | Authorized for Milestone 22 | The workflow records ledger, verification, and structural repair classifications, but only report repair executes. Milestone 22 is authorized to implement and test bounded executable ledger, verification, and structural repair routes. |
+| Targeted repairs are report-only | Implemented | Ledger repair launches one focused worker then normalizes, readjudicates, and regenerates only affected report units; verification repair appends one immutable verifier event then readjudicates and regenerates affected units; structural repair is constrained to persistence-safe corrections. All share the two-round budget and emit complete audit events. |
 | Failure diagnostics are swallowed | Implemented | Workflow returns only stable stage/code diagnostics with the safe run path state. |
 | Semantic review and repair history are absent | Implemented | `semantic-validation.json` and `repair-events.jsonl` are required archive artifacts and are validated. |
 | Archive compatibility/migration | Authorized for Milestone 23 | The tracked corpus has the current valid fixture and intentionally invalid fixtures, but no preserved pre-remediation archive or tested migration. Milestone 23 is authorized to add archive contract versioning and explicit legacy rejection. |
@@ -38,13 +38,13 @@ Claude Code 2.1.220 is installed and current official workflow documentation was
 
 ## Conclusion
 
-Offline deterministic ledger, contract, anchoring, hardening, resource-control, and diagnostic checks pass. The workflow serializer blocker is fixed, but offline verification and the invalid-depth launch diagnostic do **not** certify a production beta or a valid runtime archive. Milestones 22–24 are authorized for targeted non-report repairs, archive-version policy, and bounded current-runtime Light and Deep acceptance. Hard permission isolation remains a documented platform limitation, not a completed control.
+Offline deterministic ledger, contract, anchoring, hardening, resource-control, repair-route, and diagnostic checks pass. The workflow serializer blocker is fixed, but offline verification and the invalid-depth launch diagnostic do **not** certify a production beta or a valid runtime archive. Milestones 23–24 remain for archive-version policy and bounded current-runtime Light and Deep acceptance. Hard permission isolation remains a documented platform limitation, not a completed control.
 
 ## Residual risks and authorized follow-up
 
 | Milestone | Authorized scope | Acceptance evidence still required |
 | --- | --- | --- |
-| 22 | Execute bounded ledger, verification, and structural repair routes. | Deterministic route and global-cap regression tests. |
+| 22 | Execute bounded ledger, verification, and structural repair routes. | Complete: deterministic route and global-cap regression tests pass. |
 | 23 | Add archive contract versioning and explicit legacy rejection. | Supported-version validation and actionable rejection fixtures. |
 | 24 | Run bounded current-runtime Light and Deep acceptance. | One valid archived run at each depth, inspected and accepted by the deterministic validator. |
 
