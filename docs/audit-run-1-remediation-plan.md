@@ -60,3 +60,7 @@ Every audit heading and recommendation is assigned once below. “Accepted limit
 ## Deferred platform limitation
 
 Hard named-role tool isolation is deferred only because current documented Claude Code dynamic workflows do not expose named-agent routing or per-call tool restrictions. The project must not describe prompt constraints as technical enforcement. If Claude Code documents either capability, evaluate it as a new explicitly authorized remediation milestone rather than silently changing this plan.
+
+## Milestone 20 acceptance disposition
+
+See `docs/audit-run-1-remediation-results.md` for the requirement-by-requirement evidence. The deterministic remediation gates pass, but this plan does not authorize a production-beta claim: targeted ledger/verification/structural repairs, pre-remediation archive compatibility or migration evidence, and a successful Claude Code smoke archive remain outstanding. Role isolation remains the documented platform limitation above.

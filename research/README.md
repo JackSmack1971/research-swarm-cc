@@ -72,7 +72,7 @@ Each run directory contains:
 | `conflicts.json` | Explicit conflicts, their competing claims and sources, reasons, implications, and status. |
 | `coverage-gaps.json` | Every normalization gap with its final disposition. |
 | `semantic-validation.json` | The final structured semantic-review outcome. |
-| `repair-events.jsonl` | Each targeted report-repair attempt. |
+| `repair-events.jsonl` | Each targeted repair attempt and its classified action type; currently only report repairs execute. |
 | `report.md` | The reader-facing final report. |
 | `report-map.json` | The mapping from anchored report units to retained claim IDs and, for inferences, their premise claim IDs. |
 | `validation.json` | The machine-readable deterministic structural-validation result. |

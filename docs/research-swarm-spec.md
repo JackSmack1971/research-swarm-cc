@@ -562,22 +562,18 @@ Required conceptual fields:
 
 ```json
 {
-  "source_id": "S-001",
+  "source_id": "src_example",
   "title": "Source title",
-  "authors": ["Author name"],
   "publisher": "Responsible organization",
-  "published_at": "2026-01-15",
-  "accessed_at": "2026-07-28T15:00:00Z",
-  "url": "https://example.com/source",
-  "doi": null,
-  "source_type": "primary",
-  "independence_group": "origin-identifier",
-  "authority_notes": "Why this source is relevant",
-  "method_notes": "Study or evidence limitations"
+  "publication_date": "2026-01-15",
+  "access_date": "2026-07-28",
+  "url": "https://www.nist.gov/",
+  "source_type": "official_record",
+  "independence_group": "ig_example"
 }
 ```
 
-Allow `published_at` to be null only when the source genuinely provides no date.
+Allow `publication_date` to be null only when a genuine search cannot establish a date; record `publication_date_unavailable_reason` in that case.
 
 At least one of `url` or `doi` must be present.
 
@@ -591,33 +587,21 @@ Required conceptual fields:
 
 ```json
 {
-  "claim_id": "C-001",
+  "claim_id": "clm_example",
   "statement": "A precise externally verifiable proposition.",
   "claim_type": "fact",
-  "scope": {
-    "population": null,
-    "geography": null,
-    "time_period": null,
-    "conditions": null
-  },
+  "scope": "Population, geography, period, conditions, and limitations.",
   "materiality": "high",
-  "evidence": [
+  "supporting_evidence": [
     {
-      "source_id": "S-001",
+      "source_id": "src_example",
       "relationship": "supports",
-      "locator": "Results, Table 2",
-      "excerpt": "A short, necessary excerpt",
-      "notes": "How the evidence supports the claim"
+      "locator": "Results, Table 2"
     }
   ],
   "counter_evidence": [],
-  "conflicts_with": [],
-  "confidence": {
-    "level": "medium",
-    "rationale": "Credible primary evidence but no independent replication."
-  },
-  "verification_status": "pending",
-  "worker_ids": ["worker-subq-01"]
+  "confidence": "medium",
+  "confidence_rationale": "Credible primary evidence but no independent replication."
 }
 ```
 
@@ -640,13 +624,12 @@ Required conceptual fields:
 
 ```json
 {
-  "verification_id": "V-001",
-  "claim_id": "C-001",
+  "verification_event_id": "ver_example",
+  "claim_id": "clm_example",
+  "occurred_at": "2026-07-28T15:00:00Z",
   "outcome": "confirmed_with_qualification",
-  "checked_source_ids": ["S-004", "S-005"],
+  "checked_source_ids": ["src_example"],
   "new_evidence": [],
-  "qualification": "The result applies only to the measured population.",
-  "confidence_recommendation": "medium",
   "rationale": "The direction was confirmed, but broader generalization was unsupported."
 }
 ```
@@ -661,11 +644,11 @@ Example:
 {
   "report_units": [
     {
-      "unit_id": "R-001",
+      "report_unit_id": "rpt_example",
       "section": "Key Findings",
-      "text_hash": "stable-hash-or-normalized-text-key",
-      "claim_ids": ["C-001", "C-004"],
-      "inference": false
+      "text_sha256": "sha256-of-the-normalized-anchored-report-unit",
+      "claim_ids": ["clm_example", "clm_example_2"],
+      "is_inference": false
     }
   ]
 }
@@ -982,6 +965,9 @@ artifacts/research-runs/<UTC timestamp>-<query slug>/
 ├── discarded-claims.jsonl
 ├── verification-events.jsonl
 ├── conflicts.json
+├── coverage-gaps.json
+├── semantic-validation.json
+├── repair-events.jsonl
 ├── report.md
 ├── report-map.json
 └── validation.json

@@ -43,6 +43,7 @@ test('post-normalization escalation is bounded and detects high-risk evidence ga
 
 test('workflow uses one shared repair budget and a sanitized stage diagnostic', async () => {
   const workflow = await readFile('.claude/workflows/research-swarm.js', 'utf8');
+  assert.match(workflow, /Coverage gaps:\\n\$\{JSON\.stringify\(boundedNormalized\.coverage_gaps\)\}/);
   assert.match(workflow, /while \(semanticValidation\.status === "fail" && repairRounds < 2\)/);
   assert.match(workflow, /const REPAIR_ACTIONS =/);
   for (const action of ['report_repair', 'ledger_repair', 'verification_repair', 'structural_repair']) assert.match(workflow, new RegExp(action));
