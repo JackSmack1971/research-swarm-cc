@@ -83,6 +83,25 @@ export const canonicalSchemas = [
         "minLength": 1,
         "description": "Required by the archived discarded-claims ledger."
       },
+      "discard_basis": {
+        "enum": [
+          "provenance",
+          "duplicate",
+          "out_of_scope",
+          "adjudication",
+          "verification"
+        ],
+        "description": "Required by the archived discarded-claims ledger."
+      },
+      "verification_event_ids": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "string",
+          "pattern": "^ver_[A-Za-z0-9][A-Za-z0-9_-]*$"
+        },
+        "description": "Required when discard_basis is verification."
+      },
       "supporting_evidence": {
         "type": "array",
         "minItems": 1,
@@ -213,10 +232,11 @@ export const canonicalSchemas = [
       },
       "claim_ids": {
         "type": "array",
-        "minItems": 2,
+        "minItems": 1,
         "items": {
           "$ref": "claim.schema.json#/$defs/claimId"
-        }
+        },
+        "description": "One claim is permitted for directly conflicting evidence; two or more identify competing claims."
       },
       "supporting_source_ids": {
         "type": "array",
@@ -268,6 +288,184 @@ export const canonicalSchemas = [
   },
   {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "coverage-gap.schema.json",
+    "title": "Research coverage gap",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "coverage_gap_id",
+      "description",
+      "severity",
+      "status",
+      "related_subquestion_ids"
+    ],
+    "properties": {
+      "coverage_gap_id": {
+        "type": "string",
+        "pattern": "^gap_[A-Za-z0-9][A-Za-z0-9_-]*$"
+      },
+      "description": {
+        "type": "string",
+        "minLength": 1
+      },
+      "severity": {
+        "enum": [
+          "critical",
+          "high",
+          "medium",
+          "low"
+        ]
+      },
+      "status": {
+        "enum": [
+          "open",
+          "partially_addressed",
+          "resolved",
+          "accepted"
+        ]
+      },
+      "related_subquestion_ids": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "string",
+          "pattern": "^sq_[A-Za-z0-9][A-Za-z0-9_-]*$"
+        }
+      },
+      "related_claim_ids": {
+        "type": "array",
+        "items": {
+          "$ref": "claim.schema.json#/$defs/claimId"
+        }
+      },
+      "resolution_rationale": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "allOf": [
+      {
+        "if": {
+          "properties": {
+            "status": {
+              "const": "resolved"
+            }
+          },
+          "required": [
+            "status"
+          ]
+        },
+        "then": {
+          "required": [
+            "resolution_rationale"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "discarded-claim.schema.json",
+    "title": "Discarded research claim",
+    "allOf": [
+      {
+        "$ref": "claim.schema.json"
+      },
+      {
+        "type": "object",
+        "required": [
+          "discard_reason",
+          "discard_basis"
+        ],
+        "properties": {
+          "discard_reason": {
+            "type": "string",
+            "minLength": 1
+          },
+          "discard_basis": {
+            "enum": [
+              "provenance",
+              "duplicate",
+              "out_of_scope",
+              "adjudication",
+              "verification"
+            ]
+          },
+          "verification_event_ids": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "verification-event.schema.json#/properties/verification_event_id"
+            }
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "discard_basis": {
+                  "const": "verification"
+                }
+              },
+              "required": [
+                "discard_basis"
+              ]
+            },
+            "then": {
+              "required": [
+                "verification_event_ids"
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "repair-event.schema.json",
+    "title": "Semantic repair event",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "repair_event_id",
+      "occurred_at",
+      "repair_round",
+      "defect_ids",
+      "outcome"
+    ],
+    "properties": {
+      "repair_event_id": {
+        "type": "string",
+        "pattern": "^rep_[A-Za-z0-9][A-Za-z0-9_-]*$"
+      },
+      "occurred_at": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "repair_round": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2
+      },
+      "defect_ids": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "string",
+          "pattern": "^def_[A-Za-z0-9][A-Za-z0-9_-]*$"
+        }
+      },
+      "outcome": {
+        "enum": [
+          "completed",
+          "exhausted"
+        ]
+      }
+    }
+  },
+  {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "report-map.schema.json",
     "title": "Report-to-claim map",
     "type": "object",
@@ -295,7 +493,8 @@ export const canonicalSchemas = [
         "required": [
           "report_unit_id",
           "section",
-          "claim_ids"
+          "claim_ids",
+          "text_sha256"
         ],
         "properties": {
           "report_unit_id": {
@@ -312,6 +511,10 @@ export const canonicalSchemas = [
             "items": {
               "$ref": "claim.schema.json#/$defs/claimId"
             }
+          },
+          "text_sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
           },
           "is_inference": {
             "type": "boolean"
@@ -509,6 +712,9 @@ export const canonicalSchemas = [
           "discarded_claims",
           "verification_events",
           "conflicts",
+          "coverage_gaps",
+          "semantic_validations",
+          "repair_events",
           "report_units"
         ],
         "properties": {
@@ -536,6 +742,18 @@ export const canonicalSchemas = [
             "type": "integer",
             "minimum": 0
           },
+          "coverage_gaps": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "semantic_validations": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "repair_events": {
+            "type": "integer",
+            "minimum": 0
+          },
           "report_units": {
             "type": "integer",
             "minimum": 0
@@ -552,6 +770,9 @@ export const canonicalSchemas = [
           "discarded_claims",
           "verification_events",
           "conflicts",
+          "coverage_gaps",
+          "semantic_validation",
+          "repair_events",
           "report",
           "report_map",
           "validation"
@@ -581,6 +802,18 @@ export const canonicalSchemas = [
             "type": "string",
             "minLength": 1
           },
+          "coverage_gaps": {
+            "type": "string",
+            "minLength": 1
+          },
+          "semantic_validation": {
+            "type": "string",
+            "minLength": 1
+          },
+          "repair_events": {
+            "type": "string",
+            "minLength": 1
+          },
           "report": {
             "type": "string",
             "minLength": 1
@@ -590,6 +823,99 @@ export const canonicalSchemas = [
             "minLength": 1
           },
           "validation": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  },
+  {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "semantic-validation.schema.json",
+    "title": "Final semantic validation",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "semantic_validation_id",
+      "reviewed_at",
+      "status",
+      "defects"
+    ],
+    "properties": {
+      "semantic_validation_id": {
+        "type": "string",
+        "pattern": "^sem_[A-Za-z0-9][A-Za-z0-9_-]*$"
+      },
+      "reviewed_at": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "status": {
+        "enum": [
+          "pass",
+          "fail"
+        ]
+      },
+      "defects": {
+        "type": "array",
+        "items": {
+          "$ref": "#/$defs/defect"
+        }
+      }
+    },
+    "$defs": {
+      "defect": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "defect_id",
+          "category",
+          "severity",
+          "report_location",
+          "description",
+          "related_claim_ids",
+          "repair_instruction"
+        ],
+        "properties": {
+          "defect_id": {
+            "type": "string",
+            "pattern": "^def_[A-Za-z0-9][A-Za-z0-9_-]*$"
+          },
+          "category": {
+            "enum": [
+              "unsupported_assertion",
+              "missing_citation",
+              "concealed_conflict",
+              "overstatement",
+              "unlabeled_inference",
+              "unsupported_recommendation",
+              "missing_claim_coverage"
+            ]
+          },
+          "severity": {
+            "enum": [
+              "critical",
+              "high",
+              "medium",
+              "low"
+            ]
+          },
+          "report_location": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1
+          },
+          "related_claim_ids": {
+            "type": "array",
+            "items": {
+              "$ref": "claim.schema.json#/$defs/claimId"
+            }
+          },
+          "repair_instruction": {
             "type": "string",
             "minLength": 1
           }
@@ -762,7 +1088,27 @@ export const canonicalSchemas = [
         "type": "array",
         "items": {
           "$ref": "source.schema.json#/$defs/sourceId"
-        }
+        },
+        "description": "Canonical source IDs the verifier inspected."
+      },
+      "new_sources": {
+        "type": "array",
+        "items": {
+          "$ref": "#/$defs/verifierSource"
+        },
+        "description": "Verifier-local sources; their tmp_src_ IDs are rewritten only in the augmented ledger."
+      },
+      "new_evidence": {
+        "type": "array",
+        "items": {
+          "$ref": "#/$defs/verifierEvidence"
+        },
+        "description": "Evidence discovered during this immutable verification event."
+      },
+      "proposed_conflict": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Why newly discovered evidence may materially conflict with the target claim."
       },
       "qualification": {
         "type": "string",
@@ -779,6 +1125,138 @@ export const canonicalSchemas = [
           "unverifiable",
           "discarded"
         ]
+      },
+      "verifierSource": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "source_id",
+          "title",
+          "publisher",
+          "publication_date",
+          "source_type",
+          "independence_group",
+          "access_date"
+        ],
+        "properties": {
+          "source_id": {
+            "type": "string",
+            "pattern": "^tmp_src_[A-Za-z0-9][A-Za-z0-9_-]*$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "publisher": {
+            "type": "string",
+            "minLength": 1
+          },
+          "publication_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "publication_date_unavailable_reason": {
+            "type": "string",
+            "minLength": 1
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "minLength": 1
+          },
+          "doi": {
+            "type": "string",
+            "pattern": "^10\\.[0-9]{4,9}/\\S+$"
+          },
+          "source_type": {
+            "$ref": "source.schema.json#/$defs/sourceType"
+          },
+          "independence_group": {
+            "type": "string",
+            "pattern": "^ig_[A-Za-z0-9][A-Za-z0-9_-]*$"
+          },
+          "access_date": {
+            "type": "string",
+            "format": "date"
+          }
+        },
+        "allOf": [
+          {
+            "anyOf": [
+              {
+                "required": [
+                  "url"
+                ]
+              },
+              {
+                "required": [
+                  "doi"
+                ]
+              }
+            ]
+          },
+          {
+            "if": {
+              "properties": {
+                "publication_date": {
+                  "type": "null"
+                }
+              },
+              "required": [
+                "publication_date"
+              ]
+            },
+            "then": {
+              "required": [
+                "publication_date_unavailable_reason"
+              ]
+            },
+            "else": {
+              "not": {
+                "required": [
+                  "publication_date_unavailable_reason"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "verifierEvidence": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "source_id",
+          "locator",
+          "relationship"
+        ],
+        "properties": {
+          "source_id": {
+            "type": "string",
+            "pattern": "^(src_|tmp_src_)[A-Za-z0-9][A-Za-z0-9_-]*$"
+          },
+          "locator": {
+            "type": "string",
+            "minLength": 1
+          },
+          "relationship": {
+            "enum": [
+              "supports",
+              "contradicts",
+              "qualifies"
+            ]
+          },
+          "note": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
       }
     }
   }

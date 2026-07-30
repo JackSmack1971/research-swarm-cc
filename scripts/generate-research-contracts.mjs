@@ -13,6 +13,10 @@ const NAMES = {
   'verification-event.schema.json': 'verificationEventSchema',
   'report-map.schema.json': 'reportMapSchema',
   'conflict.schema.json': 'conflictSchema',
+  'coverage-gap.schema.json': 'coverageGapSchema',
+  'discarded-claim.schema.json': 'discardedClaimSchema',
+  'semantic-validation.schema.json': 'semanticValidationSchema',
+  'repair-event.schema.json': 'repairEventSchema',
   'run-manifest.schema.json': 'runManifestSchema'
 };
 

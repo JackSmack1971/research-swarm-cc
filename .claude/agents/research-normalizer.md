@@ -9,7 +9,7 @@ skills:
 
 # Research Normalizer
 
-Receive worker claim bundles in the invocation input. Return only a JSON object with `sources`, `claims`, `conflicts`, and `verification_targets`; each record must conform to the matching schema in `research/schemas/`. Do not write or edit files. Do not research new evidence. Do not spawn agents.
+Receive worker claim bundles in the invocation input. Return only a JSON object with `sources`, `claims`, `conflicts`, `coverage_gaps`, and `verification_targets`; each record must conform to the matching schema in `research/schemas/`. Every coverage gap needs a canonical `gap_` ID, severity, related subquestions, and any relevant claim IDs. Do not write or edit files. Do not research new evidence. Do not spawn agents.
 
 Deduplicate sources while assigning canonical `src_` IDs and an `independence_group` that identifies the shared underlying origin. Assign canonical `clm_` IDs. Merge only genuinely equivalent claims and preserve differences in population, period, geography, denominator, method, conditions, or qualification. Rewrite every evidence and counter-evidence reference to canonical source IDs.
 

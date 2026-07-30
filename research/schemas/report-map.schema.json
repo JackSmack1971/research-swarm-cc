@@ -13,11 +13,12 @@
     "reportUnit": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["report_unit_id", "section", "claim_ids"],
+      "required": ["report_unit_id", "section", "claim_ids", "text_sha256"],
       "properties": {
         "report_unit_id": { "type": "string", "pattern": "^rpt_[A-Za-z0-9][A-Za-z0-9_-]*$" },
         "section": { "type": "string", "minLength": 1 },
         "claim_ids": { "type": "array", "minItems": 1, "items": { "$ref": "claim.schema.json#/$defs/claimId" } },
+        "text_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
         "is_inference": { "type": "boolean" },
         "premise_claim_ids": { "type": "array", "minItems": 1, "items": { "$ref": "claim.schema.json#/$defs/claimId" } }
       },

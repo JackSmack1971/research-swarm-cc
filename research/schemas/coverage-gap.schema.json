@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "coverage-gap.schema.json",
+  "title": "Research coverage gap",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["coverage_gap_id", "description", "severity", "status", "related_subquestion_ids"],
+  "properties": {
+    "coverage_gap_id": { "type": "string", "pattern": "^gap_[A-Za-z0-9][A-Za-z0-9_-]*$" },
+    "description": { "type": "string", "minLength": 1 },
+    "severity": { "enum": ["critical", "high", "medium", "low"] },
+    "status": { "enum": ["open", "partially_addressed", "resolved", "accepted"] },
+    "related_subquestion_ids": { "type": "array", "minItems": 1, "items": { "type": "string", "pattern": "^sq_[A-Za-z0-9][A-Za-z0-9_-]*$" } },
+    "related_claim_ids": { "type": "array", "items": { "$ref": "claim.schema.json#/$defs/claimId" } },
+    "resolution_rationale": { "type": "string", "minLength": 1 }
+  },
+  "allOf": [{ "if": { "properties": { "status": { "const": "resolved" } }, "required": ["status"] }, "then": { "required": ["resolution_rationale"] } }]
+}

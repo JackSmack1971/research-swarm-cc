@@ -18,7 +18,7 @@ Dynamic workflows require Claude Code 2.1.154 or later. This repository was chec
 
 Enable **Dynamic workflows** in Claude Code’s `/config` when your plan exposes that setting. It is not enabled by a project `settings.json` key. Public-web research also requires that Claude Code makes `WebSearch` and `WebFetch` available to the worker and verifier roles.
 
-The workflow observes Claude Code’s active permission mode and managed/project policy. Its role definitions restrict workers and verifiers to read-only repository and web tools; only the persistence writer may write an archived run. Permission prompts or denials can still prevent a tool call.
+Custom-agent files express the intended least privilege, including read-only worker and verifier definitions. Dynamic-workflow agents currently rely on behavioral instructions: they inherit the Claude Code session permissions, and documented workflow calls cannot select a named custom agent or impose a per-call tool allowlist. For sensitive runs, start Claude Code with a narrow session-level allowlist. The persistence writer is the only role instructed to create the archive.
 
 Runs are session-scoped: resume the same Claude Code session to continue a workflow context. The workflow does not pause for or accept mid-run user input; resolve important scope choices before invoking it.
 
@@ -37,7 +37,7 @@ The command accepts either a plain query or an object with these fields:
 | `maxWorkers` | integer, 1–8 | `8` |
 | `verification` | `none`, `risk-based`, `all-material` | `risk-based` |
 | `freshness` | non-empty string | none |
-| `outputRoot` | non-empty path | `artifacts/research-runs` |
+| `outputRoot` | `artifacts/research-runs` or safe lowercase descendants | `artifacts/research-runs` |
 
 ## Modes
 
@@ -61,13 +61,30 @@ Each run directory contains:
 | `discarded-claims.jsonl` | Claims excluded from the final ledger, with discard reasons. |
 | `verification-events.jsonl` | Append-only adversarial verification attempts and outcomes. |
 | `conflicts.json` | Explicit conflicts, their competing claims and sources, reasons, implications, and status. |
+| `coverage-gaps.json` | Every normalization gap with its final disposition. |
+| `semantic-validation.json` | The final structured semantic-review outcome. |
+| `repair-events.jsonl` | Each targeted report-repair attempt. |
 | `report.md` | The reader-facing final report. |
-| `report-map.json` | The mapping from report units to retained claim IDs and, for inferences, their premise claim IDs. |
+| `report-map.json` | The mapping from anchored report units to retained claim IDs and, for inferences, their premise claim IDs. |
 | `validation.json` | The machine-readable deterministic structural-validation result. |
 
-`src_` IDs identify sources; `clm_` IDs identify claims; `ver_` IDs identify verification events; and `conf_` IDs identify evidence conflicts. An `independence_group` identifies a shared underlying origin, so derivative coverage is not mistaken for independent confirmation. `report-map.json` makes each key report unit auditable against its claims.
+`src_` IDs identify sources; `clm_` IDs identify claims; `ver_` IDs identify verification events; and `conf_` IDs identify evidence conflicts. An `independence_group` identifies a shared underlying origin, so derivative coverage is not mistaken for independent confirmation.
+
+## Report anchors
+
+Every material report unit is enclosed in matching comments:
+
+```md
+<!-- report-unit:rpt_<id>:start -->
+Material report prose.
+<!-- report-unit:rpt_<id>:end -->
+```
+
+Each `report-map.json` unit uses the same `report_unit_id` and records `text_sha256`. The deterministic validator normalizes the enclosed text as UTF-8, converts line endings to LF, removes leading and trailing blank lines and report-unit anchor comments, preserves meaningful internal whitespace, then hashes the normalized text with SHA-256. Markers in fenced code blocks are literal examples and are ignored. Headings and purely presentational lines may be outside units; all other report prose must be enclosed.
 
 Generated run directories are ignored by Git; the archive root is retained with `.gitkeep`.
+
+`outputRoot` rejects absolute, Windows-drive, UNC, backslash, traversal, encoded, control-character, empty-segment, reserved-device, and trailing-dot/space paths. Each run uses a bounded query slug plus timestamp and nonce, so source text cannot choose a directory name and concurrent runs do not collide in ordinary use.
 
 ## Validation
 

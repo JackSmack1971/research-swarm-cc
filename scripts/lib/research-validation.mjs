@@ -1,4 +1,5 @@
 import path from 'node:path';
+import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import Ajv2020 from 'ajv/dist/2020.js';
 import { readJsonl } from './jsonl.mjs';
@@ -7,7 +8,7 @@ import { canonicalSchemas, enumValues, idPatterns } from './research-contracts.g
 const REQUIRED_PATHS = {
   plan: 'plan.json', sources: 'sources.jsonl', claims: 'claims.jsonl',
   discarded_claims: 'discarded-claims.jsonl', verification_events: 'verification-events.jsonl',
-  conflicts: 'conflicts.json', report: 'report.md', report_map: 'report-map.json', validation: 'validation.json',
+  conflicts: 'conflicts.json', coverage_gaps: 'coverage-gaps.json', semantic_validation: 'semantic-validation.json', repair_events: 'repair-events.jsonl', report: 'report.md', report_map: 'report-map.json', validation: 'validation.json',
 };
 const MATERIALITY = new Set(enumValues.materiality);
 const CONFIDENCE = new Set(enumValues.confidence);
@@ -60,6 +61,85 @@ function hasPlaceholderUrl(url) {
   return /(?:example\.com|example\.org|localhost|127\.0\.0\.1|<|\{\{|placeholder)/i.test(url);
 }
 
+const REPORT_ANCHOR = /^<!--\s*report-unit:(rpt_[A-Za-z0-9][A-Za-z0-9_-]*):(start|end)\s*-->$/;
+const REPORT_ANCHOR_LIKE = /<!--\s*report-unit:[\s\S]*?-->/g;
+
+export function normalizeReportUnitText(text) {
+  const lines = String(text).replace(/\r\n?/g, '\n').replace(REPORT_ANCHOR_LIKE, '').split('\n');
+  while (lines.length && /^\s*$/.test(lines[0])) lines.shift();
+  while (lines.length && /^\s*$/.test(lines.at(-1))) lines.pop();
+  return lines.join('\n');
+}
+
+export function reportUnitSha256(text) {
+  return createHash('sha256').update(normalizeReportUnitText(text), 'utf8').digest('hex');
+}
+
+function isPresentationalReportLine(line) {
+  const text = line.trim();
+  return !text || /^#{1,6}(?:\s|$)/.test(text) || /^(?:[-*_]\s*){3,}$/.test(text) || /^\|?(?:\s*:?-{3,}:?\s*\|)+$/.test(text) || /^<!--.*-->$/.test(text);
+}
+
+function inspectReportAnchors(report, reportMap, errors) {
+  const units = new Map((reportMap?.report_units ?? []).map((unit) => [unit.report_unit_id, unit]));
+  const markers = new Map();
+  const enclosed = new Map();
+  const lines = String(report).replace(/\r\n?/g, '\n').split('\n');
+  let fence = null;
+  let open = null;
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index];
+    const fenceMatch = line.match(/^\s*(`{3,}|~{3,})/);
+    if (fenceMatch) {
+      if (!fence) fence = fenceMatch[1][0];
+      else if (fence === fenceMatch[1][0]) fence = null;
+      continue;
+    }
+    if (fence) continue;
+    const looksLikeAnchor = /<!--\s*report-unit:/.test(line);
+    const marker = line.trim().match(REPORT_ANCHOR);
+    if (looksLikeAnchor && !marker) {
+      error(errors, 'report.md', null, 'report.anchor.unknown', `Unknown report-unit marker on line ${index + 1}.`);
+      continue;
+    }
+    if (marker) {
+      const [, id, kind] = marker;
+      const record = markers.get(id) ?? { starts: [], ends: [] };
+      record[`${kind}s`].push(index);
+      markers.set(id, record);
+      if (record[`${kind}s`].length > 1) error(errors, 'report.md', id, 'report.anchor.duplicate', `Duplicate ${kind} marker for ${id}.`);
+      if (kind === 'start') {
+        if (open) error(errors, 'report.md', id, 'report.anchor.nested', `${id} starts before ${open.id} ends.`);
+        else open = { id, start: index };
+      } else if (!open) {
+        error(errors, 'report.md', id, 'report.anchor.order', `${id} ends before its start marker.`);
+      } else if (open.id !== id) {
+        error(errors, 'report.md', id, 'report.anchor.order', `${id} ends while ${open.id} is open.`);
+      } else {
+        enclosed.set(id, lines.slice(open.start + 1, index).join('\n'));
+        open = null;
+      }
+      continue;
+    }
+    if (!open && !isPresentationalReportLine(line)) error(errors, 'report.md', null, 'report.prose.unanchored', `Material report prose on line ${index + 1} is outside a report unit.`);
+  }
+  if (open) error(errors, 'report.md', open.id, 'report.anchor.missing_end', `Missing end marker for ${open.id}.`);
+  for (const [id, record] of markers) {
+    if (record.starts.length !== 1 || record.ends.length !== 1) error(errors, 'report.md', id, 'report.anchor.pair', `${id} must have exactly one start and one end marker.`);
+    if (!units.has(id)) error(errors, 'report.md', id, 'report.anchor.map', `Report marker ${id} has no report-map entry.`);
+  }
+  for (const [id, unit] of units) {
+    const record = markers.get(id);
+    if (!record || record.starts.length !== 1 || record.ends.length !== 1 || !enclosed.has(id)) {
+      error(errors, 'report-map.json', id, 'report_map.anchor', `Report map entry ${id} must have exactly one enclosed report unit.`);
+      continue;
+    }
+    const normalized = normalizeReportUnitText(enclosed.get(id));
+    if (!normalized) error(errors, 'report.md', id, 'report.anchor.empty', `Report unit ${id} is empty.`);
+    else if (reportUnitSha256(enclosed.get(id)) !== unit.text_sha256) error(errors, 'report-map.json', id, 'report_map.text_sha256', `text_sha256 does not match normalized report prose for ${id}.`);
+  }
+}
+
 async function readJson(file, errors) {
   try { return JSON.parse(await readFile(file, 'utf8')); }
   catch (cause) { error(errors, file, null, 'json.parse', `Invalid or unreadable JSON: ${cause.message}`); return null; }
@@ -95,13 +175,17 @@ export async function validateResearchRun(directory) {
 
   const plan = files.plan && await readJson(files.plan, errors);
   const conflicts = files.conflicts && await readJson(files.conflicts, errors);
+  const coverageGaps = files.coverage_gaps && await readJson(files.coverage_gaps, errors);
+  const semanticValidation = files.semantic_validation && await readJson(files.semantic_validation, errors);
   const reportMap = files.report_map && await readJson(files.report_map, errors);
   const validation = files.validation && await readJson(files.validation, errors);
+  let report = '';
   if (files.report) {
-    try { await readFile(files.report, 'utf8'); }
+    try { report = await readFile(files.report, 'utf8'); }
     catch (cause) { error(errors, 'report.md', null, 'file.required', `Missing or unreadable report: ${cause.message}`); }
   }
   if (!Array.isArray(conflicts)) error(errors, 'conflicts.json', null, 'conflicts.array', 'Conflicts must be a JSON array.');
+  if (!Array.isArray(coverageGaps)) error(errors, 'coverage-gaps.json', null, 'coverage_gaps.array', 'Coverage gaps must be a JSON array.');
   if (!Array.isArray(reportMap?.report_units)) error(errors, 'report-map.json', reportMap?.report_map_id, 'report_map.units', 'report_units must be an array.');
   if (!required(plan?.plan_id)) error(errors, 'plan.json', null, 'plan.plan_id', 'Plan must include plan_id.');
   else if (!ID_PATTERNS.plan_id.test(plan.plan_id)) error(errors, 'plan.json', plan.plan_id, 'plan.plan_id.format', 'plan_id must use the canonical plan_ identifier format.');
@@ -112,7 +196,7 @@ export async function validateResearchRun(directory) {
   if (typeof validation?.valid !== 'boolean') error(errors, 'validation.json', null, 'validation.status', 'validation.json must include boolean valid.');
 
   const jsonl = {};
-  for (const key of ['sources', 'claims', 'discarded_claims', 'verification_events']) {
+  for (const key of ['sources', 'claims', 'discarded_claims', 'verification_events', 'repair_events']) {
     jsonl[key] = files[key] ? await readJsonl(files[key]) : { records: [], errors: [] };
     for (const issue of jsonl[key].errors) error(errors, path.basename(issue.file), null, 'jsonl.parse', `Line ${issue.line ?? '?'}: ${issue.message}`);
   }
@@ -120,10 +204,13 @@ export async function validateResearchRun(directory) {
   const claims = jsonl.claims.records;
   const discarded = jsonl.discarded_claims.records;
   const events = jsonl.verification_events.records;
+  const repairEvents = jsonl.repair_events.records;
   const sourceIds = unique(sources, 'source_id', 'sources.jsonl', errors);
   const claimIds = unique(claims, 'claim_id', 'claims.jsonl', errors);
   const discardedIds = unique(discarded, 'claim_id', 'discarded-claims.jsonl', errors);
   unique(events, 'verification_event_id', 'verification-events.jsonl', errors);
+  unique(repairEvents, 'repair_event_id', 'repair-events.jsonl', errors);
+  unique(Array.isArray(coverageGaps) ? coverageGaps : [], 'coverage_gap_id', 'coverage-gaps.json', errors);
   unique(Array.isArray(conflicts) ? conflicts : [], 'conflict_id', 'conflicts.json', errors);
   unique(reportMap?.report_units ?? [], 'report_unit_id', 'report-map.json', errors);
 
@@ -132,9 +219,12 @@ export async function validateResearchRun(directory) {
   validateContract(validators['report-map.schema.json'], reportMap, 'report-map.json', reportMap?.report_map_id, errors);
   for (const source of sources) validateContract(validators['source.schema.json'], source, 'sources.jsonl', source?.source_id, errors);
   for (const claim of claims) validateContract(validators['claim.schema.json'], claim, 'claims.jsonl', claim?.claim_id, errors);
-  for (const claim of discarded) validateContract(validators['claim.schema.json'], claim, 'discarded-claims.jsonl', claim?.claim_id, errors);
+  for (const claim of discarded) validateContract(validators['discarded-claim.schema.json'], claim, 'discarded-claims.jsonl', claim?.claim_id, errors);
   for (const event of events) validateContract(validators['verification-event.schema.json'], event, 'verification-events.jsonl', event?.verification_event_id, errors);
   for (const conflict of Array.isArray(conflicts) ? conflicts : []) validateContract(validators['conflict.schema.json'], conflict, 'conflicts.json', conflict?.conflict_id, errors);
+  for (const gap of Array.isArray(coverageGaps) ? coverageGaps : []) validateContract(validators['coverage-gap.schema.json'], gap, 'coverage-gaps.json', gap?.coverage_gap_id, errors);
+  validateContract(validators['semantic-validation.schema.json'], semanticValidation, 'semantic-validation.json', semanticValidation?.semantic_validation_id, errors);
+  for (const event of repairEvents) validateContract(validators['repair-event.schema.json'], event, 'repair-events.jsonl', event?.repair_event_id, errors);
 
   for (const source of sources) {
     const id = source?.source_id;
@@ -172,9 +262,16 @@ export async function validateResearchRun(directory) {
 
   for (const event of events) {
     const id = event?.verification_event_id;
-    if (!claimIds.has(event?.claim_id)) error(errors, 'verification-events.jsonl', id, 'verification.claim', `Unknown retained claim_id ${event?.claim_id ?? '(missing)'}.`);
+    if (!claimIds.has(event?.claim_id) && !discardedIds.has(event?.claim_id)) error(errors, 'verification-events.jsonl', id, 'verification.claim', `Unknown claim_id ${event?.claim_id ?? '(missing)'}.`);
     if (!OUTCOMES.has(event?.outcome)) error(errors, 'verification-events.jsonl', id, 'verification.outcome', 'Verification outcome is invalid.');
     for (const sourceId of event?.checked_source_ids ?? []) if (!sourceIds.has(sourceId)) error(errors, 'verification-events.jsonl', id, 'verification.source', `Unknown checked source_id ${sourceId}.`);
+    const localSourceIds = new Set((event?.new_sources ?? []).map(({ source_id }) => source_id));
+    if (localSourceIds.size !== (event?.new_sources ?? []).length) error(errors, 'verification-events.jsonl', id, 'verification.new_source.unique', 'Verifier-local source IDs must be unique within an event.');
+    for (const evidence of event?.new_evidence ?? []) if (!sourceIds.has(evidence?.source_id) && !localSourceIds.has(evidence?.source_id)) error(errors, 'verification-events.jsonl', id, 'verification.new_evidence.source', `Unknown verifier evidence source_id ${evidence?.source_id ?? '(missing)'}.`);
+  }
+  const eventIds = new Set(events.map(({ verification_event_id }) => verification_event_id));
+  for (const claim of discarded) {
+    for (const eventId of claim?.verification_event_ids ?? []) if (!eventIds.has(eventId)) error(errors, 'discarded-claims.jsonl', claim?.claim_id, 'discarded_claim.verification_events', `Unknown verification_event_id ${eventId}.`);
   }
 
   const mappedClaims = new Set();
@@ -186,13 +283,15 @@ export async function validateResearchRun(directory) {
   for (const claim of claims.filter((item) => ['critical', 'high'].includes(item?.materiality))) if (!mappedClaims.has(claim.claim_id)) error(errors, 'report-map.json', claim.claim_id, 'report_map.key_claim', 'Every critical or high-materiality claim must appear in the report map.');
 
   for (const conflict of Array.isArray(conflicts) ? conflicts : []) {
-    for (const id of conflict?.claim_ids ?? []) if (!claimIds.has(id)) error(errors, 'conflicts.json', conflict?.conflict_id, 'conflict.claim', `Unknown retained claim_id ${id}.`);
+    for (const id of conflict?.claim_ids ?? []) if (!claimIds.has(id) && !discardedIds.has(id)) error(errors, 'conflicts.json', conflict?.conflict_id, 'conflict.claim', `Unknown claim_id ${id}.`);
     for (const id of conflict?.supporting_source_ids ?? []) if (!sourceIds.has(id)) error(errors, 'conflicts.json', conflict?.conflict_id, 'conflict.source', `Unknown source_id ${id}.`);
     const material = (conflict?.claim_ids ?? []).some((id) => ['critical', 'high'].includes(claims.find((claim) => claim.claim_id === id)?.materiality));
     if (conflict?.status === 'unresolved' && material && !(conflict.claim_ids ?? []).some((id) => mappedClaims.has(id))) error(errors, 'report-map.json', conflict.conflict_id, 'conflict.report_map', 'An unresolved material conflict must be represented in the report map.');
   }
+  inspectReportAnchors(report, reportMap, errors);
+  for (const gap of Array.isArray(coverageGaps) ? coverageGaps : []) for (const claimId of gap?.related_claim_ids ?? []) if (!claimIds.has(claimId) && !discardedIds.has(claimId)) error(errors, 'coverage-gaps.json', gap?.coverage_gap_id, 'coverage_gap.claim', `Unknown claim_id ${claimId}.`);
 
-  const counts = { sources: sources.length, claims: claims.length, retained_claims: claims.length, discarded_claims: discarded.length, verification_events: events.length, conflicts: Array.isArray(conflicts) ? conflicts.length : 0, report_units: reportMap?.report_units?.length ?? 0 };
+  const counts = { sources: sources.length, claims: claims.length, retained_claims: claims.length, discarded_claims: discarded.length, verification_events: events.length, conflicts: Array.isArray(conflicts) ? conflicts.length : 0, coverage_gaps: Array.isArray(coverageGaps) ? coverageGaps.length : 0, semantic_validations: semanticValidation ? 1 : 0, repair_events: repairEvents.length, report_units: reportMap?.report_units?.length ?? 0 };
   for (const [key, actual] of Object.entries(counts)) if (manifest.counts?.[key] !== actual) error(errors, 'manifest.json', manifest.run_id, 'manifest.counts', `Count for ${key} is ${manifest.counts?.[key] ?? '(missing)'}, expected ${actual}.`);
   const valid = errors.length === 0;
   if (validation && validation.valid !== valid) error(errors, 'validation.json', null, 'validation.status', `validation.json valid must be ${valid}.`);

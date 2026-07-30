@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { readJsonl } from '../scripts/lib/jsonl.mjs';
-import { validateResearchRun } from '../scripts/lib/research-validation.mjs';
+import { reportUnitSha256, validateResearchRun } from '../scripts/lib/research-validation.mjs';
 import { generateResearchContracts } from '../scripts/generate-research-contracts.mjs';
 
 const fixtures = path.join(process.cwd(), 'tests', 'fixtures');
@@ -13,6 +13,13 @@ const hasRule = (result, rule) => result.errors.some((error) => error.rule === r
 
 async function readJson(file) { return JSON.parse(await readFile(file, 'utf8')); }
 async function writeJson(file, value) { await writeFile(file, `${JSON.stringify(value, null, 2)}\n`); }
+
+async function workflowNormalizer() {
+  const workflow = await readFile(path.join(process.cwd(), '.claude', 'workflows', 'research-swarm.js'), 'utf8');
+  const start = workflow.indexOf('const TRACKING_PARAMETERS');
+  const end = workflow.indexOf('const normalizedSchema', start);
+  return new Function(`${workflow.slice(start, end)}; return { normalizeVerificationEvents, normalizedUrl };`)();
+}
 
 async function copiedValid(t) {
   const directory = await mkdtemp(path.join(tmpdir(), 'research-validation-'));
@@ -45,6 +52,13 @@ async function mutateClaim(t, mutate) {
   const claim = (await readJsonl(file)).records[0];
   mutate(claim);
   await writeFile(file, `${JSON.stringify(claim)}\n`);
+  await markInvalid(directory);
+  return validateResearchRun(directory);
+}
+
+async function mutateReport(t, mutate) {
+  const directory = await copiedValid(t);
+  await mutate(directory);
   await markInvalid(directory);
   return validateResearchRun(directory);
 }
@@ -248,4 +262,155 @@ test('a manifest count mismatch fails', async (t) => {
   const result = await validateResearchRun(directory);
   assert.equal(result.valid, false);
   assert.ok(hasRule(result, 'manifest.counts'));
+});
+
+test('report anchors tie every mapped unit to exact prose', async (t) => {
+  const cases = [
+    ['missing start marker', async (directory) => writeFile(path.join(directory, 'report.md'), '# Fixture Report\n\nThe fixture authority published the record.\n<!-- report-unit:rpt_fixture:end -->\n'), 'report.anchor.order'],
+    ['missing end marker', async (directory) => writeFile(path.join(directory, 'report.md'), '# Fixture Report\n\n<!-- report-unit:rpt_fixture:start -->\nThe fixture authority published the record.\n'), 'report.anchor.missing_end'],
+    ['reversed markers', async (directory) => writeFile(path.join(directory, 'report.md'), '# Fixture Report\n\n<!-- report-unit:rpt_fixture:end -->\nThe fixture authority published the record.\n<!-- report-unit:rpt_fixture:start -->\n'), 'report.anchor.order'],
+    ['nested markers', async (directory) => writeFile(path.join(directory, 'report.md'), '# Fixture Report\n\n<!-- report-unit:rpt_fixture:start -->\n<!-- report-unit:rpt_nested:start -->\nThe fixture authority published the record.\n<!-- report-unit:rpt_nested:end -->\n<!-- report-unit:rpt_fixture:end -->\n'), 'report.anchor.nested'],
+    ['duplicate marker', async (directory) => writeFile(path.join(directory, 'report.md'), '# Fixture Report\n\n<!-- report-unit:rpt_fixture:start -->\n<!-- report-unit:rpt_fixture:start -->\nThe fixture authority published the record.\n<!-- report-unit:rpt_fixture:end -->\n'), 'report.anchor.duplicate'],
+    ['unknown marker', async (directory) => writeFile(path.join(directory, 'report.md'), '# Fixture Report\n\n<!-- report-unit:unknown:start -->\nThe fixture authority published the record.\n<!-- report-unit:rpt_fixture:end -->\n'), 'report.anchor.unknown'],
+    ['stale hash', async (directory) => writeFile(path.join(directory, 'report.md'), '# Fixture Report\n\n<!-- report-unit:rpt_fixture:start -->\nThe edited fixture authority published the record.\n<!-- report-unit:rpt_fixture:end -->\n'), 'report_map.text_sha256'],
+    ['empty unit', async (directory) => writeFile(path.join(directory, 'report.md'), '# Fixture Report\n\n<!-- report-unit:rpt_fixture:start -->\n\n<!-- report-unit:rpt_fixture:end -->\n'), 'report.anchor.empty']
+  ];
+  for (const [name, mutate, rule] of cases) {
+    const result = await mutateReport(t, mutate);
+    assert.equal(result.valid, false, name);
+    assert.ok(hasRule(result, rule), name);
+  }
+});
+
+test('report map coverage, normalization, and ledger links are enforced', async (t) => {
+  const mapWithoutProse = await mutateReport(t, async (directory) => {
+    const map = await readJson(path.join(directory, 'report-map.json'));
+    map.report_units.push({ report_unit_id: 'rpt_orphan', section: 'Key Findings', claim_ids: ['clm_fixture'], text_sha256: '0'.repeat(64) });
+    await writeJson(path.join(directory, 'report-map.json'), map);
+    const manifest = await readJson(path.join(directory, 'manifest.json')); manifest.counts.report_units = 2; await writeJson(path.join(directory, 'manifest.json'), manifest);
+  });
+  assert.ok(hasRule(mapWithoutProse, 'report_map.anchor'));
+
+  const proseWithoutMap = await mutateReport(t, async (directory) => {
+    await writeJson(path.join(directory, 'report-map.json'), { report_map_id: 'rmap_fixture', report_units: [] });
+    const manifest = await readJson(path.join(directory, 'manifest.json')); manifest.counts.report_units = 0; await writeJson(path.join(directory, 'manifest.json'), manifest);
+  });
+  assert.ok(hasRule(proseWithoutMap, 'report.anchor.map'));
+
+  const crlf = await copiedValid(t);
+  await writeFile(path.join(crlf, 'report.md'), (await readFile(path.join(crlf, 'report.md'), 'utf8')).replace(/\n/g, '\r\n'));
+  assert.equal((await validateResearchRun(crlf)).valid, true);
+
+  const codeFence = await copiedValid(t);
+  await writeFile(path.join(codeFence, 'report.md'), `${await readFile(path.join(codeFence, 'report.md'), 'utf8')}\n\`\`\`md\n<!-- report-unit:rpt_literal:start -->\nliteral example\n<!-- report-unit:rpt_literal:end -->\n\`\`\`\n`);
+  assert.equal((await validateResearchRun(codeFence)).valid, true);
+
+  const inference = await mutateReport(t, async (directory) => {
+    const map = await readJson(path.join(directory, 'report-map.json')); map.report_units[0].is_inference = true; await writeJson(path.join(directory, 'report-map.json'), map);
+  });
+  assert.ok(hasRule(inference, 'report_map.inference'));
+
+  const discarded = await mutateReport(t, async (directory) => {
+    const claim = (await readJsonl(path.join(directory, 'claims.jsonl'))).records[0];
+    await writeFile(path.join(directory, 'discarded-claims.jsonl'), `${JSON.stringify({ ...claim, claim_id: 'clm_discarded', discard_reason: 'Fixture discard.', discard_basis: 'duplicate' })}\n`);
+    const map = await readJson(path.join(directory, 'report-map.json')); map.report_units[0].claim_ids = ['clm_discarded']; await writeJson(path.join(directory, 'report-map.json'), map);
+    const manifest = await readJson(path.join(directory, 'manifest.json')); manifest.counts.discarded_claims = 1; await writeJson(path.join(directory, 'manifest.json'), manifest);
+  });
+  assert.ok(hasRule(discarded, 'report_map.claim'));
+  assert.equal(reportUnitSha256('The fixture authority published the record.'), '9b8f63de317499e05ed03edab16517e6847a4937d06b59c1783ceac5f481dbe7');
+});
+
+test('verification events may reference retained or discarded claims, but not unknown claims', async (t) => {
+  const directory = await copiedValid(t);
+  const claim = (await readJsonl(path.join(directory, 'claims.jsonl'))).records[0];
+  const discarded = { ...claim, claim_id: 'clm_discarded', discard_reason: 'Verification contradicted the claim.', discard_basis: 'verification', verification_event_ids: ['ver_discarded'] };
+  const event = { verification_event_id: 'ver_discarded', claim_id: 'clm_discarded', occurred_at: '2026-07-28T00:00:00Z', outcome: 'contradicted', rationale: 'Fixture counter-evidence.', checked_source_ids: ['src_fixture'] };
+  await writeFile(path.join(directory, 'discarded-claims.jsonl'), `${JSON.stringify(discarded)}\n`);
+  await writeFile(path.join(directory, 'verification-events.jsonl'), `${(await readJsonl(path.join(directory, 'verification-events.jsonl'))).records.map(JSON.stringify).join('\n')}\n${JSON.stringify(event)}\n`);
+  const manifest = await readJson(path.join(directory, 'manifest.json'));
+  manifest.counts.discarded_claims = 1; manifest.counts.verification_events = 2;
+  await writeJson(path.join(directory, 'manifest.json'), manifest);
+  assert.equal((await validateResearchRun(directory)).valid, true);
+  event.claim_id = 'clm_unknown';
+  await writeFile(path.join(directory, 'verification-events.jsonl'), `${(await readJsonl(path.join(directory, 'verification-events.jsonl'))).records.slice(0, 1).map(JSON.stringify).join('\n')}\n${JSON.stringify(event)}\n`);
+  await markInvalid(directory);
+  assert.ok(hasRule(await validateResearchRun(directory), 'verification.claim'));
+});
+
+test('discard bases enforce only verification-linked event IDs', async (t) => {
+  const directory = await copiedValid(t);
+  const claim = (await readJsonl(path.join(directory, 'claims.jsonl'))).records[0];
+  const discarded = { ...claim, claim_id: 'clm_discarded', discard_reason: 'No provenance.', discard_basis: 'provenance' };
+  await writeFile(path.join(directory, 'discarded-claims.jsonl'), `${JSON.stringify(discarded)}\n`);
+  const manifest = await readJson(path.join(directory, 'manifest.json'));
+  manifest.counts.discarded_claims = 1;
+  await writeJson(path.join(directory, 'manifest.json'), manifest);
+  assert.equal((await validateResearchRun(directory)).valid, true);
+  discarded.discard_basis = 'verification';
+  await writeFile(path.join(directory, 'discarded-claims.jsonl'), `${JSON.stringify(discarded)}\n`);
+  await markInvalid(directory);
+  assert.equal((await validateResearchRun(directory)).valid, false);
+});
+
+test('conflicts and coverage gaps retain ledger references and final dispositions', async (t) => {
+  const directory = await copiedValid(t);
+  const claim = (await readJsonl(path.join(directory, 'claims.jsonl'))).records[0];
+  const discarded = { ...claim, claim_id: 'clm_discarded', discard_reason: 'Duplicate wording.', discard_basis: 'duplicate' };
+  await writeFile(path.join(directory, 'discarded-claims.jsonl'), `${JSON.stringify(discarded)}\n`);
+  await writeJson(path.join(directory, 'conflicts.json'), [{ conflict_id: 'conf_fixture', claim_ids: ['clm_fixture', 'clm_discarded'], supporting_source_ids: ['src_fixture'], reason: 'Fixture disagreement.', practical_implication: 'Qualify the conclusion.', status: 'qualified' }]);
+  await writeJson(path.join(directory, 'coverage-gaps.json'), [{ coverage_gap_id: 'gap_fixture', description: 'No secondary fixture source.', severity: 'medium', status: 'accepted', related_subquestion_ids: ['sq_fixture'], related_claim_ids: ['clm_discarded'] }]);
+  const manifest = await readJson(path.join(directory, 'manifest.json'));
+  manifest.counts.discarded_claims = 1; manifest.counts.conflicts = 1; manifest.counts.coverage_gaps = 1;
+  await writeJson(path.join(directory, 'manifest.json'), manifest);
+  assert.equal((await validateResearchRun(directory)).valid, true);
+  const conflict = await readJson(path.join(directory, 'conflicts.json')); conflict[0].claim_ids[1] = 'clm_unknown';
+  await writeJson(path.join(directory, 'conflicts.json'), conflict); await markInvalid(directory);
+  assert.ok(hasRule(await validateResearchRun(directory), 'conflict.claim'));
+});
+
+test('new archive artifacts, their schemas, and manifest counts are required', async (t) => {
+  const directory = await copiedValid(t);
+  await rm(path.join(directory, 'semantic-validation.json'));
+  await markInvalid(directory);
+  assert.equal((await validateResearchRun(directory)).valid, false);
+  const directory2 = await copiedValid(t);
+  await writeFile(path.join(directory2, 'repair-events.jsonl'), '{bad}\n'); await markInvalid(directory2);
+  assert.ok(hasRule(await validateResearchRun(directory2), 'jsonl.parse'));
+  const directory3 = await copiedValid(t);
+  const manifest = await readJson(path.join(directory3, 'manifest.json'));
+  for (const key of ['coverage_gaps', 'semantic_validations', 'repair_events']) { manifest.counts[key] += 1; await writeJson(path.join(directory3, 'manifest.json'), manifest); await markInvalid(directory3); assert.ok(hasRule(await validateResearchRun(directory3), 'manifest.counts'), key); manifest.counts[key] -= 1; }
+  const directory4 = await copiedValid(t);
+  await writeJson(path.join(directory4, 'coverage-gaps.json'), [{ coverage_gap_id: 'gap_fixture', description: 'A resolved fixture gap.', severity: 'low', status: 'resolved', related_subquestion_ids: ['sq_fixture'] }]);
+  const manifest4 = await readJson(path.join(directory4, 'manifest.json')); manifest4.counts.coverage_gaps = 1;
+  await writeJson(path.join(directory4, 'manifest.json'), manifest4); await markInvalid(directory4);
+  assert.equal((await validateResearchRun(directory4)).valid, false);
+});
+
+test('verification normalization deduplicates DOI and URL sources, preserves events, and records counter-evidence', async () => {
+  const { normalizeVerificationEvents, normalizedUrl } = await workflowNormalizer();
+  const source = (await readJsonl(path.join(fixture('valid-run'), 'sources.jsonl'))).records[0];
+  const claim = (await readJsonl(path.join(fixture('valid-run'), 'claims.jsonl'))).records[0];
+  source.doi = '10.1234/FIXTURE'; source.url = 'https://fixture-authority.invalid/record?utm_source=test#section';
+  const event = {
+    verification_event_id: 'ver_new', claim_id: claim.claim_id, occurred_at: '2026-07-28T00:00:00Z', outcome: 'contradicted', rationale: 'An independent check found a material limitation.', checked_source_ids: [source.source_id], proposed_conflict: 'The verifier found directly contradictory evidence.',
+    new_sources: [{ ...source, source_id: 'tmp_src_same', doi: 'https://doi.org/10.1234/fixture', url: 'https://fixture-authority.invalid/record?utm_medium=email#other' }],
+    new_evidence: [{ source_id: 'tmp_src_same', locator: 'Limitations', relationship: 'contradicts', note: 'The result is narrower than stated.' }]
+  };
+  const output = normalizeVerificationEvents([source], [claim], [], [event]);
+  assert.equal(output.sources.length, 1);
+  assert.equal(output.verification_events[0], event);
+  assert.equal(output.claims[0].counter_evidence[0].source_id, source.source_id);
+  assert.equal(output.conflicts[0].claim_ids[0], claim.claim_id);
+  assert.equal(normalizedUrl('https://example.test/a?keep=yes&utm_campaign=x#fragment'), 'https://example.test/a?keep=yes');
+});
+
+test('verification normalization rejects missing local evidence and does not merge title-only sources', async () => {
+  const { normalizeVerificationEvents } = await workflowNormalizer();
+  const source = (await readJsonl(path.join(fixture('valid-run'), 'sources.jsonl'))).records[0];
+  const claim = (await readJsonl(path.join(fixture('valid-run'), 'claims.jsonl'))).records[0];
+  const base = { verification_event_id: 'ver_local', claim_id: claim.claim_id, occurred_at: '2026-07-28T00:00:00Z', outcome: 'confirmed', rationale: 'Checked.', checked_source_ids: [source.source_id] };
+  assert.throws(() => normalizeVerificationEvents([source], [claim], [], [{ ...base, new_evidence: [{ source_id: 'tmp_src_missing', locator: 'Page 1', relationship: 'supports' }] }]), /missing new source/);
+  const output = normalizeVerificationEvents([source], [claim], [], [{ ...base, new_sources: [{ ...source, source_id: 'tmp_src_different', publisher: 'Different Publisher', doi: undefined, url: 'https://different.invalid/record' }], new_evidence: [{ source_id: 'tmp_src_different', locator: 'Page 1', relationship: 'supports' }] }]);
+  assert.equal(output.sources.length, 2);
+  assert.match(output.sources[1].source_id, /^src_ver_/);
 });

@@ -17,7 +17,7 @@
     "counts": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["sources", "claims", "retained_claims", "discarded_claims", "verification_events", "conflicts", "report_units"],
+      "required": ["sources", "claims", "retained_claims", "discarded_claims", "verification_events", "conflicts", "coverage_gaps", "semantic_validations", "repair_events", "report_units"],
       "properties": {
         "sources": { "type": "integer", "minimum": 0 },
         "claims": { "type": "integer", "minimum": 0 },
@@ -25,13 +25,16 @@
         "discarded_claims": { "type": "integer", "minimum": 0 },
         "verification_events": { "type": "integer", "minimum": 0 },
         "conflicts": { "type": "integer", "minimum": 0 },
+        "coverage_gaps": { "type": "integer", "minimum": 0 },
+        "semantic_validations": { "type": "integer", "minimum": 0 },
+        "repair_events": { "type": "integer", "minimum": 0 },
         "report_units": { "type": "integer", "minimum": 0 }
       }
     },
     "paths": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["plan", "sources", "claims", "discarded_claims", "verification_events", "conflicts", "report", "report_map", "validation"],
+      "required": ["plan", "sources", "claims", "discarded_claims", "verification_events", "conflicts", "coverage_gaps", "semantic_validation", "repair_events", "report", "report_map", "validation"],
       "properties": {
         "plan": { "type": "string", "minLength": 1 },
         "sources": { "type": "string", "minLength": 1 },
@@ -39,6 +42,9 @@
         "discarded_claims": { "type": "string", "minLength": 1 },
         "verification_events": { "type": "string", "minLength": 1 },
         "conflicts": { "type": "string", "minLength": 1 },
+        "coverage_gaps": { "type": "string", "minLength": 1 },
+        "semantic_validation": { "type": "string", "minLength": 1 },
+        "repair_events": { "type": "string", "minLength": 1 },
         "report": { "type": "string", "minLength": 1 },
         "report_map": { "type": "string", "minLength": 1 },
         "validation": { "type": "string", "minLength": 1 }

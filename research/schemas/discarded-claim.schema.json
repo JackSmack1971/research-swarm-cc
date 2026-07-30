@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "discarded-claim.schema.json",
+  "title": "Discarded research claim",
+  "allOf": [
+    { "$ref": "claim.schema.json" },
+    {
+      "type": "object",
+      "required": ["discard_reason", "discard_basis"],
+      "properties": {
+        "discard_reason": { "type": "string", "minLength": 1 },
+        "discard_basis": { "enum": ["provenance", "duplicate", "out_of_scope", "adjudication", "verification"] },
+        "verification_event_ids": { "type": "array", "minItems": 1, "items": { "$ref": "verification-event.schema.json#/properties/verification_event_id" } }
+      },
+      "allOf": [{ "if": { "properties": { "discard_basis": { "const": "verification" } }, "required": ["discard_basis"] }, "then": { "required": ["verification_event_ids"] } }]
+    }
+  ]
+}

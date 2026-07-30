@@ -12,8 +12,45 @@
     "occurred_at": { "type": "string", "format": "date-time" },
     "outcome": { "$ref": "#/$defs/outcome" },
     "rationale": { "type": "string", "minLength": 1 },
-    "checked_source_ids": { "type": "array", "items": { "$ref": "source.schema.json#/$defs/sourceId" } },
+    "checked_source_ids": { "type": "array", "items": { "$ref": "source.schema.json#/$defs/sourceId" }, "description": "Canonical source IDs the verifier inspected." },
+    "new_sources": { "type": "array", "items": { "$ref": "#/$defs/verifierSource" }, "description": "Verifier-local sources; their tmp_src_ IDs are rewritten only in the augmented ledger." },
+    "new_evidence": { "type": "array", "items": { "$ref": "#/$defs/verifierEvidence" }, "description": "Evidence discovered during this immutable verification event." },
+    "proposed_conflict": { "type": "string", "minLength": 1, "description": "Why newly discovered evidence may materially conflict with the target claim." },
     "qualification": { "type": "string", "minLength": 1 }
   },
-  "$defs": { "outcome": { "enum": ["confirmed", "confirmed_with_qualification", "demoted", "contradicted", "unverifiable", "discarded"] } }
+  "$defs": {
+    "outcome": { "enum": ["confirmed", "confirmed_with_qualification", "demoted", "contradicted", "unverifiable", "discarded"] },
+    "verifierSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_id", "title", "publisher", "publication_date", "source_type", "independence_group", "access_date"],
+      "properties": {
+        "source_id": { "type": "string", "pattern": "^tmp_src_[A-Za-z0-9][A-Za-z0-9_-]*$" },
+        "title": { "type": "string", "minLength": 1 },
+        "publisher": { "type": "string", "minLength": 1 },
+        "publication_date": { "anyOf": [{ "type": "string", "format": "date" }, { "type": "null" }] },
+        "publication_date_unavailable_reason": { "type": "string", "minLength": 1 },
+        "url": { "type": "string", "format": "uri", "minLength": 1 },
+        "doi": { "type": "string", "pattern": "^10\\.[0-9]{4,9}/\\S+$" },
+        "source_type": { "$ref": "source.schema.json#/$defs/sourceType" },
+        "independence_group": { "type": "string", "pattern": "^ig_[A-Za-z0-9][A-Za-z0-9_-]*$" },
+        "access_date": { "type": "string", "format": "date" }
+      },
+      "allOf": [
+        { "anyOf": [{ "required": ["url"] }, { "required": ["doi"] }] },
+        { "if": { "properties": { "publication_date": { "type": "null" } }, "required": ["publication_date"] }, "then": { "required": ["publication_date_unavailable_reason"] }, "else": { "not": { "required": ["publication_date_unavailable_reason"] } } }
+      ]
+    },
+    "verifierEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_id", "locator", "relationship"],
+      "properties": {
+        "source_id": { "type": "string", "pattern": "^(src_|tmp_src_)[A-Za-z0-9][A-Za-z0-9_-]*$" },
+        "locator": { "type": "string", "minLength": 1 },
+        "relationship": { "enum": ["supports", "contradicts", "qualifies"] },
+        "note": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
 }

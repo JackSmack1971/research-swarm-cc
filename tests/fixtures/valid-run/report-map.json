@@ -1,4 +1,4 @@
 {
   "report_map_id": "rmap_fixture",
-  "report_units": [{ "report_unit_id": "rpt_fixture", "section": "Key Findings", "claim_ids": ["clm_fixture"] }]
+  "report_units": [{ "report_unit_id": "rpt_fixture", "section": "Key Findings", "claim_ids": ["clm_fixture"], "text_sha256": "9b8f63de317499e05ed03edab16517e6847a4937d06b59c1783ceac5f481dbe7" }]
 }
