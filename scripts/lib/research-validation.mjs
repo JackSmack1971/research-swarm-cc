@@ -225,6 +225,8 @@ export async function validateResearchRun(directory) {
   for (const gap of Array.isArray(coverageGaps) ? coverageGaps : []) validateContract(validators['coverage-gap.schema.json'], gap, 'coverage-gaps.json', gap?.coverage_gap_id, errors);
   validateContract(validators['semantic-validation.schema.json'], semanticValidation, 'semantic-validation.json', semanticValidation?.semantic_validation_id, errors);
   for (const event of repairEvents) validateContract(validators['repair-event.schema.json'], event, 'repair-events.jsonl', event?.repair_event_id, errors);
+  if (repairEvents.length > 2) error(errors, 'repair-events.jsonl', null, 'repair_events.budget', 'A run may execute no more than two repair rounds.');
+  for (const [index, event] of repairEvents.entries()) if (event?.repair_round !== index + 1) error(errors, 'repair-events.jsonl', event?.repair_event_id, 'repair_events.rounds', 'Repair rounds must be sequential and shared across the workflow.');
 
   for (const source of sources) {
     const id = source?.source_id;

@@ -18,11 +18,12 @@
       "required": ["defect_id", "category", "severity", "report_location", "description", "related_claim_ids", "repair_instruction"],
       "properties": {
         "defect_id": { "type": "string", "pattern": "^def_[A-Za-z0-9][A-Za-z0-9_-]*$" },
-        "category": { "enum": ["unsupported_assertion", "missing_citation", "concealed_conflict", "overstatement", "unlabeled_inference", "unsupported_recommendation", "missing_claim_coverage"] },
+        "category": { "enum": ["unsupported_assertion", "missing_citation", "concealed_conflict", "overstatement", "unlabeled_inference", "unsupported_recommendation", "missing_claim_coverage", "incomplete_verification", "malformed_evidence_linkage", "missing_anchor"] },
         "severity": { "enum": ["critical", "high", "medium", "low"] },
         "report_location": { "type": "string", "minLength": 1 },
         "description": { "type": "string", "minLength": 1 },
         "related_claim_ids": { "type": "array", "items": { "$ref": "claim.schema.json#/$defs/claimId" } },
+        "related_report_unit_ids": { "type": "array", "items": { "$ref": "report-map.schema.json#/$defs/reportUnit/properties/report_unit_id" } },
         "repair_instruction": { "type": "string", "minLength": 1 }
       }
     }

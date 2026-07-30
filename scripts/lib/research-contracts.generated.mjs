@@ -424,14 +424,19 @@ export const canonicalSchemas = [
   {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "repair-event.schema.json",
-    "title": "Semantic repair event",
+    "title": "Bounded research repair event",
     "type": "object",
     "additionalProperties": false,
     "required": [
       "repair_event_id",
       "occurred_at",
       "repair_round",
-      "defect_ids",
+      "action_type",
+      "trigger_ids",
+      "target_claim_ids",
+      "target_report_unit_ids",
+      "agent_count",
+      "action_summary",
       "outcome"
     ],
     "properties": {
@@ -448,17 +453,49 @@ export const canonicalSchemas = [
         "minimum": 1,
         "maximum": 2
       },
-      "defect_ids": {
+      "action_type": {
+        "enum": [
+          "report_repair",
+          "ledger_repair",
+          "verification_repair",
+          "structural_repair"
+        ]
+      },
+      "trigger_ids": {
         "type": "array",
         "minItems": 1,
         "items": {
           "type": "string",
-          "pattern": "^def_[A-Za-z0-9][A-Za-z0-9_-]*$"
+          "pattern": "^(?:def|gap)_[A-Za-z0-9][A-Za-z0-9_-]*$"
         }
+      },
+      "target_claim_ids": {
+        "type": "array",
+        "items": {
+          "$ref": "claim.schema.json#/$defs/claimId"
+        }
+      },
+      "target_report_unit_ids": {
+        "type": "array",
+        "items": {
+          "$ref": "report-map.schema.json#/$defs/reportUnit/properties/report_unit_id"
+        }
+      },
+      "agent_count": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 3
+      },
+      "action_summary": {
+        "type": "string",
+        "minLength": 1
       },
       "outcome": {
         "enum": [
           "completed",
+          "no_evidence",
+          "unverifiable",
+          "failed",
           "exhausted"
         ]
       }
@@ -953,7 +990,10 @@ export const canonicalSchemas = [
               "overstatement",
               "unlabeled_inference",
               "unsupported_recommendation",
-              "missing_claim_coverage"
+              "missing_claim_coverage",
+              "incomplete_verification",
+              "malformed_evidence_linkage",
+              "missing_anchor"
             ]
           },
           "severity": {
@@ -976,6 +1016,12 @@ export const canonicalSchemas = [
             "type": "array",
             "items": {
               "$ref": "claim.schema.json#/$defs/claimId"
+            }
+          },
+          "related_report_unit_ids": {
+            "type": "array",
+            "items": {
+              "$ref": "report-map.schema.json#/$defs/reportUnit/properties/report_unit_id"
             }
           },
           "repair_instruction": {

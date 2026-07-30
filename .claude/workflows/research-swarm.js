@@ -1514,7 +1514,10 @@ const semanticValidationSchema = {
               "overstatement",
               "unlabeled_inference",
               "unsupported_recommendation",
-              "missing_claim_coverage"
+              "missing_claim_coverage",
+              "incomplete_verification",
+              "malformed_evidence_linkage",
+              "missing_anchor"
             ]
           },
           "severity": {
@@ -1536,6 +1539,13 @@ const semanticValidationSchema = {
               "pattern": "^clm_[A-Za-z0-9][A-Za-z0-9_-]*$"
             }
           },
+          "related_report_unit_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^rpt_[A-Za-z0-9][A-Za-z0-9_-]*$"
+            }
+          },
           "repair_instruction": {
             "type": "string",
             "minLength": 1
@@ -1553,7 +1563,12 @@ const repairEventSchema = {
     "repair_event_id",
     "occurred_at",
     "repair_round",
-    "defect_ids",
+    "action_type",
+    "trigger_ids",
+    "target_claim_ids",
+    "target_report_unit_ids",
+    "agent_count",
+    "action_summary",
     "outcome"
   ],
   "properties": {
@@ -1570,17 +1585,51 @@ const repairEventSchema = {
       "minimum": 1,
       "maximum": 2
     },
-    "defect_ids": {
+    "action_type": {
+      "enum": [
+        "report_repair",
+        "ledger_repair",
+        "verification_repair",
+        "structural_repair"
+      ]
+    },
+    "trigger_ids": {
       "type": "array",
       "minItems": 1,
       "items": {
         "type": "string",
-        "pattern": "^def_[A-Za-z0-9][A-Za-z0-9_-]*$"
+        "pattern": "^(?:def|gap)_[A-Za-z0-9][A-Za-z0-9_-]*$"
       }
+    },
+    "target_claim_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^clm_[A-Za-z0-9][A-Za-z0-9_-]*$"
+      }
+    },
+    "target_report_unit_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^rpt_[A-Za-z0-9][A-Za-z0-9_-]*$"
+      }
+    },
+    "agent_count": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 3
+    },
+    "action_summary": {
+      "type": "string",
+      "minLength": 1
     },
     "outcome": {
       "enum": [
         "completed",
+        "no_evidence",
+        "unverifiable",
+        "failed",
         "exhausted"
       ]
     }
@@ -1895,9 +1944,26 @@ function selectVerificationTargets(claims, sources, depth, policy) {
     .sort();
 }
 
+const REPAIR_ACTIONS = {
+  unsupported_assertion: "report_repair", missing_citation: "report_repair", concealed_conflict: "report_repair", overstatement: "report_repair", unlabeled_inference: "report_repair", unsupported_recommendation: "report_repair",
+  missing_claim_coverage: "ledger_repair", malformed_evidence_linkage: "ledger_repair", incomplete_verification: "verification_repair", missing_anchor: "structural_repair"
+};
+const REPAIR_SEVERITY = { critical: 4, high: 3, medium: 2, low: 1 };
+const FAILURE_CODES = { planning: "PLAN_FAILED", research: "RESEARCH_FAILED", normalization: "NORMALIZATION_FAILED", verification: "VERIFICATION_FAILED", adjudication: "ADJUDICATION_FAILED", synthesis: "SYNTHESIS_FAILED", semantic_validation: "SEMANTIC_VALIDATION_FAILED", repair: "REPAIR_FAILED", persistence: "PERSISTENCE_FAILED" };
+function selectRepair(defects) {
+  const defect = [...defects].sort((left, right) => REPAIR_SEVERITY[right.severity] - REPAIR_SEVERITY[left.severity] || left.defect_id.localeCompare(right.defect_id))[0];
+  return { defect, action_type: REPAIR_ACTIONS[defect.category] ?? "report_repair" };
+}
+function repairEvent(round, repair, outcome, agentCount, summary) {
+  return { repair_event_id: `rep_${round}`, occurred_at: new Date().toISOString(), repair_round: round, action_type: repair.action_type, trigger_ids: [repair.defect.defect_id], target_claim_ids: repair.defect.related_claim_ids ?? [], target_report_unit_ids: repair.defect.related_report_unit_ids ?? [], agent_count: agentCount, action_summary: summary, outcome };
+}
+
+let stage = "planning";
+let knownRunDirectory = null;
 try {
 const config = parseArguments(args);
 const runDirectory = createRunDirectory(config.outputRoot, config.query);
+knownRunDirectory = runDirectory;
 const plan = await agent(`You are the research planner. Return only JSON matching the supplied schema. Do not research sources or make substantive claims.\n\n${UNTRUSTED_DATA_RULE}\n\nOriginal query: ${config.query}\nRequested minimum depth: ${config.depth}\nMaximum workers: ${HARD_MAXIMA.maxWorkers}\nVerification policy: ${config.verification}\nFreshness requirement: ${config.freshness ?? "none"}\n\nInterpret scope without asking questions. Produce a bounded plan with assumptions, unique sq_ subquestion IDs, source types, risk areas, escalation triggers, and a worker count that equals the number of subquestions.`, { label: "plan research", schema: planSchema });
 
 validatePlan(plan, config.depth);
@@ -1906,10 +1972,12 @@ const subquestions = consolidateSubquestions(plan.subquestions, limits.maxWorker
 const policy = mergeVerificationPolicy(config.verification, plan.verification_policy, plan.initial_depth);
 const boundedPlan = { ...plan, subquestions, worker_count: subquestions.length, verification_policy: plan.verification_policy, effective_depth: plan.initial_depth, effective_depth_rationale: "Planner depth, subject to one bounded post-normalization escalation.", effective_verification_policy: policy.policy, verification_policy_rationale: policy.rationale, limits };
 
+stage = "research";
 const workerBundles = await pipeline(boundedPlan.subquestions, (subquestion) =>
   agent(`You are an isolated research worker. Return only a claim bundle matching the schema. Do not write files, produce a narrative answer, or receive findings from other workers.\n\n${UNTRUSTED_DATA_RULE}\n\nOriginal query: ${config.query}\nInterpreted scope: ${boundedPlan.interpreted_scope}\nAssigned subquestion: ${subquestion.question}\nMaximum sources: ${limits.maxSourcesPerWorker}; maximum claims: ${limits.maxClaimsPerWorker}. Prioritize materiality, risk, then stable IDs; describe any omitted evidence and count in claim rationale.\nRequired source types: ${boundedPlan.required_source_types.join(", ")}\nFreshness requirement: ${config.freshness ?? "none"}\nShared evidence standards: use authoritative sources where possible; record source provenance, independence groups, precise locators, scoped falsifiable claims, confidence rationale, and credible counter-evidence. A URL or search snippet alone is not evidence.`, { label: subquestion.subquestion_id, schema: claimBundleSchema })
 );
 
+stage = "normalization";
 const normalized = await agent(`You are the research normalizer. Return only JSON matching the schema. Do not research, write files, resolve conflicts by majority vote, or synthesize an answer. Canonicalize source and claim IDs, retain scope distinctions and counter-evidence, identify conflicts and coverage gaps, and recommend claim IDs for risk-based verification.\n\n${UNTRUSTED_DATA_RULE}\n\nResearch plan:\n${JSON.stringify(boundedPlan)}\n\nWorker claim bundles:\n${JSON.stringify(workerBundles)}`, { label: "normalize evidence", schema: normalizedSchema });
 
 const capped = capClaims(normalized.claims, limits.maxCanonicalClaims);
@@ -1931,6 +1999,7 @@ const selectedVerificationTargets = [...new Set([
 ])].sort();
 const verificationTargets = boundedPlan.effective_depth === "deep" ? boundedNormalized.claims.map(({ claim_id }) => claim_id).sort() : selectedVerificationTargets.slice(0, limits.maxVerificationTargets);
 const claimsById = new Map(boundedNormalized.claims.map((claim) => [claim.claim_id, claim]));
+stage = "verification";
 const verificationEvents = [];
 for (const verificationChunk of chunks(verificationTargets, limits.maxVerifierConcurrency)) verificationEvents.push(...await pipeline(verificationChunk, (claimId) => {
   const claim = claimsById.get(claimId);
@@ -1939,22 +2008,31 @@ for (const verificationChunk of chunks(verificationTargets, limits.maxVerifierCo
   return agent(`You are an adversarial research verifier. Return only one verification event matching the schema. Do not write files or modify shared state. Attempt refutation before confirmation; test source independence, scope, dates, units, denominators, causal attribution, and applicability. Use unverifiable for unavailable or insufficient evidence, never contradicted.\n\n${UNTRUSTED_DATA_RULE}\n\nClaim:\n${JSON.stringify(claim)}\n\nCited sources:\n${JSON.stringify(citedSources)}`, { label: `verify ${claimId}`, schema: verificationEventSchema });
 }));
 
-const verificationNormalized = normalizeVerificationEvents(boundedNormalized.sources, boundedNormalized.claims, boundedNormalized.conflicts, verificationEvents);
-const adjudicated = await agent(`You are the research adjudicator. Return only JSON matching the schema. Apply every verification event, retain material counter-evidence and unresolved conflicts, and discard claims with failed provenance or ineligible support. Carry every normalization coverage gap forward with a final status; a resolved gap needs its rationale. Do not research, write files, or introduce evidence.\n\n${UNTRUSTED_DATA_RULE}\n\nSources:\n${JSON.stringify(verificationNormalized.sources)}\n\nClaims:\n${JSON.stringify(verificationNormalized.claims)}\n\nConflicts:\n${JSON.stringify(verificationNormalized.conflicts)}\n\nCoverage gaps:\n${JSON.stringify(normalized.coverage_gaps)}\n\nVerification events (immutable originals):\n${JSON.stringify(verificationNormalized.verification_events)}`, { label: "adjudicate evidence", schema: adjudicationSchema });
+let verificationNormalized = normalizeVerificationEvents(boundedNormalized.sources, boundedNormalized.claims, boundedNormalized.conflicts, verificationEvents);
+stage = "adjudication";
+let adjudicated = await agent(`You are the research adjudicator. Return only JSON matching the schema. Apply every verification event, retain material counter-evidence and unresolved conflicts, and discard claims with failed provenance or ineligible support. Carry every normalization coverage gap forward with a final status; a resolved gap needs its rationale. Do not research, write files, or introduce evidence.\n\n${UNTRUSTED_DATA_RULE}\n\nSources:\n${JSON.stringify(verificationNormalized.sources)}\n\nClaims:\n${JSON.stringify(verificationNormalized.claims)}\n\nConflicts:\n${JSON.stringify(verificationNormalized.conflicts)}\n\nCoverage gaps:\n${JSON.stringify(normalized.coverage_gaps)}\n\nVerification events (immutable originals):\n${JSON.stringify(verificationNormalized.verification_events)}`, { label: "adjudicate evidence", schema: adjudicationSchema });
 
+stage = "synthesis";
 let draft = await agent(`You are the research synthesizer. Return only a report and report map matching the schema. Enclose every material paragraph, list, or table in exactly one matching report-unit marker pair, and record the matching normalized-text SHA-256 in the map. Normalize as UTF-8 with LF line endings, trimmed leading/trailing blank lines, report-unit anchor comments removed, and meaningful internal whitespace preserved. Use only the adjudicated ledger; every material assertion must map to retained claims. Include unresolved material conflicts and gaps, label inferences with premise IDs, and do not write files.\n\n${UNTRUSTED_DATA_RULE}\n\nPlan:\n${JSON.stringify(boundedPlan)}\n\nSources:\n${JSON.stringify(verificationNormalized.sources)}\n\nRetained claims:\n${JSON.stringify(adjudicated.retained_claims)}\n\nConflicts:\n${JSON.stringify(adjudicated.conflicts)}\n\nGaps:\n${JSON.stringify(adjudicated.coverage_gaps)}`, { label: "synthesize report", schema: synthesisSchema });
 
 const reviewDraft = (candidate) => agent(`You are the semantic research validator. Return only JSON matching the schema. Check the meaning of every anchored report unit solely against the adjudicated ledger and report map for unsupported assertions, concealed conflicts, overstatement, unlabeled inferences, unsupported recommendations, and missing coverage. Do not write files or perform deterministic marker/hash validation.\n\n${UNTRUSTED_DATA_RULE}\n\nDraft report:\n${candidate.report_markdown}\n\nReport map:\n${JSON.stringify(candidate.report_map)}\n\nRetained claims:\n${JSON.stringify(adjudicated.retained_claims)}\n\nConflicts:\n${JSON.stringify(adjudicated.conflicts)}`, { label: "validate report semantics", schema: semanticValidationSchema });
 
+stage = "semantic_validation";
 let semanticValidation = await reviewDraft(draft);
-let repairRounds = 0;
+let repairRounds = 0; // Workflow-wide budget: no nested repair loop may reset this.
 const repairEvents = [];
 while (semanticValidation.status === "fail" && repairRounds < 2) {
   repairRounds += 1;
-  repairEvents.push({ repair_event_id: `rep_${repairRounds}`, occurred_at: new Date().toISOString(), repair_round: repairRounds, defect_ids: semanticValidation.defects.map(({ defect_id }) => defect_id), outcome: "completed" });
+  const repair = selectRepair(semanticValidation.defects);
+  stage = "repair";
+  const agentCount = repair.action_type === "structural_repair" ? 0 : 1;
+  repairEvents.push(repairEvent(repairRounds, repair, "completed", agentCount, repair.action_type === "structural_repair" ? "Reserved formatting-only repair for the persistence writer." : `Ran one focused ${repair.action_type} action for the highest-priority defect.`));
   draft = await agent(`You are the research synthesizer performing targeted repair round ${repairRounds} of 2. Return only a corrected full report and report map matching the schema. Preserve canonical report-unit marker pairs around all material prose and update matching normalized-text SHA-256 values. Repair only the reported defects: remove unsupported prose, narrow scope, demote language, label uncertainty or inferences, restore a conflict, or regenerate affected sections. Do not research, alter the ledger, invent evidence, or rerun the swarm.\n\n${UNTRUSTED_DATA_RULE}\n\nCurrent draft:\n${draft.report_markdown}\n\nCurrent report map:\n${JSON.stringify(draft.report_map)}\n\nSemantic defects:\n${JSON.stringify(semanticValidation.defects)}\n\nRetained claims:\n${JSON.stringify(adjudicated.retained_claims)}\n\nConflicts:\n${JSON.stringify(adjudicated.conflicts)}\n\nGaps:\n${JSON.stringify(adjudicated.coverage_gaps)}`, { label: `repair report ${repairRounds}`, schema: synthesisSchema });
+  stage = "semantic_validation";
   semanticValidation = await reviewDraft(draft);
+  if (semanticValidation.status === "fail" && repairRounds === 2) repairEvents.at(-1).outcome = "exhausted";
 }
+stage = "persistence";
 
 const persistence = await agent(`You are the sole research persistence writer. Return only JSON matching the schema. Create exactly one archived run at ${runDirectory}; no other role may write shared artifacts. Do not create, write, or validate any path outside that exact directory. Write manifest.json, plan.json, sources.jsonl, claims.jsonl, discarded-claims.jsonl, verification-events.jsonl, conflicts.json, coverage-gaps.json, semantic-validation.json, repair-events.jsonl, report.md, report-map.json, and validation.json. Before validation, verify each report-map text_sha256 against its enclosed report unit using UTF-8, LF endings, trimmed leading/trailing blank lines, removed report-unit anchor comments, preserved internal whitespace, and SHA-256; repair only a mismatched hash. Run node scripts/validate-research-run.mjs on the run directory, write its machine-readable result to validation.json, and rerun it if needed after writing the result so validation.json agrees with the final structural result. Preserve failures for inspection. You may repair serialization or formatting only; never change evidence, claims, verification outcomes, conflicts, conclusions, mappings, or semantic-validation meaning.\n\n${UNTRUSTED_DATA_RULE}\n\nPlan:\n${JSON.stringify(boundedPlan)}\n\nSources:\n${JSON.stringify(verificationNormalized.sources)}\n\nRetained claims:\n${JSON.stringify(adjudicated.retained_claims)}\n\nDiscarded claims:\n${JSON.stringify(adjudicated.discarded_claims)}\n\nAll verification events (immutable originals):\n${JSON.stringify(verificationNormalized.verification_events)}\n\nConflicts:\n${JSON.stringify(adjudicated.conflicts)}\n\nCoverage gaps:\n${JSON.stringify(adjudicated.coverage_gaps)}\n\nReport:\n${draft.report_markdown}\n\nReport map:\n${JSON.stringify(draft.report_map)}\n\nSemantic validation:\n${JSON.stringify(semanticValidation)}\n\nRepair events:\n${JSON.stringify(repairEvents)}`, { label: "persist research run", schema: persistenceSchema });
 
@@ -1968,6 +2046,7 @@ return {
 } catch (cause) {
   return {
     report: "# Research Swarm Failure\n\nThe workflow stopped before it could produce a validated report.",
-    run_directory: null
+    run_directory: knownRunDirectory,
+    failure: { stage, code: FAILURE_CODES[stage] ?? "WORKFLOW_FAILED", archive_exists: "unknown" }
   };
 }

@@ -386,6 +386,17 @@ test('new archive artifacts, their schemas, and manifest counts are required', a
   assert.equal((await validateResearchRun(directory4)).valid, false);
 });
 
+test('repair events enforce the shared two-round budget and complete audit fields', async (t) => {
+  const directory = await copiedValid(t);
+  const event = { repair_event_id: 'rep_fixture', occurred_at: '2026-07-29T00:00:00Z', repair_round: 1, action_type: 'report_repair', trigger_ids: ['def_fixture'], target_claim_ids: ['clm_fixture'], target_report_unit_ids: ['rpt_fixture'], agent_count: 1, action_summary: 'Removed unsupported fixture prose.', outcome: 'completed' };
+  await writeFile(path.join(directory, 'repair-events.jsonl'), `${JSON.stringify(event)}\n`);
+  const manifest = await readJson(path.join(directory, 'manifest.json')); manifest.counts.repair_events = 1; await writeJson(path.join(directory, 'manifest.json'), manifest);
+  assert.equal((await validateResearchRun(directory)).valid, true);
+  await writeFile(path.join(directory, 'repair-events.jsonl'), `${[event, { ...event, repair_event_id: 'rep_two', repair_round: 2 }, { ...event, repair_event_id: 'rep_three', repair_round: 3 }].map(JSON.stringify).join('\n')}\n`);
+  manifest.counts.repair_events = 3; await writeJson(path.join(directory, 'manifest.json'), manifest); await markInvalid(directory);
+  assert.ok(hasRule(await validateResearchRun(directory), 'repair_events.budget'));
+});
+
 test('verification normalization deduplicates DOI and URL sources, preserves events, and records counter-evidence', async () => {
   const { normalizeVerificationEvents, normalizedUrl } = await workflowNormalizer();
   const source = (await readJsonl(path.join(fixture('valid-run'), 'sources.jsonl'))).records[0];

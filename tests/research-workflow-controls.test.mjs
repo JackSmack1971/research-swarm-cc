@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { capClaims, chunk, escalationDecision, limitsFor, mergeVerificationPolicy, rankClaims } from '../scripts/lib/research-controls.mjs';
+import { readFile } from 'node:fs/promises';
 
 const claim = (claim_id, materiality = 'medium', confidence = 'medium') => ({ claim_id, materiality, confidence, statement: claim_id, supporting_evidence: [{ source_id: 'src_one' }] });
 
@@ -38,4 +39,13 @@ test('post-normalization escalation is bounded and detects high-risk evidence ga
   assert.equal(result.depth, 'standard');
   assert.equal(result.policy, 'all-material');
   assert.equal(escalationDecision({ depth: 'deep', claims: [], conflicts: [], coverageGaps: [], sources: [] }).escalate, false);
+});
+
+test('workflow uses one shared repair budget and a sanitized stage diagnostic', async () => {
+  const workflow = await readFile('.claude/workflows/research-swarm.js', 'utf8');
+  assert.match(workflow, /while \(semanticValidation\.status === "fail" && repairRounds < 2\)/);
+  assert.match(workflow, /const REPAIR_ACTIONS =/);
+  for (const action of ['report_repair', 'ledger_repair', 'verification_repair', 'structural_repair']) assert.match(workflow, new RegExp(action));
+  assert.match(workflow, /failure: \{ stage, code: FAILURE_CODES\[stage\] \?\? "WORKFLOW_FAILED", archive_exists: "unknown" \}/);
+  assert.doesNotMatch(workflow.slice(workflow.lastIndexOf('} catch')), /cause\.message|cause\.stack/);
 });
