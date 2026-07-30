@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+- Research runs now apply bounded, risk-prioritized research and verification budgets with auditable escalation decisions.
 - Research runs now reject unsafe archive paths and ignore instructions hidden in research material.
 - Research reports now preserve an auditable hash link between each material passage and its supporting claims.
 - Research archives now retain verification history, evidence gaps, semantic reviews, and repair records.

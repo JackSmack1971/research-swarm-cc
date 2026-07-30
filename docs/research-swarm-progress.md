@@ -38,7 +38,7 @@ At that time, no `CLAUDE.md`, `.claude/` configuration, package manifest, lockfi
 | 15 | Make adversarial verification evidence-producing and auditable | complete |
 | 16 | Deterministic report-to-ledger anchoring | complete |
 | 17 | Runtime security hardening | complete |
-| 18 | Add bounded targeted ledger, verification, and report repairs | authorized |
+| 18 | Add bounded resource controls, policy merging, and post-research escalation | complete |
 | 19 | Preserve safe, stage-specific failure diagnostics | authorized |
 | 20 | Verify migrations, backward compatibility, and final Claude Code smoke behavior | authorized |
 
@@ -74,6 +74,7 @@ At that time, no `CLAUDE.md`, `.claude/` configuration, package manifest, lockfi
 | 2026-07-29 | The current Milestone 16 goal supersedes the stale remediation-table ordering: each material report unit now has canonical paired markers, a map entry, and a SHA-256 digest of one documented normalization algorithm. The prior runtime-hardening scope remains authorized for a later explicit goal. | Current goal; `research/schemas/report-map.schema.json`; `scripts/lib/research-validation.mjs`; `research/README.md`; `docs/audit-run-1-remediation-plan.md`. |
 | 2026-07-29 | The current Milestone 17 goal supersedes the stale table ordering. Custom agents express intended least privilege, while dynamic-workflow subagents inherit session permissions and use behavioral instructions because documented workflow calls lack named-agent routing and per-call tool allowlists. Sensitive runs therefore require a narrow session-level allowlist. | Current goal; Context7 Claude Code documentation; `research/README.md`; `.claude/workflows/research-swarm.js`. |
 | 2026-07-29 | Milestone 17 confines `outputRoot` to `artifacts/research-runs` or strict safe descendants, derives a bounded query slug and timestamp/nonce run ID before persistence, and applies the shared untrusted-data rule to research standards, worker/verifier definitions, and every workflow role prompt. | Current goal; `.claude/rules/deep-research.md`; `.claude/skills/research-standards/SKILL.md`; `scripts/lib/research-paths.mjs`; `.claude/workflows/research-swarm.js`; `tests/research-paths.test.mjs`. |
+| 2026-07-29 | Milestone 18 adds depth-aware, hard-capped resource controls; deterministic materiality/risk/claim-ID ranking; visible canonical-overflow gaps; policy merging; bounded verifier chunks; and one post-normalization escalation decision persisted in the plan. Deep verifies every admitted canonical claim. | Current goal; `.claude/workflows/research-swarm.js`; `scripts/lib/research-controls.mjs`; `tests/research-workflow-controls.test.mjs`; `research/README.md`. |
 
 ## Claude Code interface findings
 
@@ -127,6 +128,7 @@ Sources: [Dynamic workflows](https://code.claude.com/docs/en/workflows), [Create
 | 2026-07-29 | `npm run contracts:generate`; `npm test`; `npm run contracts:check`; `node scripts/validate-research-run.mjs tests/fixtures/valid-run`; `git diff --check` | Passed: generated contracts are current; 24 deterministic tests cover verifier-source DOI/URL deduplication, immutable event preservation, canonical evidence rewrite, contradiction conflict creation, missing local-source rejection, and title-only non-merging; the valid archive passes with no whitespace errors. |
 | 2026-07-29 | `npm run contracts:generate`; `npm test`; `node scripts/validate-research-run.mjs tests/fixtures/valid-run`; `git diff --check` | Passed: generated contracts are current; 26 deterministic tests cover report marker pairing/order/nesting/duplicates/unknown markers, map coverage, stale hashes, CRLF normalization, fenced-code literals, empty units, inference premises, and discarded-claim mappings; the valid archive passes. |
 | 2026-07-29 | `npm test`; `npm run contracts:check`; `node scripts/validate-research-run.mjs tests/fixtures/valid-run`; wrapped workflow syntax check; `git diff --check` | Passed: 29 offline tests include Windows/POSIX-safe archive-root rejection, bounded slugs and run IDs, and all source-consuming prompt injection defenses; canonical contracts are current; valid fixture passes; the workflow parses in its documented async shape; no whitespace errors. Claude Code runtime execution was not performed for this milestone. |
+| 2026-07-29 | `npm run contracts:generate`; `npm test`; wrapped workflow syntax check; `node scripts/validate-research-run.mjs tests/fixtures/valid-run`; `git diff --check` | Passed: generated inline contracts are current; 34 offline tests cover numeric limits, ranking, policy merging, verifier chunks, and escalation; the valid fixture validates; the workflow parses in its documented async shape; no whitespace errors. Claude Code runtime execution was not performed for this milestone. |
 
 ## Known risks
 
@@ -136,8 +138,8 @@ Sources: [Dynamic workflows](https://code.claude.com/docs/en/workflows), [Create
 * The GitHub CLI in this environment does not support the requested `gh issue list --sort` flag; the compatible pre-work scan omits that sort option.
 * The smoke trace showed compliant behavior for that one run, but it cannot establish a universal write restriction because current workflow `agent()` calls still lack documented named-agent routing or per-call tool restrictions.
 * Existing archived runs and fixtures predate the Milestones 13–19 archive contract changes. Each contract change must remain compatible or carry an explicit, tested migration; Milestone 20 is the compatibility gate.
-* Agent fan-out is bounded only indirectly, planner verification policy is overwritten, escalation triggers are not evaluated, repairs are report-only, and workflow failures omit a safe stage code. These risks remain authorized work, not completed mitigation.
+* Per-worker source and claim limits are structured-output and behavioral limits in the current Claude Code workflow interface; canonical claim, verification target, and verifier-concurrency limits are deterministic workflow controls. Repairs remain report-only and workflow failures omit a safe stage code; those risks remain authorized work.
 
 ## Next milestone
 
-Milestone 18 remains authorized. The dynamic-workflow permission limitation remains an explicit behavioral-isolation constraint, not a completion gate.
+Milestone 19 remains authorized. The dynamic-workflow permission limitation remains an explicit behavioral-isolation constraint, not a completion gate.

@@ -6,7 +6,6 @@ export const meta = {
 
 const DEFAULTS = {
   depth: "auto",
-  maxWorkers: 8,
   verification: "risk-based",
   freshness: null,
   outputRoot: "artifacts/research-runs"
@@ -423,6 +422,69 @@ const planSchema = {
         "risk-based",
         "all-material"
       ]
+    },
+    "effective_depth": {
+      "enum": [
+        "light",
+        "standard",
+        "deep"
+      ]
+    },
+    "effective_depth_rationale": {
+      "type": "string",
+      "minLength": 1
+    },
+    "effective_verification_policy": {
+      "enum": [
+        "none",
+        "risk-based",
+        "all-material"
+      ]
+    },
+    "verification_policy_rationale": {
+      "type": "string",
+      "minLength": 1
+    },
+    "limits": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "maxWorkers": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8
+        },
+        "maxSourcesPerWorker": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12
+        },
+        "maxClaimsPerWorker": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 15
+        },
+        "maxCanonicalClaims": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 40
+        },
+        "maxVerificationTargets": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 40
+        },
+        "maxVerifierConcurrency": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8
+        },
+        "maxGapFillWorkers": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2
+        }
+      }
     }
   }
 };
@@ -1751,10 +1813,13 @@ const persistenceSchema = {
   }
 };
 
-function clampWorkers(value) {
-  const numeric = Number(value);
-  return Number.isFinite(numeric) ? Math.max(1, Math.min(8, Math.floor(numeric))) : DEFAULTS.maxWorkers;
-}
+function boundedInteger(value, fallback, maximum) { const numeric = Number(value); return Number.isFinite(numeric) && Number.isInteger(numeric) && numeric > 0 ? Math.min(numeric, maximum) : fallback; }
+function limitsFor(depth, input) { const defaults = DEPTH_LIMITS[depth] ?? DEPTH_LIMITS.standard; return Object.fromEntries(Object.entries(HARD_MAXIMA).map(([key, maximum]) => [key, boundedInteger(input[key], defaults[key], maximum)])); }
+function rankClaims(claims) { const materiality = { critical: 4, high: 3, medium: 2, low: 1 }; const confidence = { low: 3, medium: 2, high: 1 }; return [...claims].sort((left, right) => materiality[right.materiality] - materiality[left.materiality] || confidence[right.confidence] - confidence[left.confidence] || left.claim_id.localeCompare(right.claim_id)); }
+function capClaims(claims, maximum) { const ranked = rankClaims(claims); return { admitted: ranked.slice(0, maximum), omitted: ranked.slice(maximum) }; }
+function mergeVerificationPolicy(userPolicy, plannerPolicy, depth) { if (depth === "deep") return { policy: "all-material", rationale: "Deep research always verifies every admitted canonical claim." }; const rank = { none: 0, "risk-based": 1, "all-material": 2 }; const policy = rank[plannerPolicy] > rank[userPolicy] ? plannerPolicy : userPolicy; return { policy, rationale: policy === userPolicy && policy === plannerPolicy ? "User and planner selected the same policy." : `Used the stronger of user (${userPolicy}) and planner (${plannerPolicy}) policy.` }; }
+function chunks(items, size) { return Array.from({ length: Math.ceil(items.length / size) }, (_, index) => items.slice(index * size, (index + 1) * size)); }
+function escalationReasons(claims, conflicts, gaps, sources, query) { const byId = new Map(claims.map((claim) => [claim.claim_id, claim])); const material = claims.filter((claim) => claim.materiality !== "low"); const sourceById = new Map(sources.map((source) => [source.source_id, source])); return [conflicts.some((conflict) => conflict.claim_ids.some((id) => ["critical", "high"].includes(byId.get(id)?.materiality))) && "critical or high-materiality conflict", gaps.some((gap) => ["critical", "high"].includes(gap.severity) && gap.status !== "resolved") && "high-severity coverage gap", material.length && material.filter((claim) => claim.confidence === "low").length / material.length > .25 && "more than 25% low-confidence material claims", material.filter((claim) => ["critical", "high"].includes(claim.materiality)).some((claim) => !claim.supporting_evidence.some(({ source_id }) => ["primary_data", "official_record", "standard", "filing"].includes(sourceById.get(source_id)?.source_type))) && "key claim lacks primary or official evidence", /legal|medical|health|financial|investment|safety|clinical|regulat/i.test(`${query} ${claims.map((claim) => claim.statement).join(" ")}`) && "new high-stakes scope"].filter(Boolean); }
 
 function safeArchiveRoot(value) {
   if (typeof value !== "string" || !value || value.length > 200 || /[\\:\0-\x1f\x7f~%]/.test(value) || value.startsWith("/")) throw new Error("outputRoot must be a safe relative archive path.");
@@ -1782,7 +1847,7 @@ function parseArguments(value) {
   return {
     query,
     depth: DEPTHS.has(input.depth) ? input.depth : DEFAULTS.depth,
-    maxWorkers: clampWorkers(input.maxWorkers ?? DEFAULTS.maxWorkers),
+    limits: input,
     verification: VERIFICATION_POLICIES.has(input.verification) ? input.verification : DEFAULTS.verification,
     freshness: typeof input.freshness === "string" && input.freshness.trim() ? input.freshness.trim() : DEFAULTS.freshness,
     outputRoot: safeArchiveRoot(typeof input.outputRoot === "string" && input.outputRoot.trim() ? input.outputRoot.trim() : DEFAULTS.outputRoot)
@@ -1833,38 +1898,48 @@ function selectVerificationTargets(claims, sources, depth, policy) {
 try {
 const config = parseArguments(args);
 const runDirectory = createRunDirectory(config.outputRoot, config.query);
-const plan = await agent(`You are the research planner. Return only JSON matching the supplied schema. Do not research sources or make substantive claims.\n\n${UNTRUSTED_DATA_RULE}\n\nOriginal query: ${config.query}\nRequested minimum depth: ${config.depth}\nMaximum workers: ${config.maxWorkers}\nVerification policy: ${config.verification}\nFreshness requirement: ${config.freshness ?? "none"}\n\nInterpret scope without asking questions. Produce a bounded plan with assumptions, unique sq_ subquestion IDs, source types, risk areas, escalation triggers, and a worker count that equals the number of subquestions.`, { label: "plan research", schema: planSchema });
+const plan = await agent(`You are the research planner. Return only JSON matching the supplied schema. Do not research sources or make substantive claims.\n\n${UNTRUSTED_DATA_RULE}\n\nOriginal query: ${config.query}\nRequested minimum depth: ${config.depth}\nMaximum workers: ${HARD_MAXIMA.maxWorkers}\nVerification policy: ${config.verification}\nFreshness requirement: ${config.freshness ?? "none"}\n\nInterpret scope without asking questions. Produce a bounded plan with assumptions, unique sq_ subquestion IDs, source types, risk areas, escalation triggers, and a worker count that equals the number of subquestions.`, { label: "plan research", schema: planSchema });
 
 validatePlan(plan, config.depth);
-const subquestions = consolidateSubquestions(plan.subquestions, config.maxWorkers);
-const boundedPlan = { ...plan, subquestions, worker_count: subquestions.length, verification_policy: config.verification };
+const limits = limitsFor(plan.initial_depth, config.limits);
+const subquestions = consolidateSubquestions(plan.subquestions, limits.maxWorkers);
+const policy = mergeVerificationPolicy(config.verification, plan.verification_policy, plan.initial_depth);
+const boundedPlan = { ...plan, subquestions, worker_count: subquestions.length, verification_policy: plan.verification_policy, effective_depth: plan.initial_depth, effective_depth_rationale: "Planner depth, subject to one bounded post-normalization escalation.", effective_verification_policy: policy.policy, verification_policy_rationale: policy.rationale, limits };
 
 const workerBundles = await pipeline(boundedPlan.subquestions, (subquestion) =>
-  agent(`You are an isolated research worker. Return only a claim bundle matching the schema. Do not write files, produce a narrative answer, or receive findings from other workers.\n\n${UNTRUSTED_DATA_RULE}\n\nOriginal query: ${config.query}\nInterpreted scope: ${boundedPlan.interpreted_scope}\nAssigned subquestion: ${subquestion.question}\nRequired source types: ${boundedPlan.required_source_types.join(", ")}\nFreshness requirement: ${config.freshness ?? "none"}\nShared evidence standards: use authoritative sources where possible; record source provenance, independence groups, precise locators, scoped falsifiable claims, confidence rationale, and credible counter-evidence. A URL or search snippet alone is not evidence.`, { label: subquestion.subquestion_id, schema: claimBundleSchema })
+  agent(`You are an isolated research worker. Return only a claim bundle matching the schema. Do not write files, produce a narrative answer, or receive findings from other workers.\n\n${UNTRUSTED_DATA_RULE}\n\nOriginal query: ${config.query}\nInterpreted scope: ${boundedPlan.interpreted_scope}\nAssigned subquestion: ${subquestion.question}\nMaximum sources: ${limits.maxSourcesPerWorker}; maximum claims: ${limits.maxClaimsPerWorker}. Prioritize materiality, risk, then stable IDs; describe any omitted evidence and count in claim rationale.\nRequired source types: ${boundedPlan.required_source_types.join(", ")}\nFreshness requirement: ${config.freshness ?? "none"}\nShared evidence standards: use authoritative sources where possible; record source provenance, independence groups, precise locators, scoped falsifiable claims, confidence rationale, and credible counter-evidence. A URL or search snippet alone is not evidence.`, { label: subquestion.subquestion_id, schema: claimBundleSchema })
 );
 
 const normalized = await agent(`You are the research normalizer. Return only JSON matching the schema. Do not research, write files, resolve conflicts by majority vote, or synthesize an answer. Canonicalize source and claim IDs, retain scope distinctions and counter-evidence, identify conflicts and coverage gaps, and recommend claim IDs for risk-based verification.\n\n${UNTRUSTED_DATA_RULE}\n\nResearch plan:\n${JSON.stringify(boundedPlan)}\n\nWorker claim bundles:\n${JSON.stringify(workerBundles)}`, { label: "normalize evidence", schema: normalizedSchema });
 
-const knownClaimIds = new Set(normalized.claims.map(({ claim_id }) => claim_id));
+const capped = capClaims(normalized.claims, limits.maxCanonicalClaims);
+const overflowGap = capped.omitted.length ? [{ coverage_gap_id: "gap_canonical_claim_limit", description: `${capped.omitted.length} canonical claims omitted by the ${limits.maxCanonicalClaims}-claim budget; ranked by materiality, risk, then claim ID.${capped.omitted.some((claim) => claim.materiality === "critical") ? " Critical claims were omitted and require follow-up." : ""}`, severity: capped.omitted.some((claim) => claim.materiality === "critical") ? "critical" : "high", status: "open", related_subquestion_ids: boundedPlan.subquestions.map(({ subquestion_id }) => subquestion_id) }] : [];
+const boundedNormalized = { ...normalized, claims: capped.admitted, coverage_gaps: [...normalized.coverage_gaps, ...overflowGap] };
+const escalation = escalationReasons(boundedNormalized.claims, boundedNormalized.conflicts, boundedNormalized.coverage_gaps, boundedNormalized.sources, config.query);
+if (escalation.length && boundedPlan.effective_depth !== "deep") {
+  boundedPlan.effective_depth = boundedPlan.effective_depth === "light" ? "standard" : "deep";
+  boundedPlan.effective_depth_rationale = `Escalated after normalization: ${escalation.join("; ")}.`;
+  boundedPlan.effective_verification_policy = "all-material";
+  boundedPlan.verification_policy_rationale = "Escalation requires all-material verification.";
+}
+const knownClaimIds = new Set(boundedNormalized.claims.map(({ claim_id }) => claim_id));
 const selectedVerificationTargets = [...new Set([
-  ...selectVerificationTargets(normalized.claims, normalized.sources, boundedPlan.initial_depth, config.verification),
-  ...(config.verification === "none" && boundedPlan.initial_depth !== "deep"
+  ...selectVerificationTargets(boundedNormalized.claims, boundedNormalized.sources, boundedPlan.effective_depth, boundedPlan.effective_verification_policy),
+  ...(boundedPlan.effective_verification_policy === "none" && boundedPlan.effective_depth !== "deep"
     ? []
-    : normalized.verification_targets.filter((claimId) => knownClaimIds.has(claimId)))
+    : boundedNormalized.verification_targets.filter((claimId) => knownClaimIds.has(claimId)))
 ])].sort();
-const deepFallbackTargets = boundedPlan.initial_depth === "deep" && selectedVerificationTargets.length === 0
-  ? normalized.claims.map(({ claim_id }) => claim_id).sort()
-  : [];
-const verificationTargets = [...new Set([...selectedVerificationTargets, ...deepFallbackTargets])];
-const claimsById = new Map(normalized.claims.map((claim) => [claim.claim_id, claim]));
-const verificationEvents = await pipeline(verificationTargets, (claimId) => {
+const verificationTargets = boundedPlan.effective_depth === "deep" ? boundedNormalized.claims.map(({ claim_id }) => claim_id).sort() : selectedVerificationTargets.slice(0, limits.maxVerificationTargets);
+const claimsById = new Map(boundedNormalized.claims.map((claim) => [claim.claim_id, claim]));
+const verificationEvents = [];
+for (const verificationChunk of chunks(verificationTargets, limits.maxVerifierConcurrency)) verificationEvents.push(...await pipeline(verificationChunk, (claimId) => {
   const claim = claimsById.get(claimId);
   const sourceIds = new Set([...claim.supporting_evidence, ...claim.counter_evidence].map(({ source_id }) => source_id));
-  const citedSources = normalized.sources.filter(({ source_id }) => sourceIds.has(source_id));
+  const citedSources = boundedNormalized.sources.filter(({ source_id }) => sourceIds.has(source_id));
   return agent(`You are an adversarial research verifier. Return only one verification event matching the schema. Do not write files or modify shared state. Attempt refutation before confirmation; test source independence, scope, dates, units, denominators, causal attribution, and applicability. Use unverifiable for unavailable or insufficient evidence, never contradicted.\n\n${UNTRUSTED_DATA_RULE}\n\nClaim:\n${JSON.stringify(claim)}\n\nCited sources:\n${JSON.stringify(citedSources)}`, { label: `verify ${claimId}`, schema: verificationEventSchema });
-});
+}));
 
-const verificationNormalized = normalizeVerificationEvents(normalized.sources, normalized.claims, normalized.conflicts, verificationEvents);
+const verificationNormalized = normalizeVerificationEvents(boundedNormalized.sources, boundedNormalized.claims, boundedNormalized.conflicts, verificationEvents);
 const adjudicated = await agent(`You are the research adjudicator. Return only JSON matching the schema. Apply every verification event, retain material counter-evidence and unresolved conflicts, and discard claims with failed provenance or ineligible support. Carry every normalization coverage gap forward with a final status; a resolved gap needs its rationale. Do not research, write files, or introduce evidence.\n\n${UNTRUSTED_DATA_RULE}\n\nSources:\n${JSON.stringify(verificationNormalized.sources)}\n\nClaims:\n${JSON.stringify(verificationNormalized.claims)}\n\nConflicts:\n${JSON.stringify(verificationNormalized.conflicts)}\n\nCoverage gaps:\n${JSON.stringify(normalized.coverage_gaps)}\n\nVerification events (immutable originals):\n${JSON.stringify(verificationNormalized.verification_events)}`, { label: "adjudicate evidence", schema: adjudicationSchema });
 
 let draft = await agent(`You are the research synthesizer. Return only a report and report map matching the schema. Enclose every material paragraph, list, or table in exactly one matching report-unit marker pair, and record the matching normalized-text SHA-256 in the map. Normalize as UTF-8 with LF line endings, trimmed leading/trailing blank lines, report-unit anchor comments removed, and meaningful internal whitespace preserved. Use only the adjudicated ledger; every material assertion must map to retained claims. Include unresolved material conflicts and gaps, label inferences with premise IDs, and do not write files.\n\n${UNTRUSTED_DATA_RULE}\n\nPlan:\n${JSON.stringify(boundedPlan)}\n\nSources:\n${JSON.stringify(verificationNormalized.sources)}\n\nRetained claims:\n${JSON.stringify(adjudicated.retained_claims)}\n\nConflicts:\n${JSON.stringify(adjudicated.conflicts)}\n\nGaps:\n${JSON.stringify(adjudicated.coverage_gaps)}`, { label: "synthesize report", schema: synthesisSchema });

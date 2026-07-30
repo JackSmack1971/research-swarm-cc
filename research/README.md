@@ -34,7 +34,13 @@ The command accepts either a plain query or an object with these fields:
 | --- | --- | --- |
 | `query` | non-empty string | required |
 | `depth` | `auto`, `light`, `standard`, `deep` | `auto` |
-| `maxWorkers` | integer, 1–8 | `8` |
+| `maxWorkers` | integer, 1–8 | depth-aware |
+| `maxSourcesPerWorker` | integer, 1–12 | depth-aware |
+| `maxClaimsPerWorker` | integer, 1–15 | depth-aware |
+| `maxCanonicalClaims` | integer, 1–40 | Light 8, Standard 20, Deep 40 |
+| `maxVerificationTargets` | integer, 1–40 | depth-aware |
+| `maxVerifierConcurrency` | integer, 1–8 | depth-aware |
+| `maxGapFillWorkers` | integer, 1–2 | depth-aware |
 | `verification` | `none`, `risk-based`, `all-material` | `risk-based` |
 | `freshness` | non-empty string | none |
 | `outputRoot` | `artifacts/research-runs` or safe lowercase descendants | `artifacts/research-runs` |
@@ -44,6 +50,9 @@ The command accepts either a plain query or an object with these fields:
 * **Auto** lets the planner choose `light`, `standard`, or `deep` from scope and risk.
 * **Light** bounds the plan and permits the selected verification policy; use it for narrow, low-consequence questions.
 * **Standard** is the normal minimum depth for multi-source questions and uses the selected verification policy.
+* Resource defaults are Light: 2 workers/8 canonical claims, Standard: 5/20, and Deep: 8/40. Hard limits are 8 workers, 12 sources and 15 claims per worker, 40 canonical claims and verification targets, 8 concurrent verifiers, and 2 focused gap workers. Invalid numeric limits fall back to the depth default; values above a hard limit are capped.
+* Claims beyond the canonical budget are ranked by materiality, confidence risk, and claim ID. Omitted work becomes an auditable coverage gap; an omitted critical claim creates a critical gap. Verifiers run in sequential bounded-concurrency chunks.
+* The persisted plan records effective depth, effective verification policy, rationale, and limits. Outside Deep, `none` remains `none`; `risk-based` can be escalated and `all-material` cannot be reduced. Deep always verifies every admitted canonical claim. Post-normalization high-risk conflicts, severe gaps, weak material evidence, missing primary evidence, and high-stakes scope can raise depth once without restarting the swarm.
 * **Deep** verifies every normalized claim adversarially, even when the requested policy is `none`.
 
 The workflow always plans, researches isolated subquestions in parallel, normalizes evidence, selects verification targets, adjudicates, synthesizes, semantically reviews, performs at most two targeted report repairs, and uses one persistence writer. It returns the report and archived run directory only.

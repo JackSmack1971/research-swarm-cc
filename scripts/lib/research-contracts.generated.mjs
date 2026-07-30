@@ -637,6 +637,69 @@ export const canonicalSchemas = [
           "risk-based",
           "all-material"
         ]
+      },
+      "effective_depth": {
+        "enum": [
+          "light",
+          "standard",
+          "deep"
+        ]
+      },
+      "effective_depth_rationale": {
+        "type": "string",
+        "minLength": 1
+      },
+      "effective_verification_policy": {
+        "enum": [
+          "none",
+          "risk-based",
+          "all-material"
+        ]
+      },
+      "verification_policy_rationale": {
+        "type": "string",
+        "minLength": 1
+      },
+      "limits": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "maxWorkers": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 8
+          },
+          "maxSourcesPerWorker": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12
+          },
+          "maxClaimsPerWorker": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 15
+          },
+          "maxCanonicalClaims": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 40
+          },
+          "maxVerificationTargets": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 40
+          },
+          "maxVerifierConcurrency": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 8
+          },
+          "maxGapFillWorkers": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2
+          }
+        }
       }
     },
     "$defs": {
