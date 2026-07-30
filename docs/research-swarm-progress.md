@@ -43,7 +43,7 @@ At that time, no `CLAUDE.md`, `.claude/` configuration, package manifest, lockfi
 | 20 | Verify migrations, backward compatibility, and final Claude Code smoke behavior | complete — offline/code acceptance review recorded outstanding gaps |
 | 21 | Finalize workflow serialization fix and authorize remaining acceptance milestones | complete |
 | 22 | Implement executable non-report repair routes | authorized |
-| 23 | Add archive contract versioning and explicit legacy rejection | authorized |
+| 23 | Add archive contract versioning and explicit legacy rejection | complete |
 | 24 | Run bounded current-runtime Light and Deep acceptance | authorized |
 
 ## Decisions log
@@ -83,6 +83,7 @@ At that time, no `CLAUDE.md`, `.claude/` configuration, package manifest, lockfi
 | 2026-07-29 | Milestone 19 uses one workflow-wide, non-resettable two-round repair counter. Repair events classify report, ledger, verification, and structural actions; select one highest-severity defect deterministically; preserve targets and outcomes; and archive the final semantic result. Failures return only a stable stage code, known run path, and archive-state uncertainty. | Current goal; `.claude/workflows/research-swarm.js`; repair and semantic schemas; `scripts/lib/research-validation.mjs`; offline tests. |
 | 2026-07-29 | Milestone 20 final acceptance review fixes canonical-budget coverage-gap propagation to adjudication, updates the canonical archive documentation, and records a complete audit disposition. Production-beta acceptance remains blocked by unimplemented targeted ledger/verification/structural repairs, unproven legacy archive migration/compatibility, and blocked current-runtime smoke launches. | `docs/audit-run-1-remediation-results.md`; `.claude/workflows/research-swarm.js`; `tests/research-workflow-controls.test.mjs`; `docs/audit-run-1-remediation-plan.md`. |
 | 2026-07-30 | Milestone 21 normalizes `.claude/workflows/research-swarm.js` to LF-only and tracks that exact checkout rule in `.gitattributes`. Offline contracts, tests, fixtures, and syntax checks are verified separately from the serializer fix. The invalid-depth diagnostic proves only serialization and planning entry; valid current-runtime Light and Deep archives remain unverified. Milestones 22–24 are authorized for non-report repair execution, archive-version policy, and bounded runtime acceptance. | `.gitattributes`; `.claude/workflows/research-swarm.js`; `docs/audit-run-1-remediation-results.md`; `docs/audit-run-1-remediation-plan.md`; GitHub issues #6 and #7. |
+| 2026-07-29 | Milestone 23 establishes exact archive schema version `1.0.0`. The deterministic validator rejects missing, malformed, whitespace-padded, numeric, unsupported-old, unknown-major, and future versions with actionable rules and never rewrites archives. Unversioned pre-remediation archives are unsupported because no genuine historical corpus exists; future migration requires explicit authorization and tests against genuine archives. | `scripts/lib/archive-version.mjs`; `research/schemas/run-manifest.schema.json`; `scripts/lib/research-validation.mjs`; `tests/research-validation.test.mjs`; `research/README.md`; GitHub issue #7. |
 
 ## Claude Code interface findings
 
@@ -144,6 +145,8 @@ Sources: [Dynamic workflows](https://code.claude.com/docs/en/workflows), [Create
 | 2026-07-30 | `npm ci`; `npm run contracts:check`; `npm test`; `node scripts/validate-research-run.mjs tests/fixtures/valid-run`; LF-only byte scan; wrapped workflow syntax check; `git diff --check`; scoped attribute check | Passed: dependencies installed; generated contracts are current; 36 deterministic tests pass; the valid fixture validates; the workflow contains no CR or CRLF bytes and parses in the documented async execution shape; no whitespace errors exist; `.gitattributes` sets `text eol=lf` only for `.claude/workflows/research-swarm.js`, while fixtures remain unaffected. |
 | 2026-07-30 | `npm run contracts:generate`; `npm run contracts:check`; `npm test`; `node scripts/validate-research-run.mjs tests/fixtures/valid-run`; wrapped workflow syntax check; `git diff --check` | Passed: generated contracts are current; 39 deterministic tests cover priority selection, resource-prohibited agents, immutable structural boundaries, executable ledger/verification/structural routes, failed-round accounting, enriched repair-event audit fields, and injected-content coverage; the valid fixture validates and the workflow parses in its documented async execution shape. Claude Code runtime execution was not performed. |
 
+| 2026-07-29 | `npm run contracts:check`; `npm test`; `node scripts/validate-research-run.mjs tests/fixtures/valid-run`; named invalid fixture validation; `git diff --check` | Passed: generated contracts are current; all 41 tests pass, including exact archive-version acceptance, persistence requirements, required/actionable rejection cases, and read-only validation; valid fixture passes and all named invalid fixtures fail. Claude Code runtime execution was not performed. |
+
 ## Known risks
 
 * A historical pre-canonical-ID Light smoke trace completed after the noninteractive print client timed out, but its generated archive was removed after the audit found noncanonical IDs. It is not current-runtime acceptance evidence.
@@ -151,10 +154,10 @@ Sources: [Dynamic workflows](https://code.claude.com/docs/en/workflows), [Create
 * The semantic validator is a structured model-review gate. The deterministic validator proves report-map references and support coverage but cannot parse arbitrary report prose; semantic support remains model-evaluated rather than fully deterministic.
 * The GitHub CLI in this environment does not support the requested `gh issue list --sort` flag; the compatible pre-work scan omits that sort option.
 * The smoke trace showed compliant behavior for that one run, but it cannot establish a universal write restriction because current workflow `agent()` calls still lack documented named-agent routing or per-call tool restrictions.
-* No preserved pre-Milestone-13 archive or tested migration exists. Compatibility with earlier archive layouts is unproven; the current fixture validates only the current layout.
+* No preserved pre-remediation archive or tested migration exists. Those unversioned archives are intentionally unsupported; a future compatibility path requires explicit authorization and genuine archive fixtures.
 * Per-worker source and claim limits are structured-output and behavioral limits in the current Claude Code workflow interface; canonical claim, verification target, verifier-concurrency, and the workflow-wide two-round repair limit are deterministic workflow controls. Role write isolation remains behavioral.
 * Current noninteractive workflow launch is verified only for a deterministic invalid-configuration path under bypass permissions. No current Light archive, Deep archive, or runtime evidence for worker, verifier, persistence, report-anchor, or safe-path behavior exists.
 
 ## Next milestone
 
-Milestone 22 is complete. Milestone 23 is next and has not started. The dynamic-workflow permission limitation remains an explicit behavioral-isolation constraint, not a completion gate; the remaining acceptance gaps are recorded in `docs/audit-run-1-remediation-results.md`.
+Milestone 23 is complete. Milestone 24 is next and has not started. The dynamic-workflow permission limitation remains an explicit behavioral-isolation constraint, not a completion gate; the remaining acceptance gaps are recorded in `docs/audit-run-1-remediation-results.md`.

@@ -662,7 +662,7 @@ A conflict record has a unique `conflict_id`, competing claim IDs, their support
 
 ## 8.6 Run manifest
 
-The manifest has a run identifier, UTC creation time, input configuration, workflow and Claude Code version metadata when available, artifact filenames, validation status, repair-round count, and final counts for sources, retained claims, discarded claims, verification events, and unresolved conflicts. It identifies the archived run directory and does not contain raw transcripts or secrets.
+The manifest has required `archive_schema_version` exactly `1.0.0`, a run identifier, UTC creation time, input configuration, workflow and Claude Code version metadata when available, artifact filenames, validation status, repair-round count, and final counts for sources, retained claims, discarded claims, verification events, and unresolved conflicts. It identifies the archived run directory and does not contain raw transcripts or secrets. The validator rejects missing, malformed, whitespace-padded, old, unknown-major, and future versions without mutating or reinterpreting the archive. Unversioned pre-remediation archives are unsupported; a future migration needs explicit authorization and tests against genuine archived runs.
 
 ---
 
@@ -1354,4 +1354,4 @@ The runtime remains the native Claude Code dynamic workflow. Per-role write isol
 
 Canonical JSON Schema files are the single contract source. Ajv 8 is approved as the sole new dependency and may be used only to enforce those schemas. Workflow inline schemas and schema-derived validator constants must be generated from the canonical schemas and checked for drift.
 
-Milestones that alter archive contracts must preserve existing fixtures and archived runs, or provide and validate an explicit migration. Milestone 20 must execute the complete offline regression suite and one Claude Code smoke test when the runtime is available; otherwise it must record the exact unavailable-runtime evidence without claiming a smoke result.
+Milestones that alter archive contracts must preserve existing fixtures and archived runs, or provide and validate an explicit migration. Unversioned pre-remediation archives are explicitly unsupported because no genuine historical corpus exists; any future migration needs explicit authorization and tests against genuine archived runs. Milestone 20 must execute the complete offline regression suite and one Claude Code smoke test when the runtime is available; otherwise it must record the exact unavailable-runtime evidence without claiming a smoke result.

@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 import Ajv2020 from 'ajv/dist/2020.js';
 import { readJsonl } from './jsonl.mjs';
 import { canonicalSchemas, enumValues, idPatterns } from './research-contracts.generated.mjs';
+import { archiveSchemaVersionError } from './archive-version.mjs';
 
 const REQUIRED_PATHS = {
   plan: 'plan.json', sources: 'sources.jsonl', claims: 'claims.jsonl',
@@ -162,6 +163,8 @@ export async function validateResearchRun(directory) {
   const manifestFile = path.join(runDirectory, 'manifest.json');
   const manifest = await readJson(manifestFile, errors);
   if (!manifest || typeof manifest !== 'object') return { valid: false, run_directory: runDirectory, errors, counts: {} };
+  const versionError = archiveSchemaVersionError(manifest.archive_schema_version);
+  if (versionError) error(errors, 'manifest.json', manifest.run_id, ...versionError);
 
   const files = {};
   for (const [key, fallback] of Object.entries(REQUIRED_PATHS)) {

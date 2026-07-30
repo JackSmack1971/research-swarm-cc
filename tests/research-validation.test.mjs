@@ -68,6 +68,32 @@ test('a valid run and definitive-primary sufficiency rationale pass', async () =
   assert.equal(result.valid, true, JSON.stringify(result.errors));
 });
 
+test('archive schema version is exact, actionable, and validation does not rewrite archives', async (t) => {
+  const directory = await copiedValid(t);
+  const manifestFile = path.join(directory, 'manifest.json');
+  const original = await readFile(manifestFile, 'utf8');
+  assert.equal((await validateResearchRun(directory)).valid, true);
+  assert.equal(await readFile(manifestFile, 'utf8'), original);
+  for (const [value, rule] of [[undefined, 'archive_schema_version.required'], ['0.9.0', 'archive_schema_version.unsupported'], ['2.0.0', 'archive_schema_version.major'], ['1.0', 'archive_schema_version.format'], [' 1.0.0 ', 'archive_schema_version.format'], [1, 'archive_schema_version.type']]) {
+    const manifest = await readJson(manifestFile);
+    if (value === undefined) delete manifest.archive_schema_version;
+    else manifest.archive_schema_version = value;
+    await writeJson(manifestFile, manifest);
+    await markInvalid(directory);
+    const result = await validateResearchRun(directory);
+    assert.equal(result.valid, false, String(value));
+    assert.ok(hasRule(result, rule), String(value));
+  }
+});
+
+test('persistence requires the current archive schema version', async () => {
+  const workflow = await readFile(path.join(process.cwd(), '.claude', 'workflows', 'research-swarm.js'), 'utf8');
+  const writer = await readFile(path.join(process.cwd(), '.claude', 'agents', 'research-persistence-writer.md'), 'utf8');
+  assert.match(workflow, /manifest: runManifestSchema/);
+  assert.match(workflow, /archive_schema_version exactly "1\.0\.0"/);
+  assert.match(writer, /archive_schema_version` exactly `1\.0\.0`/);
+});
+
 test('a definitive primary authority with a sufficiency rationale passes', async () => {
   const source = (await readJsonl(path.join(fixture('valid-run'), 'sources.jsonl'))).records[0];
   const claim = (await readJsonl(path.join(fixture('valid-run'), 'claims.jsonl'))).records[0];

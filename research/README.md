@@ -63,7 +63,7 @@ Each run directory contains:
 
 | File | Purpose |
 | --- | --- |
-| `manifest.json` | Run ID, creation time, plan ID, archive paths, and record counts. |
+| `manifest.json` | Archive schema version, run ID, creation time, plan ID, archive paths, and record counts. |
 | `plan.json` | The interpreted scope, assumptions, depth, subquestions, risks, and verification policy. |
 | `sources.jsonl` | Source records with source IDs, provenance, access dates, and independence groups. |
 | `claims.jsonl` | Retained claims with claim IDs, evidence locators, confidence, materiality, and counter-evidence. |
@@ -92,6 +92,8 @@ Material report prose.
 Each `report-map.json` unit uses the same `report_unit_id` and records `text_sha256`. The deterministic validator normalizes the enclosed text as UTF-8, converts line endings to LF, removes leading and trailing blank lines and report-unit anchor comments, preserves meaningful internal whitespace, then hashes the normalized text with SHA-256. Markers in fenced code blocks are literal examples and are ignored. Headings and purely presentational lines may be outside units; all other report prose must be enclosed.
 
 Generated run directories are ignored by Git; the archive root is retained with `.gitkeep`.
+
+Archives currently support exactly schema version `1.0.0`. Unversioned pre-remediation archives and every other version fail validation without being changed or reinterpreted. A future migration requires explicit authorization and tests against genuine archived runs.
 
 `outputRoot` rejects absolute, Windows-drive, UNC, backslash, traversal, encoded, control-character, empty-segment, reserved-device, and trailing-dot/space paths. Each run uses a bounded query slug plus timestamp and nonce, so source text cannot choose a directory name and concurrent runs do not collide in ordinary use.
 

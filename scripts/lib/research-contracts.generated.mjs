@@ -846,6 +846,7 @@ export const canonicalSchemas = [
     "type": "object",
     "additionalProperties": false,
     "required": [
+      "archive_schema_version",
       "run_id",
       "created_at",
       "run_directory",
@@ -854,6 +855,9 @@ export const canonicalSchemas = [
       "paths"
     ],
     "properties": {
+      "archive_schema_version": {
+        "const": "1.0.0"
+      },
       "run_id": {
         "type": "string",
         "pattern": "^run_[A-Za-z0-9][A-Za-z0-9_-]*$"

@@ -1742,6 +1742,7 @@ const runManifestSchema = {
   "type": "object",
   "additionalProperties": false,
   "required": [
+    "archive_schema_version",
     "run_id",
     "created_at",
     "run_directory",
@@ -1750,6 +1751,9 @@ const runManifestSchema = {
     "paths"
   ],
   "properties": {
+    "archive_schema_version": {
+      "const": "1.0.0"
+    },
     "run_id": {
       "type": "string",
       "pattern": "^run_[A-Za-z0-9][A-Za-z0-9_-]*$"
@@ -1960,7 +1964,7 @@ const persistenceSchema = {
   properties: {
     run_directory: string,
     validation_status: { type: "object", required: ["valid"], properties: { valid: { type: "boolean" } } },
-    manifest: { type: "object" }
+    manifest: runManifestSchema
   }
 };
 
@@ -2166,7 +2170,7 @@ while (semanticValidation.status === "fail" && repairRounds < 2) {
 }
 stage = "persistence";
 
-const persistence = await agent(`You are the sole research persistence writer. Return only JSON matching the schema. Create exactly one archived run at ${runDirectory}; no other role may write shared artifacts. Do not create, write, or validate any path outside that exact directory. Write manifest.json, plan.json, sources.jsonl, claims.jsonl, discarded-claims.jsonl, verification-events.jsonl, conflicts.json, coverage-gaps.json, semantic-validation.json, repair-events.jsonl, report.md, report-map.json, and validation.json. Before validation, verify each report-map text_sha256 against its enclosed report unit using UTF-8, LF endings, trimmed leading/trailing blank lines, removed report-unit anchor comments, preserved internal whitespace, and SHA-256; repair only a mismatched hash. Run node scripts/validate-research-run.mjs on the run directory, write its machine-readable result to validation.json, and rerun it if needed after writing the result so validation.json agrees with the final structural result. Preserve failures for inspection. You may repair serialization or formatting only; never change evidence, claims, verification outcomes, conflicts, conclusions, mappings, or semantic-validation meaning.\n\n${UNTRUSTED_DATA_RULE}\n\nPlan:\n${JSON.stringify(boundedPlan)}\n\nSources:\n${JSON.stringify(verificationNormalized.sources)}\n\nRetained claims:\n${JSON.stringify(adjudicated.retained_claims)}\n\nDiscarded claims:\n${JSON.stringify(adjudicated.discarded_claims)}\n\nAll verification events (immutable originals):\n${JSON.stringify(verificationNormalized.verification_events)}\n\nConflicts:\n${JSON.stringify(adjudicated.conflicts)}\n\nCoverage gaps:\n${JSON.stringify(adjudicated.coverage_gaps)}\n\nReport:\n${draft.report_markdown}\n\nReport map:\n${JSON.stringify(draft.report_map)}\n\nSemantic validation:\n${JSON.stringify(semanticValidation)}\n\nRepair events:\n${JSON.stringify(repairEvents)}`, { label: "persist research run", schema: persistenceSchema });
+const persistence = await agent(`You are the sole research persistence writer. Return only JSON matching the schema. Create exactly one archived run at ${runDirectory}; no other role may write shared artifacts. Do not create, write, or validate any path outside that exact directory. Write manifest.json with archive_schema_version exactly "1.0.0", plan.json, sources.jsonl, claims.jsonl, discarded-claims.jsonl, verification-events.jsonl, conflicts.json, coverage-gaps.json, semantic-validation.json, repair-events.jsonl, report.md, report-map.json, and validation.json. Before validation, verify each report-map text_sha256 against its enclosed report unit using UTF-8, LF endings, trimmed leading/trailing blank lines, removed report-unit anchor comments, preserved internal whitespace, and SHA-256; repair only a mismatched hash. Run node scripts/validate-research-run.mjs on the run directory, write its machine-readable result to validation.json, and rerun it if needed after writing the result so validation.json agrees with the final structural result. Preserve failures for inspection. You may repair serialization or formatting only; never change evidence, claims, verification outcomes, conflicts, conclusions, mappings, or semantic-validation meaning.\n\n${UNTRUSTED_DATA_RULE}\n\nPlan:\n${JSON.stringify(boundedPlan)}\n\nSources:\n${JSON.stringify(verificationNormalized.sources)}\n\nRetained claims:\n${JSON.stringify(adjudicated.retained_claims)}\n\nDiscarded claims:\n${JSON.stringify(adjudicated.discarded_claims)}\n\nAll verification events (immutable originals):\n${JSON.stringify(verificationNormalized.verification_events)}\n\nConflicts:\n${JSON.stringify(adjudicated.conflicts)}\n\nCoverage gaps:\n${JSON.stringify(adjudicated.coverage_gaps)}\n\nReport:\n${draft.report_markdown}\n\nReport map:\n${JSON.stringify(draft.report_map)}\n\nSemantic validation:\n${JSON.stringify(semanticValidation)}\n\nRepair events:\n${JSON.stringify(repairEvents)}`, { label: "persist research run", schema: persistenceSchema });
 
 const succeeded = persistence.validation_status.valid && semanticValidation.status === "pass";
 return {
