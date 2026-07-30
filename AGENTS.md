@@ -193,3 +193,8 @@ Work intentionally left for later milestones.
 ### Stop point
 
 Confirm that no later milestone was started.
+### RULE: CONTINUOUS CHANGELOG PROTOCOL
+**TRIGGER:** You must execute this step as the final action of any task that alters user-facing behavior, BEFORE you inform the user the task is complete.
+**ACTION:** Read `CHANGELOG.md`. Append a plain-language, single-line summary of the change to the `## [Unreleased]` section.
+**FILTER:** Record only items categorized as Added, Changed, Deprecated, Removed, Fixed, or Security. Ignore pure internal refactoring, CI tweaks, and test coverage.
+**FORMAT:** Strictly adhere to the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format. Write for a non-technical end-user.
