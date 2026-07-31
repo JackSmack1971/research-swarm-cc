@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- Research policy candidates can now be compared against preserved evidence ledgers without mistaking fixed-ledger results for search improvements.
 - Research learning now keeps auditable lesson lifecycle decisions, including expiry, supersession, and rollback.
 - People can now add scoped corrections, preferences, usefulness ratings, and outcomes to a completed research run without changing its historical archive.
 - Research runs can now safely reuse bounded, relevant lessons from prior validated runs.

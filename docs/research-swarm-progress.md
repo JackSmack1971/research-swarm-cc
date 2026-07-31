@@ -172,6 +172,14 @@ Sources: [Dynamic workflows](https://code.claude.com/docs/en/workflows), [Create
 
 ## Known risks
 
+## Milestone 31
+
+The active goal authorizes replay, counterfactual evaluation, and quality comparison under Milestone 31, although the older self-improvement plan labels replay/canary evaluation as Milestone 30. The active goal is followed; the older table remains historical planning context.
+
+Implemented read-only offline replay tooling for post-retrieval policy changes, with preserved-ledger and version-2 checks, blinded deterministic evaluator ordering, per-dimension comparisons, hard-gate regressions, disagreement retention, cost/verbosity reporting, and a two-run majority improvement threshold. Retrieval-affecting changes return `requires_live_canary` and `inconclusive`; fixed-ledger replay explicitly never proves retrieval improvement. Runtime/friction changes retain required deterministic-test and targeted-runtime-check signals. No archive, policy, or learning-state data is changed by either command.
+
+| 2026-07-30 | `npm run contracts:check`; `npm test`; `node scripts/validate-research-run.mjs tests/fixtures/valid-run-v2`; `node --check scripts/replay-research-policy.mjs`; `node --check scripts/evaluate-policy-candidate.mjs`; `node --check scripts/lib/research-quality-metrics.mjs`; `git diff --check` | Passed: canonical contracts are current; all 67 offline tests pass; the version-2 fixture validates; replay scripts parse; deterministic replay tests cover length-only apparent gains, citation regression, retrieval classification, blinded evaluator order, ties, missing baseline, version-1 archives, contradictory metrics, one-run overfit, and the fixed-ledger fixture. |
+
 ## Milestone 30
 
 The active goal defines Milestone 30 as deterministic lesson lifecycle and anti-oscillation controls. This differs from the older `docs/self-improvement-plan.md` table, which labels Milestone 30 as replay/canary evaluation. The active goal is followed for this implementation; the older table is retained as historical planning context.

@@ -1,0 +1,21 @@
+{
+  "constitution_version": "1.0.0",
+  "candidate": {
+    "improvement_candidate_id": "imp_replay_fixture",
+    "policy_snapshot_id": "psn_candidate_fixture",
+    "baseline_policy_snapshot_id": "psn_base_fixture",
+    "constitution_version": "1.0.0",
+    "change_categories": ["synthesis"]
+  },
+  "runs": [
+    {
+      "run_id": "run_replay_one",
+      "archive_schema_version": "2.0.0",
+      "policy_snapshot_id": "psn_base_fixture",
+      "ledger_preserved": true,
+      "evaluators": [
+        {"evaluator_id": "fixture_a", "baseline": {"coverage": 0.7, "citation_support": 0.8, "conflict_disclosure": 0.7, "calibration": 0.8, "usefulness": 0.6, "defects": 0, "cost": 10, "verbosity": 100}, "candidate": {"coverage": 0.7, "citation_support": 0.8, "conflict_disclosure": 0.7, "calibration": 0.8, "usefulness": 0.8, "defects": 0, "cost": 9, "verbosity": 120}}
+      ]
+    }
+  ]
+}
