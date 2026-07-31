@@ -454,8 +454,9 @@ export const canonicalSchemas = [
       },
       "status": {
         "enum": [
-          "candidate",
-          "evaluated",
+          "proposed",
+          "replay_passed",
+          "canary",
           "promoted",
           "rejected",
           "rolled_back"

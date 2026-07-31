@@ -172,6 +172,12 @@ Sources: [Dynamic workflows](https://code.claude.com/docs/en/workflows), [Create
 
 ## Known risks
 
+## Milestone 32
+
+Implemented deterministic policy-canary state handling under the ignored learning root only. Candidates move through `proposed`, `replay_passed`, `canary`, `promoted`, `rejected`, or `rolled_back`; only constitution-compatible, bounded, low-risk candidates with active lesson evidence, no unresolved lesson conflict, the required replay/runtime evidence, and an exact rollback snapshot can enter a canary. Assignment is deterministic by candidate and run ID and persists the single baseline-or-candidate decision. Promotion needs three independent completed candidate quality wins. Critical provenance/security, unsupported high-materiality, validator, budget, constitution, or user-harm signals roll back immediately; two consecutive high-severity regressions also roll back. Rollback retains affected runs and restores the recorded baseline snapshot; corrupt snapshots reject, and rolled-back candidates observe a seven-day cooldown. This automation writes only ignored generated-policy state and never repository files.
+
+| 2026-07-31 | `npm run contracts:generate`; `npm test`; `npm run contracts:check`; `node scripts/validate-research-run.mjs tests/fixtures/valid-run-v2`; `node --check scripts/advance-research-policy-canaries.mjs`; `git diff --check` | Passed: generated contracts are current; 71 offline tests cover deterministic single-policy assignment, eligibility, replay/runtime gates, three-run promotion, critical and consecutive-regression rollback, unrelated failure, user harm, corrupt snapshots, simultaneous candidates, and cooldown; the version-2 fixture validates; the canary advancement command parses; no whitespace errors. Claude Code runtime execution was not performed. |
+
 ## Milestone 31
 
 The active goal authorizes replay, counterfactual evaluation, and quality comparison under Milestone 31, although the older self-improvement plan labels replay/canary evaluation as Milestone 30. The active goal is followed; the older table remains historical planning context.
