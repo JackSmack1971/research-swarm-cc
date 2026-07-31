@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- Research runs can now safely reuse bounded, relevant lessons from prior validated runs.
 - Research runs now receive independent quality and friction evaluations with provisional, auditable lessons.
 - Added documented safeguards for future adaptive research policy, including human review and rollback requirements.
 - Added version-2 research archives with auditable learning records while keeping existing archives readable.
