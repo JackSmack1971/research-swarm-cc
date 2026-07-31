@@ -1796,6 +1796,8 @@ export const canonicalSchemas = [
       "run_id",
       "policy_snapshot_id",
       "evaluated_at",
+      "evaluator_identities",
+      "run_outcome",
       "correctness_risk_findings",
       "coverage_assessment",
       "citation_assessment",
@@ -1825,6 +1827,23 @@ export const canonicalSchemas = [
       "evaluated_at": {
         "type": "string",
         "format": "date-time"
+      },
+      "evaluator_identities": {
+        "type": "array",
+        "minItems": 2,
+        "uniqueItems": true,
+        "items": {
+          "enum": [
+            "research-run-evaluator",
+            "research-friction-evaluator"
+          ]
+        }
+      },
+      "run_outcome": {
+        "enum": [
+          "completed",
+          "failed"
+        ]
       },
       "correctness_risk_findings": {
         "type": "array",

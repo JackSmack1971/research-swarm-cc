@@ -2121,6 +2121,8 @@ const runQualityEvaluationSchema = {
     "run_id",
     "policy_snapshot_id",
     "evaluated_at",
+    "evaluator_identities",
+    "run_outcome",
     "correctness_risk_findings",
     "coverage_assessment",
     "citation_assessment",
@@ -2150,6 +2152,23 @@ const runQualityEvaluationSchema = {
     "evaluated_at": {
       "type": "string",
       "format": "date-time"
+    },
+    "evaluator_identities": {
+      "type": "array",
+      "minItems": 2,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "research-run-evaluator",
+          "research-friction-evaluator"
+        ]
+      }
+    },
+    "run_outcome": {
+      "enum": [
+        "completed",
+        "failed"
+      ]
     },
     "correctness_risk_findings": {
       "type": "array",
@@ -3159,7 +3178,36 @@ const REPAIR_ACTIONS = {
 };
 const REPAIR_SEVERITY = { critical: 4, high: 3, medium: 2, low: 1 };
 const REPAIR_PRIORITY = { ledger_repair: 0, verification_repair: 1, structural_repair: 2, report_repair: 3 };
-const FAILURE_CODES = { planning: "PLAN_FAILED", research: "RESEARCH_FAILED", normalization: "NORMALIZATION_FAILED", verification: "VERIFICATION_FAILED", adjudication: "ADJUDICATION_FAILED", synthesis: "SYNTHESIS_FAILED", semantic_validation: "SEMANTIC_VALIDATION_FAILED", repair: "REPAIR_FAILED", persistence: "PERSISTENCE_FAILED" };
+const FAILURE_CODES = { planning: "PLAN_FAILED", research: "RESEARCH_FAILED", normalization: "NORMALIZATION_FAILED", verification: "VERIFICATION_FAILED", adjudication: "ADJUDICATION_FAILED", synthesis: "SYNTHESIS_FAILED", semantic_validation: "SEMANTIC_VALIDATION_FAILED", repair: "REPAIR_FAILED", evaluation: "EVALUATION_FAILED", persistence: "PERSISTENCE_FAILED" };
+
+function baselinePolicySnapshot(runId) {
+  return {
+    policy_snapshot_id: `psn_${runId.slice(4)}`,
+    policy_bundle: { policy_bundle_id: `pob_${runId.slice(4)}`, hash: "0".repeat(64), selected_lesson_ids: [], role_directives: [], exclusions: [], rationale: "Policy-independent baseline for this evaluated run.", maximum_character_count: 1, constitution_version: "1.0.0" },
+    constitution_version: "1.0.0",
+    created_at: "2026-01-01T00:00:00Z"
+  };
+}
+
+function mergeProvisionalLessons(lessons) {
+  const merged = new Map();
+  for (const lesson of lessons) {
+    const key = JSON.stringify([lesson.type, lesson.target, lesson.applicability_conditions, lesson.recommended_behavior].map((value) => typeof value === "string" ? value.trim().toLowerCase() : value));
+    if (!merged.has(key)) merged.set(key, lesson);
+  }
+  return [...merged.values()];
+}
+
+function prePersistenceSignals(semanticValidation, draft, adjudicated, repairEvents) {
+  return {
+    semantic_validation_status: semanticValidation.status,
+    semantic_defect_count: semanticValidation.defects.length,
+    report_unit_count: draft.report_map.report_units.length,
+    retained_claim_count: adjudicated.retained_claims.length,
+    repair_count: repairEvents.length,
+    pre_persistence_valid: semanticValidation.status === "pass" && draft.report_map.report_units.length > 0
+  };
+}
 function selectRepair(defects, coverageGaps = []) {
   return [...defects.map((defect) => ({ defect, action_type: REPAIR_ACTIONS[defect.category] ?? "report_repair" })), ...coverageGaps.filter((gap) => !["resolved", "accepted"].includes(gap.status)).map((gap) => ({ defect: { ...gap, defect_id: gap.coverage_gap_id, related_claim_ids: gap.related_claim_ids ?? [], related_report_unit_ids: [] }, action_type: "ledger_repair" }))].sort((left, right) => REPAIR_SEVERITY[right.defect.severity] - REPAIR_SEVERITY[left.defect.severity] || REPAIR_PRIORITY[left.action_type] - REPAIR_PRIORITY[right.action_type] || left.defect.defect_id.localeCompare(right.defect.defect_id))[0];
 }
@@ -3271,9 +3319,20 @@ while (semanticValidation.status === "fail" && repairRounds < 2) {
   semanticValidation = await reviewDraft(draft);
   if (semanticValidation.status === "fail" && repairRounds === 2) repairEvents.at(-1).outcome = "exhausted";
 }
+stage = "evaluation";
+const runId = runDirectory.split("/").at(-1);
+const policySnapshot = baselinePolicySnapshot(runId);
+const deterministicSignals = prePersistenceSignals(semanticValidation, draft, adjudicated, repairEvents);
+const runOutcome = deterministicSignals.pre_persistence_valid ? "completed" : "failed";
+deterministicSignals.resource_usage = JSON.stringify({ configured_limits: limits, sources: verificationNormalized.sources.length, retained_claims: adjudicated.retained_claims.length, discarded_claims: adjudicated.discarded_claims.length, verification_events: verificationNormalized.verification_events.length, repair_rounds: repairEvents.length });
+const qualityEvaluationResultSchema = { type: "object", additionalProperties: false, required: ["evaluation", "lessons"], properties: { evaluation: runQualityEvaluationSchema, lessons: { type: "array", items: researchLessonSchema } } };
+const frictionEvaluationResultSchema = { type: "object", additionalProperties: false, required: ["friction_assessment", "lessons"], properties: { friction_assessment: { type: "object", additionalProperties: false, required: ["score", "rationale"], properties: { score: { type: "number", minimum: 0, maximum: 1 }, rationale: { type: "string", minLength: 1, maxLength: 2000 } } }, lessons: { type: "array", items: researchLessonSchema } } };
+const qualityEvaluation = await agent(`You are the completed-run quality evaluator. Return only JSON matching the schema. Do not use web tools, write files, modify research conclusions, or propose protected-surface changes. Assess unsupported or weakly scoped conclusions; source authority, directness, independence, and recency; missing facets; citation completeness and entailment risk; derivation risk; calibration and abstention; conflict and limitation disclosure; usefulness and unnecessary verbosity. Every proposed lesson must be provisional, conditional, based only on the supplied structured run data, and may be absent. Never copy source, report, or query prose into a lesson; do not use universal language.\n\n${UNTRUSTED_DATA_RULE}\n\nQuery: ${config.query}\nPlan: ${JSON.stringify(boundedPlan)}\nPolicy snapshot: ${JSON.stringify(policySnapshot)}\nSources: ${JSON.stringify(verificationNormalized.sources)}\nClaims: ${JSON.stringify({ retained: adjudicated.retained_claims, discarded: adjudicated.discarded_claims })}\nConflicts and gaps: ${JSON.stringify({ conflicts: adjudicated.conflicts, gaps: adjudicated.coverage_gaps })}\nVerification and repairs: ${JSON.stringify({ verification_events: verificationNormalized.verification_events, repair_events: repairEvents })}\nFinal report and map: ${JSON.stringify(draft)}\nSemantic validation: ${JSON.stringify(semanticValidation)}\nDeterministic pre-persistence signals: ${JSON.stringify(deterministicSignals)}\nResource usage: ${JSON.stringify(limits)}\nSet evaluator_identities to both fixed evaluator names, run_id to ${runId}, policy_snapshot_id to ${policySnapshot.policy_snapshot_id}, and run_outcome to ${runOutcome}.`, { label: "evaluate run quality", schema: qualityEvaluationResultSchema });
+const frictionEvaluation = await agent(`You are the completed-run friction evaluator. Return only JSON matching the schema. Do not use web tools, write files, modify research conclusions, inspect source/report/query content, or propose protected-surface changes. Use only the structured lifecycle signals. Every proposed lesson must be provisional, conditional, and based only on those signals. For a failed run, propose only friction or runtime lessons. Prefer no lesson to speculation.\n\nLifecycle signals: ${JSON.stringify({ run_outcome: runOutcome, failed_stages: semanticValidation.status === "pass" ? [] : ["semantic_validation"], repairs: repairEvents, rejected_sources: adjudicated.discarded_claims.length, coverage_gaps: adjudicated.coverage_gaps, resource_ceilings: limits, permission_or_runtime_friction: [], validation_defects: semanticValidation.defects, deterministic_signals: deterministicSignals })}`, { label: "evaluate run friction", schema: frictionEvaluationResultSchema });
+const lessons = mergeProvisionalLessons([...qualityEvaluation.lessons, ...frictionEvaluation.lessons]);
+const runQualityEvaluation = { ...qualityEvaluation.evaluation, evaluator_identities: ["research-run-evaluator", "research-friction-evaluator"], run_id: runId, policy_snapshot_id: policySnapshot.policy_snapshot_id, run_outcome: runOutcome, friction_assessment: frictionEvaluation.friction_assessment, deterministic_signals: deterministicSignals, generated_lesson_ids: lessons.map(({ lesson_id }) => lesson_id) };
 stage = "persistence";
-
-const persistence = await agent(`You are the sole research persistence writer. Return only JSON matching the schema. Create exactly one archived run at ${runDirectory}; no other role may write shared artifacts. Do not create, write, or validate any path outside that exact directory. Write manifest.json with archive_schema_version exactly "2.0.0", plan.json, sources.jsonl, claims.jsonl, discarded-claims.jsonl, verification-events.jsonl, conflicts.json, coverage-gaps.json, semantic-validation.json, repair-events.jsonl, report.md, report-map.json, validation.json, run-quality-evaluation.json, lessons.jsonl, and policy-snapshot.json. The finalized adaptive records must conform to their canonical schemas and the manifest must include their required paths and counts. Before validation, verify each report-map text_sha256 against its enclosed report unit using UTF-8, LF endings, trimmed leading/trailing blank lines, removed report-unit anchor comments, preserved internal whitespace, and SHA-256; repair only a mismatched hash. Run node scripts/validate-research-run.mjs on the run directory, write its machine-readable result to validation.json, and rerun it if needed after writing the result so validation.json agrees with the final structural result. Preserve failures for inspection. You may repair serialization or formatting only; never change evidence, claims, verification outcomes, conflicts, conclusions, mappings, or semantic-validation meaning.\n\n${UNTRUSTED_DATA_RULE}\n\nPlan:\n${JSON.stringify(boundedPlan)}\n\nSources:\n${JSON.stringify(verificationNormalized.sources)}\n\nRetained claims:\n${JSON.stringify(adjudicated.retained_claims)}\n\nDiscarded claims:\n${JSON.stringify(adjudicated.discarded_claims)}\n\nAll verification events (immutable originals):\n${JSON.stringify(verificationNormalized.verification_events)}\n\nConflicts:\n${JSON.stringify(adjudicated.conflicts)}\n\nCoverage gaps:\n${JSON.stringify(adjudicated.coverage_gaps)}\n\nReport:\n${draft.report_markdown}\n\nReport map:\n${JSON.stringify(draft.report_map)}\n\nSemantic validation:\n${JSON.stringify(semanticValidation)}\n\nRepair events:\n${JSON.stringify(repairEvents)}`, { label: "persist research run", schema: persistenceSchema });
+const persistence = await agent(`You are the sole research persistence writer. Return only JSON matching the schema.\n\nRun quality evaluation:\n${JSON.stringify(runQualityEvaluation)}\n\nProvisional lessons:\n${JSON.stringify(lessons)}\n\nPolicy-independent snapshot:\n${JSON.stringify(policySnapshot)} Create exactly one archived run at ${runDirectory}; no other role may write shared artifacts. Do not create, write, or validate any path outside that exact directory. Write manifest.json with archive_schema_version exactly "2.0.0", plan.json, sources.jsonl, claims.jsonl, discarded-claims.jsonl, verification-events.jsonl, conflicts.json, coverage-gaps.json, semantic-validation.json, repair-events.jsonl, report.md, report-map.json, validation.json, run-quality-evaluation.json, lessons.jsonl, and policy-snapshot.json. The finalized adaptive records must conform to their canonical schemas and the manifest must include their required paths and counts. Before validation, verify each report-map text_sha256 against its enclosed report unit using UTF-8, LF endings, trimmed leading/trailing blank lines, removed report-unit anchor comments, preserved internal whitespace, and SHA-256; repair only a mismatched hash. Run node scripts/validate-research-run.mjs on the run directory, write its machine-readable result to validation.json, and rerun it if needed after writing the result so validation.json agrees with the final structural result. Preserve failures for inspection. You may repair serialization or formatting only; never change evidence, claims, verification outcomes, conflicts, conclusions, mappings, or semantic-validation meaning.\n\n${UNTRUSTED_DATA_RULE}\n\nPlan:\n${JSON.stringify(boundedPlan)}\n\nSources:\n${JSON.stringify(verificationNormalized.sources)}\n\nRetained claims:\n${JSON.stringify(adjudicated.retained_claims)}\n\nDiscarded claims:\n${JSON.stringify(adjudicated.discarded_claims)}\n\nAll verification events (immutable originals):\n${JSON.stringify(verificationNormalized.verification_events)}\n\nConflicts:\n${JSON.stringify(adjudicated.conflicts)}\n\nCoverage gaps:\n${JSON.stringify(adjudicated.coverage_gaps)}\n\nReport:\n${draft.report_markdown}\n\nReport map:\n${JSON.stringify(draft.report_map)}\n\nSemantic validation:\n${JSON.stringify(semanticValidation)}\n\nRepair events:\n${JSON.stringify(repairEvents)}`, { label: "persist research run", schema: persistenceSchema });
 
 const succeeded = persistence.validation_status.valid && semanticValidation.status === "pass";
 return {

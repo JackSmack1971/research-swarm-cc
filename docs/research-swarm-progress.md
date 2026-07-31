@@ -47,7 +47,7 @@ At that time, no `CLAUDE.md`, `.claude/` configuration, package manifest, lockfi
 | 24 | Run bounded current-runtime Light and Deep acceptance | incomplete — Light partially executed but produced no validated archive; Deep was not attempted |
 | 25 | Authorize adaptive self-improvement architecture and immutable policy | complete |
 | 26 | Define version-2 learning-state and archive contract | complete |
-| 27 | Add completed-run evaluation | authorized |
+| 27 | Add completed-run evaluation | complete |
 | 28 | Add deterministic lesson registration and policy compilation | authorized |
 | 29 | Add independent, reversible lesson promotion | authorized |
 | 30 | Add replay and canary candidate evaluation | authorized |
@@ -100,6 +100,7 @@ At that time, no `CLAUDE.md`, `.claude/` configuration, package manifest, lockfi
 | 2026-07-30 | The Milestone 25 prompt assumed Milestone 24 was complete, but repository and runtime evidence show that Light produced no archived run and Deep was not attempted. Evidence supersedes the prompt assumption. Milestone 24 remains incomplete, while Milestone 25 may proceed as an independently authorized architecture milestone. Adaptive runtime acceptance must later include successful Light and Deep version-2 archives. | Runtime traces `wf_5018c78f-385` and `wf_fe1ea574-675`; no current archive under `artifacts/research-runs`; current workflow, tests, and validation log; `docs/audit-run-1-remediation-results.md`; `docs/self-improvement-plan.md`. |
 | 2026-07-30 | Milestone 25 defines a human-owned immutable core and a reversible machine-managed prompt/policy overlay. It authorizes ignored learning state and future archive version `2.0.0` without changing the current version-`1.0.0` contract, workflow, validator, or fixtures. | `docs/self-improvement-plan.md`; `research/self-improvement/constitution.md`; `.gitignore`; current `research/schemas/run-manifest.schema.json`; `scripts/lib/archive-version.mjs`. |
 | 2026-07-30 | Milestone 26 establishes version `2.0.0` learning contracts. Version 1 archives remain read-only-valid and are explicitly rejected as learning evidence; version 2 requires a run-quality evaluation, lessons ledger, and policy snapshot with manifest paths and counts. Canonical schemas are generated into workflow contracts and the validator enforces known run, lesson, policy, status, expiry, constitution, and size relationships without mutating archives. | `research/schemas/*.schema.json`; `scripts/generate-research-contracts.mjs`; `scripts/lib/archive-version.mjs`; `scripts/lib/research-validation.mjs`; `tests/fixtures/valid-run-v2`; `tests/research-validation.test.mjs`. |
+| 2026-07-30 | Milestone 27 evaluates each completed run after semantic validation and before persistence with read-only quality and friction evaluators. The persistence-only deterministic validator cannot produce an archive result before this point, so evaluators receive an auditable workflow-owned pre-persistence structural signal instead; the persistence writer still records the final deterministic validation result. New runs use an empty policy-independent baseline snapshot, and this milestone does not read or update the cross-run lesson registry. | Current Milestone 27 goal; `research/self-improvement/constitution.md`; `.claude/agents/research-run-evaluator.md`; `.claude/agents/research-friction-evaluator.md`; `.claude/workflows/research-swarm.js`; `scripts/lib/research-validation.mjs`; `tests/research-validation.test.mjs`. |
 
 ## Claude Code interface findings
 
@@ -178,4 +179,4 @@ Sources: [Dynamic workflows](https://code.claude.com/docs/en/workflows), [Create
 
 ## Next milestone
 
-Milestone 26 is complete. Milestone 24 remains incomplete: Light partially executed but produced no validated archive, and Deep was not attempted. Milestone 27 is next: add completed-run evaluation. Production readiness remains unavailable until successful current-runtime Light and Deep version-2 archives validate.
+Milestone 27 is complete. Milestone 24 remains incomplete: Light partially executed but produced no validated archive, and Deep was not attempted. Milestone 28 is next: add deterministic lesson registration and policy compilation. Production readiness remains unavailable until successful current-runtime Light and Deep version-2 archives validate.

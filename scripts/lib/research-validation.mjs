@@ -18,6 +18,9 @@ const CONFIDENCE = new Set(enumValues.confidence);
 const OUTCOMES = new Set(enumValues.outcome);
 const DEFINITIVE_TYPES = new Set(['primary_data', 'official_record', 'standard', 'filing']);
 const ID_PATTERNS = Object.fromEntries(Object.entries(idPatterns).map(([key, pattern]) => [key, new RegExp(pattern)]));
+const PROTECTED_SURFACE = /\b(?:constitution|canonical schema|validator|workflow control|permission|protected surface|agent definition)\b/i;
+const SOURCE_INSTRUCTION = /\b(?:ignore|disregard|follow)\s+(?:all\s+)?(?:previous|source|webpage|page)?\s*instructions?\b/i;
+const UNIVERSAL_LESSON = /\b(?:always|never|all|every|universal)\b/i;
 
 function error(errors, file, entityId, rule, message) {
   errors.push({ file, entity_id: entityId ?? null, rule, message });
@@ -308,13 +311,24 @@ export async function validateResearchRun(directory) {
       if (lesson?.constitution_compatibility?.constitution_version !== CONSTITUTION_VERSION || lesson?.constitution_compatibility?.result !== 'compatible') error(errors, 'lessons.jsonl', lesson?.lesson_id, 'lesson.constitution', `Lessons must be compatible with constitution version ${CONSTITUTION_VERSION}.`);
       const expiry = lesson?.expiry?.expires_at;
       if (expiry && Date.parse(expiry) <= Date.parse(manifest.created_at)) error(errors, 'lessons.jsonl', lesson?.lesson_id, 'lesson.expiry', 'Lesson expiry must be after the archived run creation time.');
+      if (lesson?.status !== 'provisional') error(errors, 'lessons.jsonl', lesson?.lesson_id, 'lesson.provisional', 'Milestone 27 lessons must remain provisional.');
+      const lessonText = [lesson?.observed_problem, lesson?.root_cause, lesson?.recommended_behavior, ...(lesson?.applicability_conditions ?? []), ...(lesson?.exclusions ?? [])].join('\n');
+      if (UNIVERSAL_LESSON.test(lessonText)) error(errors, 'lessons.jsonl', lesson?.lesson_id, 'lesson.conditional', 'Lessons must be conditional rather than universal.');
+      if (SOURCE_INSTRUCTION.test(lessonText)) error(errors, 'lessons.jsonl', lesson?.lesson_id, 'lesson.source_instruction', 'Lessons must not copy instructions from research material.');
+      if (PROTECTED_SURFACE.test(lessonText)) error(errors, 'lessons.jsonl', lesson?.lesson_id, 'lesson.protected_surface', 'Lessons must not propose protected-surface changes.');
     }
+    const expectedEvaluators = new Set(['research-run-evaluator', 'research-friction-evaluator']);
+    const evaluators = new Set(runQualityEvaluation?.evaluator_identities ?? []);
+    if (evaluators.size !== expectedEvaluators.size || [...expectedEvaluators].some((id) => !evaluators.has(id))) error(errors, 'run-quality-evaluation.json', runQualityEvaluation?.run_quality_evaluation_id, 'run_quality_evaluation.evaluators', 'Both fixed evaluator identities are required.');
+    if (runQualityEvaluation?.evaluator_uncertainty > 0.5 && lessons.length) error(errors, 'run-quality-evaluation.json', runQualityEvaluation?.run_quality_evaluation_id, 'run_quality_evaluation.uncertainty', 'High evaluator uncertainty requires no provisional lessons.');
+    if (runQualityEvaluation?.run_outcome === 'failed' && lessons.some((lesson) => !['friction', 'runtime'].includes(lesson?.type))) error(errors, 'lessons.jsonl', null, 'lesson.failed_run_type', 'Failed runs may produce only friction or runtime lessons.');
     const bundle = policySnapshot?.policy_bundle;
     if (policySnapshot?.constitution_version !== CONSTITUTION_VERSION || bundle?.constitution_version !== CONSTITUTION_VERSION) error(errors, 'policy-snapshot.json', policySnapshot?.policy_snapshot_id, 'policy.constitution', `Policy snapshot and bundle must use constitution version ${CONSTITUTION_VERSION}.`);
     for (const lessonId of bundle?.selected_lesson_ids ?? []) if (!lessonIds.has(lessonId)) error(errors, 'policy-snapshot.json', policySnapshot?.policy_snapshot_id, 'policy.lesson', `Unknown selected lesson_id ${lessonId}.`);
     for (const lessonId of bundle?.exclusions ?? []) if (!lessonIds.has(lessonId)) error(errors, 'policy-snapshot.json', policySnapshot?.policy_snapshot_id, 'policy.lesson', `Unknown excluded lesson_id ${lessonId}.`);
     const directiveCharacters = (bundle?.role_directives ?? []).reduce((total, directive) => total + (directive?.directive?.length ?? 0), 0);
     if (directiveCharacters > (bundle?.maximum_character_count ?? 0)) error(errors, 'policy-snapshot.json', policySnapshot?.policy_snapshot_id, 'policy.size', `Generated policy uses ${directiveCharacters} characters, exceeding its ${bundle?.maximum_character_count ?? 0}-character limit.`);
+    if ((bundle?.selected_lesson_ids?.length ?? 0) || (bundle?.role_directives?.length ?? 0) || (bundle?.exclusions?.length ?? 0)) error(errors, 'policy-snapshot.json', policySnapshot?.policy_snapshot_id, 'policy.baseline', 'Milestone 27 runs must use the policy-independent baseline snapshot.');
   }
 
   const mappedClaims = new Set();
