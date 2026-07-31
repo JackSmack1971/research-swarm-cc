@@ -168,6 +168,8 @@ Sources: [Dynamic workflows](https://code.claude.com/docs/en/workflows), [Create
 
 | 2026-07-30 | `npm test`; `npm run contracts:check`; `node scripts/validate-research-run.mjs tests/fixtures/valid-run-v2`; wrapped workflow syntax check; `git diff --check` | Passed: 53 deterministic tests cover first registration, relevant and irrelevant compilation, corrupt-state recovery, stale locks, concurrent idempotence, safe empty state, policy limits, constitution incompatibility, and `off`/`evaluate`/`adapt` wiring; canonical contracts remain current; the version-2 fixture validates; the workflow parses and no whitespace errors exist. Claude Code runtime execution was not performed. |
 
+| 2026-07-30 | `npm run contracts:generate`; `npm run contracts:check`; `npm test`; `node scripts/validate-research-run.mjs tests/fixtures/valid-run-v2`; `git diff --check` | Passed: generated contracts are current; all 57 deterministic tests pass, including factual correction, style preference, malicious security weakening, unknown run, active-lesson contradiction, duplicate idempotence, critic disagreement/unavailability, jurisdiction/version scope, and private-text exclusion. The version-2 fixture validates and no whitespace errors exist. Claude Code runtime execution was not performed. |
+
 ## Known risks
 
 * A historical pre-canonical-ID Light smoke trace completed after the noninteractive print client timed out, but its generated archive was removed after the audit found noncanonical IDs. It is not current-runtime acceptance evidence.
@@ -182,4 +184,4 @@ Sources: [Dynamic workflows](https://code.claude.com/docs/en/workflows), [Create
 
 ## Next milestone
 
-Milestone 28 is complete. The registry validates only version-2 archives, preserves provisional lesson provenance and counterexamples, recovers ignored local state safely, and compiles bounded policy guidance for the next run. Milestone 24 remains incomplete: Light partially executed but produced no validated archive, and Deep was not attempted. Milestone 29 is next: add independent, reversible lesson promotion. Production readiness remains unavailable until successful current-runtime Light and Deep version-2 archives validate.
+Milestone 29 is complete. Feedback is appended atomically to ignored learning state, scoped corrections can suppress contradicted low-risk lessons, and high-risk feedback-driven changes remain blocked without an independent critic outcome. Milestone 24 remains incomplete: Light partially executed but produced no validated archive, and Deep was not attempted. Production readiness remains unavailable until successful current-runtime Light and Deep version-2 archives validate.

@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- People can now add scoped corrections, preferences, usefulness ratings, and outcomes to a completed research run without changing its historical archive.
 - Research runs can now safely reuse bounded, relevant lessons from prior validated runs.
 - Research runs now receive independent quality and friction evaluations with provisional, auditable lessons.
 - Added documented safeguards for future adaptive research policy, including human review and rollback requirements.

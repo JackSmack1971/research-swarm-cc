@@ -57,6 +57,16 @@ The command accepts either a plain query or an object with these fields:
 
 The workflow always plans, researches isolated subquestions in parallel, normalizes evidence, selects verification targets, adjudicates, synthesizes, semantically reviews, performs at most two targeted report repairs, and uses one persistence writer. It returns the report and archived run directory only.
 
+## Optional feedback
+
+After a validated version-2 run, register scoped feedback without changing the archive:
+
+```text
+/research-feedback run_example {"kind":"correction","text":"This applies only in Ontario for version 4.2.","scope":{"domain":"Ontario version 4.2","conditions":["Ontario","software version 4.2"]},"affected_claim_ids":["clm_example"]}
+```
+
+Feedback may be a factual correction, a preference, a usefulness rating, or an observed outcome. Preferences are never treated as factual corrections. Feedback is atomically recorded in ignored learning state; repeat submissions are idempotent. Private feedback is retained only there and is never copied into generated policy. High-risk feedback-driven lesson changes require an independent critic review, and no feedback can weaken the constitution or security controls.
+
 ## Archived run
 
 Each run directory contains:
@@ -98,7 +108,7 @@ Each `report-map.json` unit uses the same `report_unit_id` and records `text_sha
 
 Generated run directories are ignored by Git; the archive root is retained with `.gitkeep`.
 
-Archives currently support exactly schema version `1.0.0`. Unversioned pre-remediation archives and every other version fail validation without being changed or reinterpreted. A future migration requires explicit authorization and tests against genuine archived runs.
+Archives currently support exactly schema versions `1.0.0` and `2.0.0`; only version `2.0.0` can enter learning. Unversioned pre-remediation archives and every other version fail validation without being changed or reinterpreted. A future migration requires explicit authorization and tests against genuine archived runs.
 
 `outputRoot` rejects absolute, Windows-drive, UNC, backslash, traversal, encoded, control-character, empty-segment, reserved-device, and trailing-dot/space paths. Each run uses a bounded query slug plus timestamp and nonce, so source text cannot choose a directory name and concurrent runs do not collide in ordinary use.
 

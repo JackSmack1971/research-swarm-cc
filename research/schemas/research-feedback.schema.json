@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "research-feedback.schema.json",
+  "title": "Registered research feedback evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["feedback_id", "run_id", "recorded_at", "kind", "text", "private", "scope", "affected_claim_ids", "affected_report_unit_ids", "affected_lesson_ids", "evidence_authority", "disposition"],
+  "properties": {
+    "feedback_id": { "type": "string", "pattern": "^fdb_[a-f0-9]{16}$" },
+    "run_id": { "type": "string", "pattern": "^run_[A-Za-z0-9][A-Za-z0-9_-]*$" },
+    "recorded_at": { "type": "string", "format": "date-time" },
+    "kind": { "enum": ["correction", "preference", "usefulness", "outcome"] },
+    "text": { "type": "string", "minLength": 1, "maxLength": 4000 },
+    "private": { "type": "boolean" },
+    "scope": { "type": "object", "additionalProperties": false, "required": ["domain", "conditions"], "properties": { "domain": { "type": "string", "minLength": 1, "maxLength": 500 }, "conditions": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1, "maxLength": 500 } } } },
+    "affected_claim_ids": { "type": "array", "uniqueItems": true, "items": { "type": "string", "pattern": "^clm_[A-Za-z0-9][A-Za-z0-9_-]*$" } },
+    "affected_report_unit_ids": { "type": "array", "uniqueItems": true, "items": { "type": "string", "pattern": "^rpt_[A-Za-z0-9][A-Za-z0-9_-]*$" } },
+    "affected_lesson_ids": { "type": "array", "uniqueItems": true, "items": { "type": "string", "pattern": "^les_[A-Za-z0-9][A-Za-z0-9_-]*$" } },
+    "evidence_authority": { "enum": ["explicit_user_correction", "single_evaluator_opinion"] },
+    "disposition": { "enum": ["recorded", "rejected_constitution"] }
+  },
+  "allOf": [{ "if": { "properties": { "kind": { "const": "correction" } }, "required": ["kind"] }, "then": { "properties": { "evidence_authority": { "const": "explicit_user_correction" } } } }, { "if": { "properties": { "kind": { "const": "preference" } }, "required": ["kind"] }, "then": { "properties": { "evidence_authority": { "const": "single_evaluator_opinion" } } } }]
+}

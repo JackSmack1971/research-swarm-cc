@@ -4,7 +4,7 @@ import path from 'node:path';
 
 export const CONSTITUTION_VERSION = '1.0.0';
 export const POLICY_LIMITS = Object.freeze({ lessons: 12, directivesPerRole: 4, characters: 6000 });
-const FILES = ['manifest.json', 'provisional-lessons.jsonl', 'active-lessons.jsonl', 'rejected-lessons.jsonl', 'promotion-events.jsonl', 'generated-policy.json', 'generated-policy.md'];
+const FILES = ['manifest.json', 'provisional-lessons.jsonl', 'active-lessons.jsonl', 'rejected-lessons.jsonl', 'promotion-events.jsonl', 'feedback-evidence.jsonl', 'lesson-critic-events.jsonl', 'generated-policy.json', 'generated-policy.md'];
 const forbidden = /\b(?:ignore|disregard|follow)\s+(?:all\s+)?(?:previous|source|webpage|page)?\s*instructions?\b|\b(?:constitution|canonical schema|validator|workflow control|permission|protected surface|agent definition)\b/i;
 
 export function learningRoot(value = process.env.RESEARCH_LEARNING_ROOT) { return path.resolve(value || 'artifacts/research-learning'); }
@@ -24,8 +24,8 @@ async function readJsonl(file) { try { return (await readFile(file, 'utf8')).spl
 const jsonl = (records) => records.map((record) => JSON.stringify(record)).join(records.length ? '\n' : '') + (records.length ? '\n' : '');
 
 export async function readState(root = learningRoot()) {
-  const state = { manifest: await readJson(path.join(root, 'manifest.json'), {}), provisional: await readJsonl(path.join(root, 'provisional-lessons.jsonl')), active: await readJsonl(path.join(root, 'active-lessons.jsonl')), rejected: await readJsonl(path.join(root, 'rejected-lessons.jsonl')), promotions: await readJsonl(path.join(root, 'promotion-events.jsonl')) };
-  return state.manifest?.constitution_version === CONSTITUTION_VERSION ? state : { manifest: {}, provisional: [], active: [], rejected: [], promotions: [] };
+  const state = { manifest: await readJson(path.join(root, 'manifest.json'), {}), provisional: await readJsonl(path.join(root, 'provisional-lessons.jsonl')), active: await readJsonl(path.join(root, 'active-lessons.jsonl')), rejected: await readJsonl(path.join(root, 'rejected-lessons.jsonl')), promotions: await readJsonl(path.join(root, 'promotion-events.jsonl')), feedback: await readJsonl(path.join(root, 'feedback-evidence.jsonl')), critic: await readJsonl(path.join(root, 'lesson-critic-events.jsonl')) };
+  return state.manifest?.constitution_version === CONSTITUTION_VERSION ? state : { manifest: {}, provisional: [], active: [], rejected: [], promotions: [], feedback: [], critic: [] };
 }
 
 export async function withLearningLock(root, callback, { waitMs = 5000, staleMs = 30000 } = {}) {
@@ -53,7 +53,7 @@ export async function writeState(root, state) {
   const all = [...state.provisional, ...state.active, ...state.rejected];
   const manifest = { lesson_registry_id: 'lreg_research_learning', generated_at: now(), constitution_version: CONSTITUTION_VERSION, lesson_ids: [...new Set(all.map(({ lesson_id }) => lesson_id))].sort(), version: '1.0.0' };
   await Promise.all([
-    atomicWrite(path.join(root, 'manifest.json'), `${JSON.stringify(manifest)}\n`), atomicWrite(path.join(root, 'provisional-lessons.jsonl'), jsonl(state.provisional)), atomicWrite(path.join(root, 'active-lessons.jsonl'), jsonl(state.active)), atomicWrite(path.join(root, 'rejected-lessons.jsonl'), jsonl(state.rejected)), atomicWrite(path.join(root, 'promotion-events.jsonl'), jsonl(state.promotions))
+    atomicWrite(path.join(root, 'manifest.json'), `${JSON.stringify(manifest)}\n`), atomicWrite(path.join(root, 'provisional-lessons.jsonl'), jsonl(state.provisional)), atomicWrite(path.join(root, 'active-lessons.jsonl'), jsonl(state.active)), atomicWrite(path.join(root, 'rejected-lessons.jsonl'), jsonl(state.rejected)), atomicWrite(path.join(root, 'promotion-events.jsonl'), jsonl(state.promotions)), atomicWrite(path.join(root, 'feedback-evidence.jsonl'), jsonl(state.feedback || [])), atomicWrite(path.join(root, 'lesson-critic-events.jsonl'), jsonl(state.critic || []))
   ]);
 }
 
