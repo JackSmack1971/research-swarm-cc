@@ -172,6 +172,14 @@ Sources: [Dynamic workflows](https://code.claude.com/docs/en/workflows), [Create
 
 ## Known risks
 
+## Milestone 33
+
+The active goal assigns evidence-backed durable change proposals to Milestone 33, while the older self-improvement plan labels that work Milestone 32 and labels Milestone 33 diagnostics/retention. The active goal is followed; the older table remains historical planning context.
+
+Implemented review-only improvement candidates under the ignored learning root. Candidate creation requires at least two strong active lessons with independent supporting runs, records immutable evidence and target hashes with an exact reversible patch, rejects protected surfaces, permission broadening, validator weakening, secrets, live reports/source content, stale targets, and pending overlap, and never applies the patch to the working tree. The candidate checker copies the repository to a temporary sandbox, applies there only, runs contract, test, replay, syntax, and diff checks, and records `ready`, `rejected`, or `inconclusive` for human review. The new command and designer agent provide the bounded review path without authority to edit, commit, push, or merge.
+
+| 2026-07-31 | `node --check scripts/create-improvement-candidate.mjs`; `node --check scripts/test-improvement-candidate.mjs`; `npm run contracts:check`; `npm test`; temporary ignored-learning candidate exercise; `git diff --check` | Passed: both candidate scripts parse; canonical contracts are current; all 71 existing offline tests pass; the temporary candidate path rejected a deliberately malformed patch without changing the working tree. Claude Code runtime execution was not performed. |
+
 ## Milestone 32
 
 Implemented deterministic policy-canary state handling under the ignored learning root only. Candidates move through `proposed`, `replay_passed`, `canary`, `promoted`, `rejected`, or `rolled_back`; only constitution-compatible, bounded, low-risk candidates with active lesson evidence, no unresolved lesson conflict, the required replay/runtime evidence, and an exact rollback snapshot can enter a canary. Assignment is deterministic by candidate and run ID and persists the single baseline-or-candidate decision. Promotion needs three independent completed candidate quality wins. Critical provenance/security, unsupported high-materiality, validator, budget, constitution, or user-harm signals roll back immediately; two consecutive high-severity regressions also roll back. Rollback retains affected runs and restores the recorded baseline snapshot; corrupt snapshots reject, and rolled-back candidates observe a seven-day cooldown. This automation writes only ignored generated-policy state and never repository files.
