@@ -156,6 +156,15 @@ test('v2 adaptive records reject unexpected properties', async (t) => {
   assert.ok(hasRule(await validateResearchRun(directory), 'schema.additionalProperties'));
 });
 
+test('v2 lessons cannot lower the fixed two-counterexample rollback threshold', async (t) => {
+  const directory = await copiedFixture(t, 'valid-run-v2');
+  const lessonFile = path.join(directory, 'lessons.jsonl');
+  const lesson = (await readJsonl(lessonFile)).records[0];
+  lesson.counterexample_threshold = 1;
+  await writeFile(lessonFile, `${JSON.stringify(lesson)}\n`); await markInvalid(directory);
+  assert.ok(hasRule(await validateResearchRun(directory), 'schema.const'));
+});
+
 test('Milestone 27 evaluates a policy-independent successful run without lessons', async (t) => {
   const directory = await copiedFixture(t, 'valid-run-v2');
   const evaluationFile = path.join(directory, 'run-quality-evaluation.json');

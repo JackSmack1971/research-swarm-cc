@@ -26,7 +26,7 @@ test('lifecycle promotion paths, anti-oscillation, and deterministic policy boun
   assert.deepEqual(state.active.map(({ lesson_id }) => lesson_id).sort(), ['les_defect', 'les_repeat', 'les_user']);
   assert.equal(state.provisional[0].lesson_id, 'les_same_run');
   assert.equal(state.promotions.length, 3);
-  const promoted = state.active.find(({ lesson_id }) => lesson_id === 'les_defect'); promoted.counterexample_run_ids = ['run_counter']; advanceLessonLifecycle(state, { at: '2026-07-30T12:00:00Z' });
+  const promoted = state.active.find(({ lesson_id }) => lesson_id === 'les_defect'); promoted.counterexample_threshold = 1; promoted.counterexample_run_ids = ['run_counter']; advanceLessonLifecycle(state, { at: '2026-07-30T12:00:00Z' });
   assert.ok(state.provisional.some(({ lesson_id }) => lesson_id === 'les_defect'));
   const qualified = state.provisional.find(({ lesson_id }) => lesson_id === 'les_defect'); qualified.status = 'active'; qualified.promotion_event_id = 'prm_again'; qualified.counterexample_run_ids = ['run_counter', 'run_counter_two']; state.provisional = state.provisional.filter(({ lesson_id }) => lesson_id !== 'les_defect'); state.active.push(qualified); advanceLessonLifecycle(state, { at: '2026-07-30T18:00:00Z' });
   assert.ok(state.rolledBack.some(({ lesson_id }) => lesson_id === 'les_defect'));

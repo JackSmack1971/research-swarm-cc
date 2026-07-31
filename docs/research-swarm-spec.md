@@ -1358,3 +1358,13 @@ The runtime remains the native Claude Code dynamic workflow. Per-role write isol
 Canonical JSON Schema files are the single contract source. Ajv 8 is approved as the sole new dependency and may be used only to enforce those schemas. Workflow inline schemas and schema-derived validator constants must be generated from the canonical schemas and checked for drift.
 
 Milestones that alter archive contracts must preserve existing fixtures and archived runs, or provide and validate an explicit migration. Unversioned pre-remediation archives are explicitly unsupported because no genuine historical corpus exists; any future migration needs explicit authorization and tests against genuine archived runs. Milestone 20 must execute the complete offline regression suite and one Claude Code smoke test when the runtime is available; otherwise it must record the exact unavailable-runtime evidence without claiming a smoke result.
+
+---
+
+# 21. Adaptive self-improvement acceptance
+
+Version-2 archives must retain a fixed-rubric evaluation even when no useful lesson is produced. Lessons are provisional first; only relevant, bounded, constitution-compatible active lessons may enter a later prompt. Promotion requires permitted independent evidence, and policy canaries must retain a reversible baseline snapshot and roll back on critical regression. A lesson or evaluator may not lower the fixed two-counterexample rollback threshold.
+
+Generated learning state stays under ignored `artifacts/research-learning/`; it must never include live query, report, source, private-feedback, or untrusted-instruction text in directives. Automation may create only reviewable durable-change proposals and may not rewrite protected repository files. Version-1 archives remain read-only-valid and cannot enter learning.
+
+Production readiness requires separately recorded current Claude Code runtime evidence: one bounded Light and one bounded Deep version-2 archive must validate, with honest separation from deterministic fixture/replay evidence. Document behavioral, rather than hard permission, role isolation until the Claude Code interface documents named-agent routing or per-call restrictions.

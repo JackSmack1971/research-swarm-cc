@@ -1343,9 +1343,7 @@ export const canonicalSchemas = [
         "format": "date-time"
       },
       "counterexample_threshold": {
-        "type": "integer",
-        "minimum": 1,
-        "maximum": 20
+        "const": 2
       },
       "evidence_score": {
         "type": "object",

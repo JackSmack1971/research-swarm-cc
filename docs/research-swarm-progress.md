@@ -49,13 +49,13 @@ At that time, no `CLAUDE.md`, `.claude/` configuration, package manifest, lockfi
 | 26 | Define version-2 learning-state and archive contract | complete |
 | 27 | Add completed-run evaluation | complete |
 | 28 | Add deterministic lesson registration and policy compilation | complete |
-| 29 | Add independent, reversible lesson promotion | authorized |
-| 30 | Add replay and canary candidate evaluation | authorized |
-| 31 | Add rollback and regression controls | authorized |
-| 32 | Generate durable protected-surface patch proposals | authorized |
-| 33 | Add learning diagnostics and retention controls | authorized |
-| 34 | Validate compatibility and adversarial policy boundaries | authorized |
-| 35 | Run adaptive Light and Deep runtime acceptance | authorized |
+| 29 | Add independent, reversible lesson promotion | complete |
+| 30 | Add replay and canary candidate evaluation | complete |
+| 31 | Add rollback and regression controls | complete |
+| 32 | Generate durable protected-surface patch proposals | complete |
+| 33 | Add learning diagnostics and retention controls | complete |
+| 34 | Validate compatibility and adversarial policy boundaries | complete |
+| 35 | Run adaptive Light and Deep runtime acceptance | incomplete — no current-runtime version-2 archive validated |
 
 ## Decisions log
 
@@ -222,4 +222,10 @@ Implemented deterministic provisional, active, rejected, expired, superseded, an
 
 ## Next milestone
 
-Milestone 30 lifecycle controls are complete. Replay/canary evaluation remains later work under the historical self-improvement plan. Milestone 24 remains incomplete: Light partially executed but produced no validated archive, and Deep was not attempted. Production readiness remains unavailable until successful current-runtime Light and Deep version-2 archives validate.
+## Milestone 35
+
+Completed the final deterministic/adversarial acceptance audit. The canonical lesson contract now fixes the rollback threshold at two counterexamples, and lifecycle code refuses an attempted lower in-memory value. Added a normal Stop-hook paused-learning test so a valid archive is not registered while learning is paused. Fixture evidence covers all requested adversarial scenarios, including untrusted instructions, universal lessons, conflicting lessons, citation regression, duplicate IDs, corrupt/concurrent/stale registry behavior, policy bounds, constitutional protection, user correction, canary rollback, missing snapshots, recursion, paused learning, and no useful lesson.
+
+| 2026-07-31 | `npm ci`; `npm run contracts:generate`; `npm run contracts:check`; `npm test`; v1/v2 fixture validation; invalid fixture rejection; bounded Claude Code Light invocation; Context7 Claude Code workflow/hook review | Deterministic gates passed. The Light CLI invocation timed out after 124 seconds without a persisted archive; Deep was not attempted. Runtime acceptance and production readiness remain incomplete. Current documentation states workflow arguments should be JSON values; the repository keeps string JSON parsing as a compatibility fallback because the earlier local runtime supplied serialized `args`. |
+
+Milestone 35 deterministic acceptance is complete, but its runtime gate is not. Milestone 24 remains incomplete: Light has not produced a validated archive and Deep was not attempted. Production readiness remains unavailable until successful current-runtime Light and Deep version-2 archives validate.

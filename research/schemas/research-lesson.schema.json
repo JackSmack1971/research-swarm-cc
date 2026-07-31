@@ -27,7 +27,7 @@
     "conflict_set_id": { "type": "string", "pattern": "^lcf_[A-Za-z0-9][A-Za-z0-9_-]*$" },
     "activated_at": { "type": "string", "format": "date-time" },
     "cooldown_until": { "type": "string", "format": "date-time" },
-    "counterexample_threshold": { "type": "integer", "minimum": 1, "maximum": 20 },
+    "counterexample_threshold": { "const": 2 },
     "evidence_score": { "type": "object", "additionalProperties": false, "required": ["validated_run_count", "independent_run_count", "direct_rule_to_fix", "critic_approved", "counterexample_count"], "properties": { "validated_run_count": { "type": "integer", "minimum": 0 }, "independent_run_count": { "type": "integer", "minimum": 0 }, "direct_rule_to_fix": { "type": "boolean" }, "critic_approved": { "type": "boolean" }, "counterexample_count": { "type": "integer", "minimum": 0 } } },
     "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
     "constitution_compatibility": { "type": "object", "additionalProperties": false, "required": ["constitution_version", "result"], "properties": { "constitution_version": { "type": "string", "minLength": 1 }, "result": { "enum": ["compatible", "incompatible"] }, "rationale": { "type": "string", "minLength": 1, "maxLength": 2000 } } }

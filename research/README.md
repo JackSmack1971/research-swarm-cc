@@ -67,6 +67,10 @@ After a validated version-2 run, register scoped feedback without changing the a
 
 Feedback may be a factual correction, a preference, a usefulness rating, or an observed outcome. Preferences are never treated as factual corrections. Feedback is atomically recorded in ignored learning state; repeat submissions are idempotent. Private feedback is retained only there and is never copied into generated policy. High-risk feedback-driven lesson changes require an independent critic review, and no feedback can weaken the constitution or security controls.
 
+## Adaptive learning status
+
+Every completed version-2 run contributes auditable evaluation evidence. Lessons start provisional; only bounded, relevant active lessons can guide a later run. The system does not train model weights and does not guarantee every run improves. Canaries and rollback protect active policy, while durable repository changes remain human-reviewed proposals. See `docs/self-improvement-acceptance.md` for the current acceptance status: production readiness requires valid current-runtime Light and Deep version-2 archives.
+
 ## Archived run
 
 Each run directory contains:
@@ -110,7 +114,7 @@ Generated run directories are ignored by Git; the archive root is retained with 
 
 Archives currently support exactly schema versions `1.0.0` and `2.0.0`; only version `2.0.0` can enter learning. Unversioned pre-remediation archives and every other version fail validation without being changed or reinterpreted. A future migration requires explicit authorization and tests against genuine archived runs.
 
-`outputRoot` rejects absolute, Windows-drive, UNC, backslash, traversal, encoded, control-character, empty-segment, reserved-device, and trailing-dot/space paths. Each run uses a bounded query slug plus timestamp and nonce, so source text cannot choose a directory name and concurrent runs do not collide in ordinary use.
+`outputRoot` rejects absolute, Windows-drive, UNC, backslash, traversal, encoded, control-character, empty-segment, reserved-device, and trailing-dot/space paths. Each run uses a bounded query slug, so source text cannot choose a directory name. The current Claude Code runtime rejects direct clock/random calls in the workflow; repeated identical queries can therefore collide and should use distinct safe output roots until the runtime documents a collision-safe primitive.
 
 ## Validation
 

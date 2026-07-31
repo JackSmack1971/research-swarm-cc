@@ -32,3 +32,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Research archives now retain verification history, evidence gaps, semantic reviews, and repair records.
 - Research archives now reject malformed evidence records before report-support checks run.
 - Research verification now preserves and audits newly discovered supporting, qualifying, and contradictory evidence.
+
+### Security
+
+- Research policy rollback now requires two counterexamples, preventing an evaluator from lowering its own safety threshold.

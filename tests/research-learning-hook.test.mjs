@@ -30,6 +30,15 @@ test('Stop recovery never recurses or blocks malformed, missing-project, locked,
   assert.equal((await readState(stateRoot)).manifest.paused, true);
 });
 
+test('Stop recovery leaves a normal validated archive unregistered while learning is paused', async (t) => {
+  const runs = await root(); const stateRoot = await root(); t.after(() => Promise.all([rm(runs, { recursive: true, force: true }), rm(stateRoot, { recursive: true, force: true })]));
+  const archive = path.join(runs, 'run_fixture'); await cp('tests/fixtures/valid-run-v2', archive, { recursive: true }); const manifest = JSON.parse(await readFile(path.join(archive, 'manifest.json'), 'utf8')); manifest.run_directory = archive; await writeFile(path.join(archive, 'manifest.json'), JSON.stringify(manifest));
+  await writeState(stateRoot, { manifest: { paused: true }, provisional: [], active: [], rejected: [], expired: [], superseded: [], rolledBack: [], promotions: [], events: [], feedback: [], critic: [], candidates: [], canary_assignments: [] });
+  const env = { CLAUDE_PROJECT_DIR: process.cwd(), RESEARCH_RUN_ROOT: runs, RESEARCH_LEARNING_ROOT: stateRoot };
+  assert.equal((await command('scripts/hook-smoke-test.mjs', ['tests/fixtures/research-learning-hook/stop.json'], env)).valid, true);
+  const state = await readState(stateRoot); assert.deepEqual(state.manifest.registered_run_ids || [], []); assert.equal(state.provisional.length, 0);
+});
+
 test('Stop recovery registers a validated v2 archive exactly once', async (t) => {
   const runs = await root(); const stateRoot = await root(); t.after(() => Promise.all([rm(runs, { recursive: true, force: true }), rm(stateRoot, { recursive: true, force: true })]));
   const archive = path.join(runs, 'run_fixture'); await cp('tests/fixtures/valid-run-v2', archive, { recursive: true }); const manifest = JSON.parse(await readFile(path.join(archive, 'manifest.json'), 'utf8')); manifest.run_directory = archive; await writeFile(path.join(archive, 'manifest.json'), JSON.stringify(manifest));
