@@ -1,3 +1,16 @@
 {
-  "workflowSizeGuideline": "medium"
+  "workflowSizeGuideline": "medium",
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PROJECT_DIR}/scripts/recover-research-learning.mjs\"",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
 }

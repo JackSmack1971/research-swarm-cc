@@ -172,6 +172,14 @@ Sources: [Dynamic workflows](https://code.claude.com/docs/en/workflows), [Create
 
 ## Known risks
 
+## Milestone 34
+
+Implemented deterministic learning lifecycle controls and a recovery-only project Stop hook. The normal workflow remains the primary evaluation, registration, and compilation path. The hook uses the documented `${CLAUDE_PROJECT_DIR}` environment variable, consumes Stop-hook JSON from stdin, exits silently on malformed input, recursion, missing project state, locks, corruption, or any other recoverable failure, and invokes only local Node validation/registration code. It scans only validated version-2 archives, records registered run IDs for exactly-once recovery, never changes archives, and does not add prompt or experimental-agent hooks. Windows support uses the documented native-Windows Git Bash-compatible quoted Node command.
+
+Added `/research-learning-status`, `/research-learning-explain`, `/research-learning-pause`, `/research-learning-resume`, `/research-learning-rollback`, and `/research-learning-rebuild`. Status and explain emit redacted structured state only; pause empties generated policy and prevents registration, resume requires a valid compatible state, rollback restores a named snapshot and records an event, and rebuild deterministically recompiles policy from registries. Verified interfaces: official Claude Code hook documentation (Stop command hooks, stdin JSON, `stop_hook_active`, no-output success behavior, and `$CLAUDE_PROJECT_DIR`), official slash-command frontmatter, and official Windows guidance for Git Bash.
+
+| 2026-07-31 | Context7 official Claude Code hook/command/settings/Windows documentation; `node --test tests/research-learning-hook.test.mjs`; `npm test`; `npm run contracts:check`; `node scripts/validate-research-run.mjs tests/fixtures/valid-run-v2`; `node scripts/doctor-research-learning-hooks.mjs`; two captured-stdin hook smoke tests; `git diff --check` | Passed: all 75 offline tests passed. Captured Stop inputs verify duplicate recovery registration, recursion, malformed stdin, missing project directory, paused state, redacted command output, deterministic rebuild, rollback, Windows quoting, and local invalid-hook configuration detection. The v2 fixture validates. No Claude Code runtime session was executed. |
+
 ## Milestone 33
 
 The active goal assigns evidence-backed durable change proposals to Milestone 33, while the older self-improvement plan labels that work Milestone 32 and labels Milestone 33 diagnostics/retention. The active goal is followed; the older table remains historical planning context.

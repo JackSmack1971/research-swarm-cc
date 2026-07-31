@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- Research learning can now be paused, resumed, inspected, rebuilt, and restored from an auditable snapshot without exposing research content.
 - Research policy candidates can now be compared against preserved evidence ledgers without mistaking fixed-ledger results for search improvements.
 - Research improvement proposals can now be prepared with independent evidence and tested safely before human review.
 - Research learning now keeps auditable lesson lifecycle decisions, including expiry, supersession, and rollback.
