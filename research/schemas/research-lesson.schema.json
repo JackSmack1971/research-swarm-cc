@@ -16,19 +16,25 @@
     "target": { "type": "object", "additionalProperties": false, "required": ["role", "policy_surface"], "properties": { "role": { "type": "string", "minLength": 1, "maxLength": 100 }, "policy_surface": { "enum": ["planner", "worker", "normalizer", "verifier", "adjudicator", "synthesizer", "persistence"] } } },
     "supporting_run_ids": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "pattern": "^run_[A-Za-z0-9][A-Za-z0-9_-]*$" } },
     "counterexample_run_ids": { "type": "array", "uniqueItems": true, "items": { "type": "string", "pattern": "^run_[A-Za-z0-9][A-Za-z0-9_-]*$" } },
-    "evidence_authority": { "enum": ["deterministic_evaluation", "independent_evaluation", "human_review"] },
+    "evidence_authority": { "enum": ["deterministic_evaluation", "deterministic_defect", "explicit_user_correction", "repeated_behavior", "independent_evaluation", "human_review"] },
     "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
     "risk": { "enum": ["low", "medium", "high", "critical"] },
-    "status": { "enum": ["provisional", "active", "superseded", "expired", "rejected"] },
+    "status": { "enum": ["provisional", "active", "superseded", "expired", "rejected", "rolled_back"] },
     "expiry": { "oneOf": [{ "type": "object", "additionalProperties": false, "required": ["expires_at"], "properties": { "expires_at": { "type": "string", "format": "date-time" } } }, { "type": "object", "additionalProperties": false, "required": ["review_condition"], "properties": { "review_condition": { "type": "string", "minLength": 1, "maxLength": 1000 } } }] },
     "promotion_event_id": { "type": "string", "pattern": "^prm_[A-Za-z0-9][A-Za-z0-9_-]*$" },
     "superseded_by_lesson_id": { "type": "string", "pattern": "^les_[A-Za-z0-9][A-Za-z0-9_-]*$" },
+    "supersedes_lesson_ids": { "type": "array", "uniqueItems": true, "items": { "type": "string", "pattern": "^les_[A-Za-z0-9][A-Za-z0-9_-]*$" } },
+    "conflict_set_id": { "type": "string", "pattern": "^lcf_[A-Za-z0-9][A-Za-z0-9_-]*$" },
+    "activated_at": { "type": "string", "format": "date-time" },
+    "cooldown_until": { "type": "string", "format": "date-time" },
+    "counterexample_threshold": { "type": "integer", "minimum": 1, "maximum": 20 },
+    "evidence_score": { "type": "object", "additionalProperties": false, "required": ["validated_run_count", "independent_run_count", "direct_rule_to_fix", "critic_approved", "counterexample_count"], "properties": { "validated_run_count": { "type": "integer", "minimum": 0 }, "independent_run_count": { "type": "integer", "minimum": 0 }, "direct_rule_to_fix": { "type": "boolean" }, "critic_approved": { "type": "boolean" }, "counterexample_count": { "type": "integer", "minimum": 0 } } },
     "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
     "constitution_compatibility": { "type": "object", "additionalProperties": false, "required": ["constitution_version", "result"], "properties": { "constitution_version": { "type": "string", "minLength": 1 }, "result": { "enum": ["compatible", "incompatible"] }, "rationale": { "type": "string", "minLength": 1, "maxLength": 2000 } } }
   },
   "allOf": [
     { "if": { "properties": { "status": { "const": "active" } }, "required": ["status"] }, "then": { "required": ["promotion_event_id"] } },
     { "if": { "properties": { "status": { "const": "superseded" } }, "required": ["status"] }, "then": { "required": ["superseded_by_lesson_id"] } },
-    { "if": { "properties": { "status": { "enum": ["provisional", "rejected", "expired"] } }, "required": ["status"] }, "then": { "not": { "required": ["promotion_event_id"] } } }
+    { "if": { "properties": { "status": { "enum": ["provisional", "rejected", "expired", "rolled_back"] } }, "required": ["status"] }, "then": { "not": { "required": ["promotion_event_id"] } } }
   ]
 }

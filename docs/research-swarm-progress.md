@@ -172,6 +172,14 @@ Sources: [Dynamic workflows](https://code.claude.com/docs/en/workflows), [Create
 
 ## Known risks
 
+## Milestone 30
+
+The active goal defines Milestone 30 as deterministic lesson lifecycle and anti-oscillation controls. This differs from the older `docs/self-improvement-plan.md` table, which labels Milestone 30 as replay/canary evaluation. The active goal is followed for this implementation; the older table is retained as historical planning context.
+
+Implemented deterministic provisional, active, rejected, expired, superseded, and rolled-back lesson state under ignored learning storage. Promotion is restricted to the requested defect, scoped user-correction, or independent repeated-behavior paths; generated policy uses active, constitution-compatible lessons only. The lifecycle records named evidence-score components, immutable transitions, expiry, counterexample qualification/rollback, conflict-set supersession with cooldown, specificity precedence, and active/per-role caps.
+
+| 2026-07-30 | `npm run contracts:generate`; `npm run contracts:check`; `npm test`; `node scripts/validate-research-run.mjs tests/fixtures/valid-run-v2`; `git diff --check` | Passed: generated contracts are current; all 58 deterministic tests pass, including promotion paths, duplicate-run rejection, conflict-set precedence, expiry, counterexample qualification and rollback, cooldown, active-cap enforcement, deterministic ordering, critic gating, and protected-surface exclusion. The version-2 fixture validates. Claude Code runtime execution was not performed. |
+
 * A historical pre-canonical-ID Light smoke trace completed after the noninteractive print client timed out, but its generated archive was removed after the audit found noncanonical IDs. It is not current-runtime acceptance evidence.
 * Direct workflow routing to a named `.claude/agents/` definition is not documented. The inline workflow role prompts therefore cannot inherit the custom agents' restrictive tool allowlists. Current workflow documentation also states that workflow subagents run in `acceptEdits` mode. This blocks proof that workers/verifiers cannot write shared artifacts and that the persistence writer alone is technically capable of archived writes.
 * The semantic validator is a structured model-review gate. The deterministic validator proves report-map references and support coverage but cannot parse arbitrary report prose; semantic support remains model-evaluated rather than fully deterministic.
@@ -184,4 +192,4 @@ Sources: [Dynamic workflows](https://code.claude.com/docs/en/workflows), [Create
 
 ## Next milestone
 
-Milestone 29 is complete. Feedback is appended atomically to ignored learning state, scoped corrections can suppress contradicted low-risk lessons, and high-risk feedback-driven changes remain blocked without an independent critic outcome. Milestone 24 remains incomplete: Light partially executed but produced no validated archive, and Deep was not attempted. Production readiness remains unavailable until successful current-runtime Light and Deep version-2 archives validate.
+Milestone 30 lifecycle controls are complete. Replay/canary evaluation remains later work under the historical self-improvement plan. Milestone 24 remains incomplete: Light partially executed but produced no validated archive, and Deep was not attempted. Production readiness remains unavailable until successful current-runtime Light and Deep version-2 archives validate.

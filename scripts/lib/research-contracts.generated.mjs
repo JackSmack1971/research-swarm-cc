@@ -557,6 +557,16 @@ export const canonicalSchemas = [
       "version": {
         "type": "string",
         "pattern": "^\\d+\\.\\d+\\.\\d+$"
+      },
+      "active_lesson_limit": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 100
+      },
+      "directive_limit_per_role": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 24
       }
     }
   },
@@ -1242,6 +1252,9 @@ export const canonicalSchemas = [
       "evidence_authority": {
         "enum": [
           "deterministic_evaluation",
+          "deterministic_defect",
+          "explicit_user_correction",
+          "repeated_behavior",
           "independent_evaluation",
           "human_review"
         ]
@@ -1265,7 +1278,8 @@ export const canonicalSchemas = [
           "active",
           "superseded",
           "expired",
-          "rejected"
+          "rejected",
+          "rolled_back"
         ]
       },
       "expiry": {
@@ -1306,6 +1320,62 @@ export const canonicalSchemas = [
       "superseded_by_lesson_id": {
         "type": "string",
         "pattern": "^les_[A-Za-z0-9][A-Za-z0-9_-]*$"
+      },
+      "supersedes_lesson_ids": {
+        "type": "array",
+        "uniqueItems": true,
+        "items": {
+          "type": "string",
+          "pattern": "^les_[A-Za-z0-9][A-Za-z0-9_-]*$"
+        }
+      },
+      "conflict_set_id": {
+        "type": "string",
+        "pattern": "^lcf_[A-Za-z0-9][A-Za-z0-9_-]*$"
+      },
+      "activated_at": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "cooldown_until": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "counterexample_threshold": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 20
+      },
+      "evidence_score": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "validated_run_count",
+          "independent_run_count",
+          "direct_rule_to_fix",
+          "critic_approved",
+          "counterexample_count"
+        ],
+        "properties": {
+          "validated_run_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "independent_run_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "direct_rule_to_fix": {
+            "type": "boolean"
+          },
+          "critic_approved": {
+            "type": "boolean"
+          },
+          "counterexample_count": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
       },
       "version": {
         "type": "string",
@@ -1379,7 +1449,8 @@ export const canonicalSchemas = [
               "enum": [
                 "provisional",
                 "rejected",
-                "expired"
+                "expired",
+                "rolled_back"
               ]
             }
           },
