@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "run-quality-evaluation.schema.json",
+  "title": "Archived adaptive run-quality evaluation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["run_quality_evaluation_id", "run_id", "policy_snapshot_id", "evaluated_at", "correctness_risk_findings", "coverage_assessment", "citation_assessment", "source_fitness_assessment", "derivation_assessment", "calibration_assessment", "usefulness_assessment", "friction_assessment", "deterministic_signals", "evaluator_uncertainty", "overall_disposition", "generated_lesson_ids"],
+  "properties": {
+    "run_quality_evaluation_id": { "type": "string", "pattern": "^rqe_[A-Za-z0-9][A-Za-z0-9_-]*$" },
+    "run_id": { "type": "string", "pattern": "^run_[A-Za-z0-9][A-Za-z0-9_-]*$" },
+    "policy_snapshot_id": { "type": "string", "pattern": "^psn_[A-Za-z0-9][A-Za-z0-9_-]*$" },
+    "evaluated_at": { "type": "string", "format": "date-time" },
+    "correctness_risk_findings": { "type": "array", "items": { "$ref": "#/$defs/finding" } },
+    "coverage_assessment": { "$ref": "#/$defs/assessment" },
+    "citation_assessment": { "$ref": "#/$defs/assessment" },
+    "source_fitness_assessment": { "$ref": "#/$defs/assessment" },
+    "derivation_assessment": { "$ref": "#/$defs/assessment" },
+    "calibration_assessment": { "$ref": "#/$defs/assessment" },
+    "usefulness_assessment": { "$ref": "#/$defs/assessment" },
+    "friction_assessment": { "$ref": "#/$defs/assessment" },
+    "deterministic_signals": { "type": "object", "additionalProperties": { "anyOf": [{ "type": "boolean" }, { "type": "number" }, { "type": "string" }] } },
+    "evaluator_uncertainty": { "type": "number", "minimum": 0, "maximum": 1 },
+    "overall_disposition": { "enum": ["eligible", "provisional", "ineligible", "rejected"] },
+    "generated_lesson_ids": { "type": "array", "uniqueItems": true, "items": { "type": "string", "pattern": "^les_[A-Za-z0-9][A-Za-z0-9_-]*$" } }
+  },
+  "$defs": {
+    "assessment": { "type": "object", "additionalProperties": false, "required": ["score", "rationale"], "properties": { "score": { "type": "number", "minimum": 0, "maximum": 1 }, "rationale": { "type": "string", "minLength": 1, "maxLength": 2000 } } },
+    "finding": { "type": "object", "additionalProperties": false, "required": ["finding_id", "severity", "description"], "properties": { "finding_id": { "type": "string", "pattern": "^rqf_[A-Za-z0-9][A-Za-z0-9_-]*$" }, "severity": { "enum": ["critical", "high", "medium", "low"] }, "description": { "type": "string", "minLength": 1, "maxLength": 2000 } } }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "lesson-registry.schema.json",
+  "title": "Deterministic lesson registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["lesson_registry_id", "generated_at", "constitution_version", "lesson_ids", "version"],
+  "properties": { "lesson_registry_id": { "type": "string", "pattern": "^lreg_[A-Za-z0-9][A-Za-z0-9_-]*$" }, "generated_at": { "type": "string", "format": "date-time" }, "constitution_version": { "type": "string", "minLength": 1 }, "lesson_ids": { "type": "array", "uniqueItems": true, "items": { "type": "string", "pattern": "^les_[A-Za-z0-9][A-Za-z0-9_-]*$" } }, "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" } }
+}

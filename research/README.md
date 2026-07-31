@@ -76,6 +76,11 @@ Each run directory contains:
 | `report.md` | The reader-facing final report. |
 | `report-map.json` | The mapping from anchored report units to retained claim IDs and, for inferences, their premise claim IDs. |
 | `validation.json` | The machine-readable deterministic structural-validation result. |
+| `run-quality-evaluation.json` | Version-2 only: fixed-format run-quality evaluation and generated lesson IDs. |
+| `lessons.jsonl` | Version-2 only: attributable, scoped adaptive lessons generated for this run. |
+| `policy-snapshot.json` | Version-2 only: the bounded policy bundle and lesson IDs used by the run. |
+
+Version `1.0.0` archives remain read-only-valid. New archives use version `2.0.0`, require all three adaptive artifacts, and are the only archives eligible to become learning evidence.
 
 `src_` IDs identify sources; `clm_` IDs identify claims; `ver_` IDs identify verification events; and `conf_` IDs identify evidence conflicts. An `independence_group` identifies a shared underlying origin, so derivative coverage is not mistaken for independent confirmation.
 

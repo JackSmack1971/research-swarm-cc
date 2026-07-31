@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "policy-bundle.schema.json",
+  "title": "Bounded adaptive policy bundle",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["policy_bundle_id", "hash", "selected_lesson_ids", "role_directives", "exclusions", "rationale", "maximum_character_count", "constitution_version"],
+  "properties": {
+    "policy_bundle_id": { "type": "string", "pattern": "^pob_[A-Za-z0-9][A-Za-z0-9_-]*$" },
+    "hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "selected_lesson_ids": { "type": "array", "uniqueItems": true, "items": { "type": "string", "pattern": "^les_[A-Za-z0-9][A-Za-z0-9_-]*$" } },
+    "role_directives": { "type": "array", "maxItems": 24, "items": { "type": "object", "additionalProperties": false, "required": ["role", "directive"], "properties": { "role": { "type": "string", "minLength": 1, "maxLength": 100 }, "directive": { "type": "string", "minLength": 1, "maxLength": 2000 } } } },
+    "exclusions": { "type": "array", "uniqueItems": true, "items": { "type": "string", "pattern": "^les_[A-Za-z0-9][A-Za-z0-9_-]*$" } },
+    "rationale": { "type": "string", "minLength": 1, "maxLength": 4000 },
+    "maximum_character_count": { "type": "integer", "minimum": 1, "maximum": 20000 },
+    "constitution_version": { "type": "string", "minLength": 1 }
+  }
+}

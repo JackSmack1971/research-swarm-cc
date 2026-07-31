@@ -423,6 +423,317 @@ export const canonicalSchemas = [
   },
   {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "improvement-candidate.schema.json",
+    "title": "Adaptive improvement candidate",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "improvement_candidate_id",
+      "policy_snapshot_id",
+      "baseline_policy_snapshot_id",
+      "created_at",
+      "status",
+      "constitution_version"
+    ],
+    "properties": {
+      "improvement_candidate_id": {
+        "type": "string",
+        "pattern": "^imp_[A-Za-z0-9][A-Za-z0-9_-]*$"
+      },
+      "policy_snapshot_id": {
+        "type": "string",
+        "pattern": "^psn_[A-Za-z0-9][A-Za-z0-9_-]*$"
+      },
+      "baseline_policy_snapshot_id": {
+        "type": "string",
+        "pattern": "^psn_[A-Za-z0-9][A-Za-z0-9_-]*$"
+      },
+      "created_at": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "status": {
+        "enum": [
+          "candidate",
+          "evaluated",
+          "promoted",
+          "rejected",
+          "rolled_back"
+        ]
+      },
+      "constitution_version": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "improvement-evaluation.schema.json",
+    "title": "Adaptive improvement evaluation",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "improvement_evaluation_id",
+      "improvement_candidate_id",
+      "evaluated_at",
+      "method",
+      "outcome",
+      "rationale",
+      "constitution_version"
+    ],
+    "properties": {
+      "improvement_evaluation_id": {
+        "type": "string",
+        "pattern": "^iev_[A-Za-z0-9][A-Za-z0-9_-]*$"
+      },
+      "improvement_candidate_id": {
+        "type": "string",
+        "pattern": "^imp_[A-Za-z0-9][A-Za-z0-9_-]*$"
+      },
+      "evaluated_at": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "method": {
+        "enum": [
+          "replay",
+          "bounded_canary"
+        ]
+      },
+      "outcome": {
+        "enum": [
+          "improved",
+          "neutral",
+          "regressed",
+          "inconclusive"
+        ]
+      },
+      "rationale": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 4000
+      },
+      "constitution_version": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "lesson-registry.schema.json",
+    "title": "Deterministic lesson registry",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "lesson_registry_id",
+      "generated_at",
+      "constitution_version",
+      "lesson_ids",
+      "version"
+    ],
+    "properties": {
+      "lesson_registry_id": {
+        "type": "string",
+        "pattern": "^lreg_[A-Za-z0-9][A-Za-z0-9_-]*$"
+      },
+      "generated_at": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "constitution_version": {
+        "type": "string",
+        "minLength": 1
+      },
+      "lesson_ids": {
+        "type": "array",
+        "uniqueItems": true,
+        "items": {
+          "type": "string",
+          "pattern": "^les_[A-Za-z0-9][A-Za-z0-9_-]*$"
+        }
+      },
+      "version": {
+        "type": "string",
+        "pattern": "^\\d+\\.\\d+\\.\\d+$"
+      }
+    }
+  },
+  {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "policy-bundle.schema.json",
+    "title": "Bounded adaptive policy bundle",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "policy_bundle_id",
+      "hash",
+      "selected_lesson_ids",
+      "role_directives",
+      "exclusions",
+      "rationale",
+      "maximum_character_count",
+      "constitution_version"
+    ],
+    "properties": {
+      "policy_bundle_id": {
+        "type": "string",
+        "pattern": "^pob_[A-Za-z0-9][A-Za-z0-9_-]*$"
+      },
+      "hash": {
+        "type": "string",
+        "pattern": "^[a-f0-9]{64}$"
+      },
+      "selected_lesson_ids": {
+        "type": "array",
+        "uniqueItems": true,
+        "items": {
+          "type": "string",
+          "pattern": "^les_[A-Za-z0-9][A-Za-z0-9_-]*$"
+        }
+      },
+      "role_directives": {
+        "type": "array",
+        "maxItems": 24,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "role",
+            "directive"
+          ],
+          "properties": {
+            "role": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "directive": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            }
+          }
+        }
+      },
+      "exclusions": {
+        "type": "array",
+        "uniqueItems": true,
+        "items": {
+          "type": "string",
+          "pattern": "^les_[A-Za-z0-9][A-Za-z0-9_-]*$"
+        }
+      },
+      "rationale": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 4000
+      },
+      "maximum_character_count": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 20000
+      },
+      "constitution_version": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "policy-snapshot.schema.json",
+    "title": "Archived adaptive policy snapshot",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "policy_snapshot_id",
+      "policy_bundle",
+      "constitution_version",
+      "created_at"
+    ],
+    "properties": {
+      "policy_snapshot_id": {
+        "type": "string",
+        "pattern": "^psn_[A-Za-z0-9][A-Za-z0-9_-]*$"
+      },
+      "policy_bundle": {
+        "$ref": "policy-bundle.schema.json"
+      },
+      "constitution_version": {
+        "type": "string",
+        "minLength": 1
+      },
+      "created_at": {
+        "type": "string",
+        "format": "date-time"
+      }
+    }
+  },
+  {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "promotion-event.schema.json",
+    "title": "Independent lesson promotion event",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "promotion_event_id",
+      "lesson_id",
+      "occurred_at",
+      "independent_evaluator_id",
+      "supporting_evaluation_ids",
+      "outcome",
+      "rationale",
+      "constitution_version"
+    ],
+    "properties": {
+      "promotion_event_id": {
+        "type": "string",
+        "pattern": "^prm_[A-Za-z0-9][A-Za-z0-9_-]*$"
+      },
+      "lesson_id": {
+        "type": "string",
+        "pattern": "^les_[A-Za-z0-9][A-Za-z0-9_-]*$"
+      },
+      "occurred_at": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "independent_evaluator_id": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 200
+      },
+      "supporting_evaluation_ids": {
+        "type": "array",
+        "minItems": 1,
+        "uniqueItems": true,
+        "items": {
+          "type": "string",
+          "pattern": "^rqe_[A-Za-z0-9][A-Za-z0-9_-]*$"
+        }
+      },
+      "outcome": {
+        "enum": [
+          "promoted",
+          "rejected",
+          "rolled_back"
+        ]
+      },
+      "rationale": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 4000
+      },
+      "constitution_version": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "repair-event.schema.json",
     "title": "Bounded research repair event",
     "type": "object",
@@ -663,6 +974,279 @@ export const canonicalSchemas = [
   },
   {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "research-lesson.schema.json",
+    "title": "Adaptive research lesson",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "lesson_id",
+      "type",
+      "applicability_conditions",
+      "exclusions",
+      "observed_problem",
+      "root_cause",
+      "recommended_behavior",
+      "target",
+      "supporting_run_ids",
+      "counterexample_run_ids",
+      "evidence_authority",
+      "confidence",
+      "risk",
+      "status",
+      "expiry",
+      "version",
+      "constitution_compatibility"
+    ],
+    "properties": {
+      "lesson_id": {
+        "type": "string",
+        "pattern": "^les_[A-Za-z0-9][A-Za-z0-9_-]*$"
+      },
+      "type": {
+        "enum": [
+          "quality",
+          "friction",
+          "runtime",
+          "preference",
+          "security",
+          "domain"
+        ]
+      },
+      "applicability_conditions": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        }
+      },
+      "exclusions": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        }
+      },
+      "observed_problem": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 4000
+      },
+      "root_cause": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 4000
+      },
+      "recommended_behavior": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 4000
+      },
+      "target": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "role",
+          "policy_surface"
+        ],
+        "properties": {
+          "role": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "policy_surface": {
+            "enum": [
+              "planner",
+              "worker",
+              "normalizer",
+              "verifier",
+              "adjudicator",
+              "synthesizer",
+              "persistence"
+            ]
+          }
+        }
+      },
+      "supporting_run_ids": {
+        "type": "array",
+        "minItems": 1,
+        "uniqueItems": true,
+        "items": {
+          "type": "string",
+          "pattern": "^run_[A-Za-z0-9][A-Za-z0-9_-]*$"
+        }
+      },
+      "counterexample_run_ids": {
+        "type": "array",
+        "uniqueItems": true,
+        "items": {
+          "type": "string",
+          "pattern": "^run_[A-Za-z0-9][A-Za-z0-9_-]*$"
+        }
+      },
+      "evidence_authority": {
+        "enum": [
+          "deterministic_evaluation",
+          "independent_evaluation",
+          "human_review"
+        ]
+      },
+      "confidence": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+      },
+      "risk": {
+        "enum": [
+          "low",
+          "medium",
+          "high",
+          "critical"
+        ]
+      },
+      "status": {
+        "enum": [
+          "provisional",
+          "active",
+          "superseded",
+          "expired",
+          "rejected"
+        ]
+      },
+      "expiry": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "expires_at"
+            ],
+            "properties": {
+              "expires_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "review_condition"
+            ],
+            "properties": {
+              "review_condition": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1000
+              }
+            }
+          }
+        ]
+      },
+      "promotion_event_id": {
+        "type": "string",
+        "pattern": "^prm_[A-Za-z0-9][A-Za-z0-9_-]*$"
+      },
+      "superseded_by_lesson_id": {
+        "type": "string",
+        "pattern": "^les_[A-Za-z0-9][A-Za-z0-9_-]*$"
+      },
+      "version": {
+        "type": "string",
+        "pattern": "^\\d+\\.\\d+\\.\\d+$"
+      },
+      "constitution_compatibility": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "constitution_version",
+          "result"
+        ],
+        "properties": {
+          "constitution_version": {
+            "type": "string",
+            "minLength": 1
+          },
+          "result": {
+            "enum": [
+              "compatible",
+              "incompatible"
+            ]
+          },
+          "rationale": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          }
+        }
+      }
+    },
+    "allOf": [
+      {
+        "if": {
+          "properties": {
+            "status": {
+              "const": "active"
+            }
+          },
+          "required": [
+            "status"
+          ]
+        },
+        "then": {
+          "required": [
+            "promotion_event_id"
+          ]
+        }
+      },
+      {
+        "if": {
+          "properties": {
+            "status": {
+              "const": "superseded"
+            }
+          },
+          "required": [
+            "status"
+          ]
+        },
+        "then": {
+          "required": [
+            "superseded_by_lesson_id"
+          ]
+        }
+      },
+      {
+        "if": {
+          "properties": {
+            "status": {
+              "enum": [
+                "provisional",
+                "rejected",
+                "expired"
+              ]
+            }
+          },
+          "required": [
+            "status"
+          ]
+        },
+        "then": {
+          "not": {
+            "required": [
+              "promotion_event_id"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "research-plan.schema.json",
     "title": "Research plan",
     "type": "object",
@@ -844,43 +1428,96 @@ export const canonicalSchemas = [
     "$id": "run-manifest.schema.json",
     "title": "Archived research-run manifest",
     "type": "object",
-    "additionalProperties": false,
-    "required": [
-      "archive_schema_version",
-      "run_id",
-      "created_at",
-      "run_directory",
-      "plan_id",
-      "counts",
-      "paths"
-    ],
-    "properties": {
-      "archive_schema_version": {
-        "const": "1.0.0"
+    "oneOf": [
+      {
+        "$ref": "#/$defs/v1"
       },
-      "run_id": {
-        "type": "string",
-        "pattern": "^run_[A-Za-z0-9][A-Za-z0-9_-]*$"
-      },
-      "created_at": {
-        "type": "string",
-        "format": "date-time"
-      },
-      "run_directory": {
-        "type": "string",
-        "minLength": 1
-      },
-      "plan_id": {
-        "$ref": "research-plan.schema.json#/$defs/planId"
-      },
-      "counts": {
-        "$ref": "#/$defs/counts"
-      },
-      "paths": {
-        "$ref": "#/$defs/paths"
+      {
+        "$ref": "#/$defs/v2"
       }
-    },
+    ],
     "$defs": {
+      "base": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "archive_schema_version",
+          "run_id",
+          "created_at",
+          "run_directory",
+          "plan_id",
+          "counts",
+          "paths"
+        ],
+        "properties": {
+          "archive_schema_version": {
+            "type": "string"
+          },
+          "run_id": {
+            "type": "string",
+            "pattern": "^run_[A-Za-z0-9][A-Za-z0-9_-]*$"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "run_directory": {
+            "type": "string",
+            "minLength": 1
+          },
+          "plan_id": {
+            "$ref": "research-plan.schema.json#/$defs/planId"
+          },
+          "counts": {
+            "type": "object"
+          },
+          "paths": {
+            "type": "object"
+          }
+        }
+      },
+      "v1": {
+        "allOf": [
+          {
+            "$ref": "#/$defs/base"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "archive_schema_version": {
+                "const": "1.0.0"
+              },
+              "counts": {
+                "$ref": "#/$defs/counts"
+              },
+              "paths": {
+                "$ref": "#/$defs/paths"
+              }
+            }
+          }
+        ]
+      },
+      "v2": {
+        "allOf": [
+          {
+            "$ref": "#/$defs/base"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "archive_schema_version": {
+                "const": "2.0.0"
+              },
+              "counts": {
+                "$ref": "#/$defs/v2Counts"
+              },
+              "paths": {
+                "$ref": "#/$defs/v2Paths"
+              }
+            }
+          }
+        ]
+      },
       "counts": {
         "type": "object",
         "additionalProperties": false,
@@ -1004,6 +1641,302 @@ export const canonicalSchemas = [
           "validation": {
             "type": "string",
             "minLength": 1
+          }
+        }
+      },
+      "v2Counts": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "sources",
+          "claims",
+          "retained_claims",
+          "discarded_claims",
+          "verification_events",
+          "conflicts",
+          "coverage_gaps",
+          "semantic_validations",
+          "repair_events",
+          "report_units",
+          "run_quality_evaluations",
+          "lessons",
+          "policy_snapshots"
+        ],
+        "properties": {
+          "sources": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "claims": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "retained_claims": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "discarded_claims": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "verification_events": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "conflicts": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "coverage_gaps": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "semantic_validations": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "repair_events": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "report_units": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "run_quality_evaluations": {
+            "const": 1
+          },
+          "lessons": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "policy_snapshots": {
+            "const": 1
+          }
+        }
+      },
+      "v2Paths": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "plan",
+          "sources",
+          "claims",
+          "discarded_claims",
+          "verification_events",
+          "conflicts",
+          "coverage_gaps",
+          "semantic_validation",
+          "repair_events",
+          "report",
+          "report_map",
+          "validation",
+          "run_quality_evaluation",
+          "lessons",
+          "policy_snapshot"
+        ],
+        "properties": {
+          "plan": {
+            "const": "plan.json"
+          },
+          "sources": {
+            "const": "sources.jsonl"
+          },
+          "claims": {
+            "const": "claims.jsonl"
+          },
+          "discarded_claims": {
+            "const": "discarded-claims.jsonl"
+          },
+          "verification_events": {
+            "const": "verification-events.jsonl"
+          },
+          "conflicts": {
+            "const": "conflicts.json"
+          },
+          "coverage_gaps": {
+            "const": "coverage-gaps.json"
+          },
+          "semantic_validation": {
+            "const": "semantic-validation.json"
+          },
+          "repair_events": {
+            "const": "repair-events.jsonl"
+          },
+          "report": {
+            "const": "report.md"
+          },
+          "report_map": {
+            "const": "report-map.json"
+          },
+          "validation": {
+            "const": "validation.json"
+          },
+          "run_quality_evaluation": {
+            "const": "run-quality-evaluation.json"
+          },
+          "lessons": {
+            "const": "lessons.jsonl"
+          },
+          "policy_snapshot": {
+            "const": "policy-snapshot.json"
+          }
+        }
+      }
+    }
+  },
+  {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "run-quality-evaluation.schema.json",
+    "title": "Archived adaptive run-quality evaluation",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "run_quality_evaluation_id",
+      "run_id",
+      "policy_snapshot_id",
+      "evaluated_at",
+      "correctness_risk_findings",
+      "coverage_assessment",
+      "citation_assessment",
+      "source_fitness_assessment",
+      "derivation_assessment",
+      "calibration_assessment",
+      "usefulness_assessment",
+      "friction_assessment",
+      "deterministic_signals",
+      "evaluator_uncertainty",
+      "overall_disposition",
+      "generated_lesson_ids"
+    ],
+    "properties": {
+      "run_quality_evaluation_id": {
+        "type": "string",
+        "pattern": "^rqe_[A-Za-z0-9][A-Za-z0-9_-]*$"
+      },
+      "run_id": {
+        "type": "string",
+        "pattern": "^run_[A-Za-z0-9][A-Za-z0-9_-]*$"
+      },
+      "policy_snapshot_id": {
+        "type": "string",
+        "pattern": "^psn_[A-Za-z0-9][A-Za-z0-9_-]*$"
+      },
+      "evaluated_at": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "correctness_risk_findings": {
+        "type": "array",
+        "items": {
+          "$ref": "#/$defs/finding"
+        }
+      },
+      "coverage_assessment": {
+        "$ref": "#/$defs/assessment"
+      },
+      "citation_assessment": {
+        "$ref": "#/$defs/assessment"
+      },
+      "source_fitness_assessment": {
+        "$ref": "#/$defs/assessment"
+      },
+      "derivation_assessment": {
+        "$ref": "#/$defs/assessment"
+      },
+      "calibration_assessment": {
+        "$ref": "#/$defs/assessment"
+      },
+      "usefulness_assessment": {
+        "$ref": "#/$defs/assessment"
+      },
+      "friction_assessment": {
+        "$ref": "#/$defs/assessment"
+      },
+      "deterministic_signals": {
+        "type": "object",
+        "additionalProperties": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "evaluator_uncertainty": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+      },
+      "overall_disposition": {
+        "enum": [
+          "eligible",
+          "provisional",
+          "ineligible",
+          "rejected"
+        ]
+      },
+      "generated_lesson_ids": {
+        "type": "array",
+        "uniqueItems": true,
+        "items": {
+          "type": "string",
+          "pattern": "^les_[A-Za-z0-9][A-Za-z0-9_-]*$"
+        }
+      }
+    },
+    "$defs": {
+      "assessment": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "score",
+          "rationale"
+        ],
+        "properties": {
+          "score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "rationale": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          }
+        }
+      },
+      "finding": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "finding_id",
+          "severity",
+          "description"
+        ],
+        "properties": {
+          "finding_id": {
+            "type": "string",
+            "pattern": "^rqf_[A-Za-z0-9][A-Za-z0-9_-]*$"
+          },
+          "severity": {
+            "enum": [
+              "critical",
+              "high",
+              "medium",
+              "low"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
           }
         }
       }

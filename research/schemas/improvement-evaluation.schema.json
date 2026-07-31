@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "improvement-evaluation.schema.json",
+  "title": "Adaptive improvement evaluation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["improvement_evaluation_id", "improvement_candidate_id", "evaluated_at", "method", "outcome", "rationale", "constitution_version"],
+  "properties": { "improvement_evaluation_id": { "type": "string", "pattern": "^iev_[A-Za-z0-9][A-Za-z0-9_-]*$" }, "improvement_candidate_id": { "type": "string", "pattern": "^imp_[A-Za-z0-9][A-Za-z0-9_-]*$" }, "evaluated_at": { "type": "string", "format": "date-time" }, "method": { "enum": ["replay", "bounded_canary"] }, "outcome": { "enum": ["improved", "neutral", "regressed", "inconclusive"] }, "rationale": { "type": "string", "minLength": 1, "maxLength": 4000 }, "constitution_version": { "type": "string", "minLength": 1 } }
+}

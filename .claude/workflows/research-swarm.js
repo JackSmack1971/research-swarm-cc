@@ -1740,161 +1740,1264 @@ const repairEventSchema = {
 
 const runManifestSchema = {
   "type": "object",
+  "oneOf": [
+    {
+      "allOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "archive_schema_version",
+            "run_id",
+            "created_at",
+            "run_directory",
+            "plan_id",
+            "counts",
+            "paths"
+          ],
+          "properties": {
+            "archive_schema_version": {
+              "type": "string"
+            },
+            "run_id": {
+              "type": "string",
+              "pattern": "^run_[A-Za-z0-9][A-Za-z0-9_-]*$"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "run_directory": {
+              "type": "string",
+              "minLength": 1
+            },
+            "plan_id": {
+              "type": "string",
+              "pattern": "^plan_[A-Za-z0-9][A-Za-z0-9_-]*$"
+            },
+            "counts": {
+              "type": "object"
+            },
+            "paths": {
+              "type": "object"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "archive_schema_version": {
+              "const": "1.0.0"
+            },
+            "counts": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "sources",
+                "claims",
+                "retained_claims",
+                "discarded_claims",
+                "verification_events",
+                "conflicts",
+                "coverage_gaps",
+                "semantic_validations",
+                "repair_events",
+                "report_units"
+              ],
+              "properties": {
+                "sources": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "claims": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "retained_claims": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "discarded_claims": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "verification_events": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "conflicts": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "coverage_gaps": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "semantic_validations": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "repair_events": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "report_units": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "paths": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "plan",
+                "sources",
+                "claims",
+                "discarded_claims",
+                "verification_events",
+                "conflicts",
+                "coverage_gaps",
+                "semantic_validation",
+                "repair_events",
+                "report",
+                "report_map",
+                "validation"
+              ],
+              "properties": {
+                "plan": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "sources": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "claims": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "discarded_claims": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "verification_events": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "conflicts": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "coverage_gaps": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "semantic_validation": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "repair_events": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "report": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "report_map": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "validation": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "allOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "archive_schema_version",
+            "run_id",
+            "created_at",
+            "run_directory",
+            "plan_id",
+            "counts",
+            "paths"
+          ],
+          "properties": {
+            "archive_schema_version": {
+              "type": "string"
+            },
+            "run_id": {
+              "type": "string",
+              "pattern": "^run_[A-Za-z0-9][A-Za-z0-9_-]*$"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "run_directory": {
+              "type": "string",
+              "minLength": 1
+            },
+            "plan_id": {
+              "type": "string",
+              "pattern": "^plan_[A-Za-z0-9][A-Za-z0-9_-]*$"
+            },
+            "counts": {
+              "type": "object"
+            },
+            "paths": {
+              "type": "object"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "archive_schema_version": {
+              "const": "2.0.0"
+            },
+            "counts": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "sources",
+                "claims",
+                "retained_claims",
+                "discarded_claims",
+                "verification_events",
+                "conflicts",
+                "coverage_gaps",
+                "semantic_validations",
+                "repair_events",
+                "report_units",
+                "run_quality_evaluations",
+                "lessons",
+                "policy_snapshots"
+              ],
+              "properties": {
+                "sources": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "claims": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "retained_claims": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "discarded_claims": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "verification_events": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "conflicts": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "coverage_gaps": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "semantic_validations": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "repair_events": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "report_units": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "run_quality_evaluations": {
+                  "const": 1
+                },
+                "lessons": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "policy_snapshots": {
+                  "const": 1
+                }
+              }
+            },
+            "paths": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "plan",
+                "sources",
+                "claims",
+                "discarded_claims",
+                "verification_events",
+                "conflicts",
+                "coverage_gaps",
+                "semantic_validation",
+                "repair_events",
+                "report",
+                "report_map",
+                "validation",
+                "run_quality_evaluation",
+                "lessons",
+                "policy_snapshot"
+              ],
+              "properties": {
+                "plan": {
+                  "const": "plan.json"
+                },
+                "sources": {
+                  "const": "sources.jsonl"
+                },
+                "claims": {
+                  "const": "claims.jsonl"
+                },
+                "discarded_claims": {
+                  "const": "discarded-claims.jsonl"
+                },
+                "verification_events": {
+                  "const": "verification-events.jsonl"
+                },
+                "conflicts": {
+                  "const": "conflicts.json"
+                },
+                "coverage_gaps": {
+                  "const": "coverage-gaps.json"
+                },
+                "semantic_validation": {
+                  "const": "semantic-validation.json"
+                },
+                "repair_events": {
+                  "const": "repair-events.jsonl"
+                },
+                "report": {
+                  "const": "report.md"
+                },
+                "report_map": {
+                  "const": "report-map.json"
+                },
+                "validation": {
+                  "const": "validation.json"
+                },
+                "run_quality_evaluation": {
+                  "const": "run-quality-evaluation.json"
+                },
+                "lessons": {
+                  "const": "lessons.jsonl"
+                },
+                "policy_snapshot": {
+                  "const": "policy-snapshot.json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+};
+
+const runQualityEvaluationSchema = {
+  "type": "object",
   "additionalProperties": false,
   "required": [
-    "archive_schema_version",
+    "run_quality_evaluation_id",
     "run_id",
-    "created_at",
-    "run_directory",
-    "plan_id",
-    "counts",
-    "paths"
+    "policy_snapshot_id",
+    "evaluated_at",
+    "correctness_risk_findings",
+    "coverage_assessment",
+    "citation_assessment",
+    "source_fitness_assessment",
+    "derivation_assessment",
+    "calibration_assessment",
+    "usefulness_assessment",
+    "friction_assessment",
+    "deterministic_signals",
+    "evaluator_uncertainty",
+    "overall_disposition",
+    "generated_lesson_ids"
   ],
   "properties": {
-    "archive_schema_version": {
-      "const": "1.0.0"
+    "run_quality_evaluation_id": {
+      "type": "string",
+      "pattern": "^rqe_[A-Za-z0-9][A-Za-z0-9_-]*$"
     },
     "run_id": {
       "type": "string",
       "pattern": "^run_[A-Za-z0-9][A-Za-z0-9_-]*$"
     },
+    "policy_snapshot_id": {
+      "type": "string",
+      "pattern": "^psn_[A-Za-z0-9][A-Za-z0-9_-]*$"
+    },
+    "evaluated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "correctness_risk_findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "finding_id",
+          "severity",
+          "description"
+        ],
+        "properties": {
+          "finding_id": {
+            "type": "string",
+            "pattern": "^rqf_[A-Za-z0-9][A-Za-z0-9_-]*$"
+          },
+          "severity": {
+            "enum": [
+              "critical",
+              "high",
+              "medium",
+              "low"
+            ]
+          }
+        }
+      }
+    },
+    "coverage_assessment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "score",
+        "rationale"
+      ],
+      "properties": {
+        "score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      }
+    },
+    "citation_assessment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "score",
+        "rationale"
+      ],
+      "properties": {
+        "score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      }
+    },
+    "source_fitness_assessment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "score",
+        "rationale"
+      ],
+      "properties": {
+        "score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      }
+    },
+    "derivation_assessment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "score",
+        "rationale"
+      ],
+      "properties": {
+        "score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      }
+    },
+    "calibration_assessment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "score",
+        "rationale"
+      ],
+      "properties": {
+        "score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      }
+    },
+    "usefulness_assessment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "score",
+        "rationale"
+      ],
+      "properties": {
+        "score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      }
+    },
+    "friction_assessment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "score",
+        "rationale"
+      ],
+      "properties": {
+        "score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      }
+    },
+    "deterministic_signals": {
+      "type": "object",
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "string"
+          }
+        ]
+      }
+    },
+    "evaluator_uncertainty": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "overall_disposition": {
+      "enum": [
+        "eligible",
+        "provisional",
+        "ineligible",
+        "rejected"
+      ]
+    },
+    "generated_lesson_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^les_[A-Za-z0-9][A-Za-z0-9_-]*$"
+      }
+    }
+  }
+};
+
+const researchLessonSchema = {
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "lesson_id",
+    "type",
+    "applicability_conditions",
+    "exclusions",
+    "observed_problem",
+    "root_cause",
+    "recommended_behavior",
+    "target",
+    "supporting_run_ids",
+    "counterexample_run_ids",
+    "evidence_authority",
+    "confidence",
+    "risk",
+    "status",
+    "expiry",
+    "version",
+    "constitution_compatibility"
+  ],
+  "properties": {
+    "lesson_id": {
+      "type": "string",
+      "pattern": "^les_[A-Za-z0-9][A-Za-z0-9_-]*$"
+    },
+    "type": {
+      "enum": [
+        "quality",
+        "friction",
+        "runtime",
+        "preference",
+        "security",
+        "domain"
+      ]
+    },
+    "applicability_conditions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1000
+      }
+    },
+    "exclusions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1000
+      }
+    },
+    "observed_problem": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4000
+    },
+    "root_cause": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4000
+    },
+    "recommended_behavior": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4000
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "role",
+        "policy_surface"
+      ],
+      "properties": {
+        "role": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "policy_surface": {
+          "enum": [
+            "planner",
+            "worker",
+            "normalizer",
+            "verifier",
+            "adjudicator",
+            "synthesizer",
+            "persistence"
+          ]
+        }
+      }
+    },
+    "supporting_run_ids": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^run_[A-Za-z0-9][A-Za-z0-9_-]*$"
+      }
+    },
+    "counterexample_run_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^run_[A-Za-z0-9][A-Za-z0-9_-]*$"
+      }
+    },
+    "evidence_authority": {
+      "enum": [
+        "deterministic_evaluation",
+        "independent_evaluation",
+        "human_review"
+      ]
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "risk": {
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ]
+    },
+    "status": {
+      "enum": [
+        "provisional",
+        "active",
+        "superseded",
+        "expired",
+        "rejected"
+      ]
+    },
+    "expiry": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "expires_at"
+          ],
+          "properties": {
+            "expires_at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "review_condition"
+          ],
+          "properties": {
+            "review_condition": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1000
+            }
+          }
+        }
+      ]
+    },
+    "promotion_event_id": {
+      "type": "string",
+      "pattern": "^prm_[A-Za-z0-9][A-Za-z0-9_-]*$"
+    },
+    "superseded_by_lesson_id": {
+      "type": "string",
+      "pattern": "^les_[A-Za-z0-9][A-Za-z0-9_-]*$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "constitution_compatibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "constitution_version",
+        "result"
+      ],
+      "properties": {
+        "constitution_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "result": {
+          "enum": [
+            "compatible",
+            "incompatible"
+          ]
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "active"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "required": [
+          "promotion_event_id"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "superseded"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "required": [
+          "superseded_by_lesson_id"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "enum": [
+              "provisional",
+              "rejected",
+              "expired"
+            ]
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "not": {
+          "required": [
+            "promotion_event_id"
+          ]
+        }
+      }
+    }
+  ]
+};
+
+const policyBundleSchema = {
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "policy_bundle_id",
+    "hash",
+    "selected_lesson_ids",
+    "role_directives",
+    "exclusions",
+    "rationale",
+    "maximum_character_count",
+    "constitution_version"
+  ],
+  "properties": {
+    "policy_bundle_id": {
+      "type": "string",
+      "pattern": "^pob_[A-Za-z0-9][A-Za-z0-9_-]*$"
+    },
+    "hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "selected_lesson_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^les_[A-Za-z0-9][A-Za-z0-9_-]*$"
+      }
+    },
+    "role_directives": {
+      "type": "array",
+      "maxItems": 24,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "role",
+          "directive"
+        ],
+        "properties": {
+          "role": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "directive": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          }
+        }
+      }
+    },
+    "exclusions": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^les_[A-Za-z0-9][A-Za-z0-9_-]*$"
+      }
+    },
+    "rationale": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4000
+    },
+    "maximum_character_count": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 20000
+    },
+    "constitution_version": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+};
+
+const lessonRegistrySchema = {
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "lesson_registry_id",
+    "generated_at",
+    "constitution_version",
+    "lesson_ids",
+    "version"
+  ],
+  "properties": {
+    "lesson_registry_id": {
+      "type": "string",
+      "pattern": "^lreg_[A-Za-z0-9][A-Za-z0-9_-]*$"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "constitution_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "lesson_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^les_[A-Za-z0-9][A-Za-z0-9_-]*$"
+      }
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    }
+  }
+};
+
+const promotionEventSchema = {
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "promotion_event_id",
+    "lesson_id",
+    "occurred_at",
+    "independent_evaluator_id",
+    "supporting_evaluation_ids",
+    "outcome",
+    "rationale",
+    "constitution_version"
+  ],
+  "properties": {
+    "promotion_event_id": {
+      "type": "string",
+      "pattern": "^prm_[A-Za-z0-9][A-Za-z0-9_-]*$"
+    },
+    "lesson_id": {
+      "type": "string",
+      "pattern": "^les_[A-Za-z0-9][A-Za-z0-9_-]*$"
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "independent_evaluator_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "supporting_evaluation_ids": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^rqe_[A-Za-z0-9][A-Za-z0-9_-]*$"
+      }
+    },
+    "outcome": {
+      "enum": [
+        "promoted",
+        "rejected",
+        "rolled_back"
+      ]
+    },
+    "rationale": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4000
+    },
+    "constitution_version": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+};
+
+const policySnapshotSchema = {
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "policy_snapshot_id",
+    "policy_bundle",
+    "constitution_version",
+    "created_at"
+  ],
+  "properties": {
+    "policy_snapshot_id": {
+      "type": "string",
+      "pattern": "^psn_[A-Za-z0-9][A-Za-z0-9_-]*$"
+    },
+    "policy_bundle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policy_bundle_id",
+        "hash",
+        "selected_lesson_ids",
+        "role_directives",
+        "exclusions",
+        "rationale",
+        "maximum_character_count",
+        "constitution_version"
+      ],
+      "properties": {
+        "policy_bundle_id": {
+          "type": "string",
+          "pattern": "^pob_[A-Za-z0-9][A-Za-z0-9_-]*$"
+        },
+        "hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "selected_lesson_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^les_[A-Za-z0-9][A-Za-z0-9_-]*$"
+          }
+        },
+        "role_directives": {
+          "type": "array",
+          "maxItems": 24,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "role",
+              "directive"
+            ],
+            "properties": {
+              "role": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "directive": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              }
+            }
+          }
+        },
+        "exclusions": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^les_[A-Za-z0-9][A-Za-z0-9_-]*$"
+          }
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4000
+        },
+        "maximum_character_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20000
+        },
+        "constitution_version": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "constitution_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+};
+
+const improvementCandidateSchema = {
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "improvement_candidate_id",
+    "policy_snapshot_id",
+    "baseline_policy_snapshot_id",
+    "created_at",
+    "status",
+    "constitution_version"
+  ],
+  "properties": {
+    "improvement_candidate_id": {
+      "type": "string",
+      "pattern": "^imp_[A-Za-z0-9][A-Za-z0-9_-]*$"
+    },
+    "policy_snapshot_id": {
+      "type": "string",
+      "pattern": "^psn_[A-Za-z0-9][A-Za-z0-9_-]*$"
+    },
+    "baseline_policy_snapshot_id": {
+      "type": "string",
+      "pattern": "^psn_[A-Za-z0-9][A-Za-z0-9_-]*$"
+    },
     "created_at": {
       "type": "string",
       "format": "date-time"
     },
-    "run_directory": {
+    "status": {
+      "enum": [
+        "candidate",
+        "evaluated",
+        "promoted",
+        "rejected",
+        "rolled_back"
+      ]
+    },
+    "constitution_version": {
       "type": "string",
       "minLength": 1
-    },
-    "plan_id": {
+    }
+  }
+};
+
+const improvementEvaluationSchema = {
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "improvement_evaluation_id",
+    "improvement_candidate_id",
+    "evaluated_at",
+    "method",
+    "outcome",
+    "rationale",
+    "constitution_version"
+  ],
+  "properties": {
+    "improvement_evaluation_id": {
       "type": "string",
-      "pattern": "^plan_[A-Za-z0-9][A-Za-z0-9_-]*$"
+      "pattern": "^iev_[A-Za-z0-9][A-Za-z0-9_-]*$"
     },
-    "counts": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "sources",
-        "claims",
-        "retained_claims",
-        "discarded_claims",
-        "verification_events",
-        "conflicts",
-        "coverage_gaps",
-        "semantic_validations",
-        "repair_events",
-        "report_units"
-      ],
-      "properties": {
-        "sources": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "claims": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "retained_claims": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "discarded_claims": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "verification_events": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "conflicts": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "coverage_gaps": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "semantic_validations": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "repair_events": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "report_units": {
-          "type": "integer",
-          "minimum": 0
-        }
-      }
+    "improvement_candidate_id": {
+      "type": "string",
+      "pattern": "^imp_[A-Za-z0-9][A-Za-z0-9_-]*$"
     },
-    "paths": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "plan",
-        "sources",
-        "claims",
-        "discarded_claims",
-        "verification_events",
-        "conflicts",
-        "coverage_gaps",
-        "semantic_validation",
-        "repair_events",
-        "report",
-        "report_map",
-        "validation"
-      ],
-      "properties": {
-        "plan": {
-          "type": "string",
-          "minLength": 1
-        },
-        "sources": {
-          "type": "string",
-          "minLength": 1
-        },
-        "claims": {
-          "type": "string",
-          "minLength": 1
-        },
-        "discarded_claims": {
-          "type": "string",
-          "minLength": 1
-        },
-        "verification_events": {
-          "type": "string",
-          "minLength": 1
-        },
-        "conflicts": {
-          "type": "string",
-          "minLength": 1
-        },
-        "coverage_gaps": {
-          "type": "string",
-          "minLength": 1
-        },
-        "semantic_validation": {
-          "type": "string",
-          "minLength": 1
-        },
-        "repair_events": {
-          "type": "string",
-          "minLength": 1
-        },
-        "report": {
-          "type": "string",
-          "minLength": 1
-        },
-        "report_map": {
-          "type": "string",
-          "minLength": 1
-        },
-        "validation": {
-          "type": "string",
-          "minLength": 1
-        }
-      }
+    "evaluated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "method": {
+      "enum": [
+        "replay",
+        "bounded_canary"
+      ]
+    },
+    "outcome": {
+      "enum": [
+        "improved",
+        "neutral",
+        "regressed",
+        "inconclusive"
+      ]
+    },
+    "rationale": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4000
+    },
+    "constitution_version": {
+      "type": "string",
+      "minLength": 1
     }
   }
 };
@@ -2170,7 +3273,7 @@ while (semanticValidation.status === "fail" && repairRounds < 2) {
 }
 stage = "persistence";
 
-const persistence = await agent(`You are the sole research persistence writer. Return only JSON matching the schema. Create exactly one archived run at ${runDirectory}; no other role may write shared artifacts. Do not create, write, or validate any path outside that exact directory. Write manifest.json with archive_schema_version exactly "1.0.0", plan.json, sources.jsonl, claims.jsonl, discarded-claims.jsonl, verification-events.jsonl, conflicts.json, coverage-gaps.json, semantic-validation.json, repair-events.jsonl, report.md, report-map.json, and validation.json. Before validation, verify each report-map text_sha256 against its enclosed report unit using UTF-8, LF endings, trimmed leading/trailing blank lines, removed report-unit anchor comments, preserved internal whitespace, and SHA-256; repair only a mismatched hash. Run node scripts/validate-research-run.mjs on the run directory, write its machine-readable result to validation.json, and rerun it if needed after writing the result so validation.json agrees with the final structural result. Preserve failures for inspection. You may repair serialization or formatting only; never change evidence, claims, verification outcomes, conflicts, conclusions, mappings, or semantic-validation meaning.\n\n${UNTRUSTED_DATA_RULE}\n\nPlan:\n${JSON.stringify(boundedPlan)}\n\nSources:\n${JSON.stringify(verificationNormalized.sources)}\n\nRetained claims:\n${JSON.stringify(adjudicated.retained_claims)}\n\nDiscarded claims:\n${JSON.stringify(adjudicated.discarded_claims)}\n\nAll verification events (immutable originals):\n${JSON.stringify(verificationNormalized.verification_events)}\n\nConflicts:\n${JSON.stringify(adjudicated.conflicts)}\n\nCoverage gaps:\n${JSON.stringify(adjudicated.coverage_gaps)}\n\nReport:\n${draft.report_markdown}\n\nReport map:\n${JSON.stringify(draft.report_map)}\n\nSemantic validation:\n${JSON.stringify(semanticValidation)}\n\nRepair events:\n${JSON.stringify(repairEvents)}`, { label: "persist research run", schema: persistenceSchema });
+const persistence = await agent(`You are the sole research persistence writer. Return only JSON matching the schema. Create exactly one archived run at ${runDirectory}; no other role may write shared artifacts. Do not create, write, or validate any path outside that exact directory. Write manifest.json with archive_schema_version exactly "2.0.0", plan.json, sources.jsonl, claims.jsonl, discarded-claims.jsonl, verification-events.jsonl, conflicts.json, coverage-gaps.json, semantic-validation.json, repair-events.jsonl, report.md, report-map.json, validation.json, run-quality-evaluation.json, lessons.jsonl, and policy-snapshot.json. The finalized adaptive records must conform to their canonical schemas and the manifest must include their required paths and counts. Before validation, verify each report-map text_sha256 against its enclosed report unit using UTF-8, LF endings, trimmed leading/trailing blank lines, removed report-unit anchor comments, preserved internal whitespace, and SHA-256; repair only a mismatched hash. Run node scripts/validate-research-run.mjs on the run directory, write its machine-readable result to validation.json, and rerun it if needed after writing the result so validation.json agrees with the final structural result. Preserve failures for inspection. You may repair serialization or formatting only; never change evidence, claims, verification outcomes, conflicts, conclusions, mappings, or semantic-validation meaning.\n\n${UNTRUSTED_DATA_RULE}\n\nPlan:\n${JSON.stringify(boundedPlan)}\n\nSources:\n${JSON.stringify(verificationNormalized.sources)}\n\nRetained claims:\n${JSON.stringify(adjudicated.retained_claims)}\n\nDiscarded claims:\n${JSON.stringify(adjudicated.discarded_claims)}\n\nAll verification events (immutable originals):\n${JSON.stringify(verificationNormalized.verification_events)}\n\nConflicts:\n${JSON.stringify(adjudicated.conflicts)}\n\nCoverage gaps:\n${JSON.stringify(adjudicated.coverage_gaps)}\n\nReport:\n${draft.report_markdown}\n\nReport map:\n${JSON.stringify(draft.report_map)}\n\nSemantic validation:\n${JSON.stringify(semanticValidation)}\n\nRepair events:\n${JSON.stringify(repairEvents)}`, { label: "persist research run", schema: persistenceSchema });
 
 const succeeded = persistence.validation_status.valid && semanticValidation.status === "pass";
 return {

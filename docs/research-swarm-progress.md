@@ -46,7 +46,7 @@ At that time, no `CLAUDE.md`, `.claude/` configuration, package manifest, lockfi
 | 23 | Add archive contract versioning and explicit legacy rejection | complete |
 | 24 | Run bounded current-runtime Light and Deep acceptance | incomplete — Light partially executed but produced no validated archive; Deep was not attempted |
 | 25 | Authorize adaptive self-improvement architecture and immutable policy | complete |
-| 26 | Define version-2 learning-state and archive contract | next |
+| 26 | Define version-2 learning-state and archive contract | complete |
 | 27 | Add completed-run evaluation | authorized |
 | 28 | Add deterministic lesson registration and policy compilation | authorized |
 | 29 | Add independent, reversible lesson promotion | authorized |
@@ -99,6 +99,7 @@ At that time, no `CLAUDE.md`, `.claude/` configuration, package manifest, lockfi
 | 2026-07-30 | The current runtime blocked the monolithic normalizer schema as too large for its safety classifier. The workflow now invokes three smaller canonical-schema normalizer outputs—sources, claims, and relationships—and combines them in workflow state. This preserves the existing source, claim, conflict, gap, and verification-target contracts; runtime verification is pending because the active Claude session is rate-limited until 00:30 America/New_York. | `.claude/workflows/research-swarm.js`; `tests/research-workflow-controls.test.mjs`; current-runtime trace `wf_fe1ea574-675`; `npm run contracts:check`; `npm test`. |
 | 2026-07-30 | The Milestone 25 prompt assumed Milestone 24 was complete, but repository and runtime evidence show that Light produced no archived run and Deep was not attempted. Evidence supersedes the prompt assumption. Milestone 24 remains incomplete, while Milestone 25 may proceed as an independently authorized architecture milestone. Adaptive runtime acceptance must later include successful Light and Deep version-2 archives. | Runtime traces `wf_5018c78f-385` and `wf_fe1ea574-675`; no current archive under `artifacts/research-runs`; current workflow, tests, and validation log; `docs/audit-run-1-remediation-results.md`; `docs/self-improvement-plan.md`. |
 | 2026-07-30 | Milestone 25 defines a human-owned immutable core and a reversible machine-managed prompt/policy overlay. It authorizes ignored learning state and future archive version `2.0.0` without changing the current version-`1.0.0` contract, workflow, validator, or fixtures. | `docs/self-improvement-plan.md`; `research/self-improvement/constitution.md`; `.gitignore`; current `research/schemas/run-manifest.schema.json`; `scripts/lib/archive-version.mjs`. |
+| 2026-07-30 | Milestone 26 establishes version `2.0.0` learning contracts. Version 1 archives remain read-only-valid and are explicitly rejected as learning evidence; version 2 requires a run-quality evaluation, lessons ledger, and policy snapshot with manifest paths and counts. Canonical schemas are generated into workflow contracts and the validator enforces known run, lesson, policy, status, expiry, constitution, and size relationships without mutating archives. | `research/schemas/*.schema.json`; `scripts/generate-research-contracts.mjs`; `scripts/lib/archive-version.mjs`; `scripts/lib/research-validation.mjs`; `tests/fixtures/valid-run-v2`; `tests/research-validation.test.mjs`. |
 
 ## Claude Code interface findings
 
@@ -177,4 +178,4 @@ Sources: [Dynamic workflows](https://code.claude.com/docs/en/workflows), [Create
 
 ## Next milestone
 
-Milestone 25 is complete. Milestone 24 remains incomplete: Light partially executed but produced no validated archive, and Deep was not attempted. Milestone 26 is next: define the version-2 learning-state and archive contract. Production readiness remains unavailable until successful current-runtime Light and Deep version-2 archives validate.
+Milestone 26 is complete. Milestone 24 remains incomplete: Light partially executed but produced no validated archive, and Deep was not attempted. Milestone 27 is next: add completed-run evaluation. Production readiness remains unavailable until successful current-runtime Light and Deep version-2 archives validate.

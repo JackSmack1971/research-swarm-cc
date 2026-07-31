@@ -662,7 +662,7 @@ A conflict record has a unique `conflict_id`, competing claim IDs, their support
 
 ## 8.6 Run manifest
 
-The manifest has required `archive_schema_version` exactly `1.0.0`, a run identifier, UTC creation time, input configuration, workflow and Claude Code version metadata when available, artifact filenames, validation status, repair-round count, and final counts for sources, retained claims, discarded claims, verification events, and unresolved conflicts. It identifies the archived run directory and does not contain raw transcripts or secrets. The validator rejects missing, malformed, whitespace-padded, old, unknown-major, and future versions without mutating or reinterpreting the archive. Unversioned pre-remediation archives are unsupported; a future migration needs explicit authorization and tests against genuine archived runs.
+The manifest accepts read-only version `1.0.0` archives and emits version `2.0.0` for new runs. Version 2 extends the archive with an auditable run-quality evaluation, generated lessons, and a policy snapshot; version 1 remains valid but cannot enter learning. The validator rejects missing, malformed, whitespace-padded, unsupported, unknown-major, and future versions without mutating or reinterpreting the archive. Unversioned pre-remediation archives are unsupported; a future migration needs explicit authorization and tests against genuine archived runs.
 
 ---
 
@@ -970,7 +970,10 @@ artifacts/research-runs/<UTC timestamp>-<query slug>/
 ├── repair-events.jsonl
 ├── report.md
 ├── report-map.json
-└── validation.json
+├── validation.json
+├── run-quality-evaluation.json
+├── lessons.jsonl
+└── policy-snapshot.json
 ```
 
 It must run:

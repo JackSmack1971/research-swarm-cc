@@ -17,7 +17,15 @@ const NAMES = {
   'discarded-claim.schema.json': 'discardedClaimSchema',
   'semantic-validation.schema.json': 'semanticValidationSchema',
   'repair-event.schema.json': 'repairEventSchema',
-  'run-manifest.schema.json': 'runManifestSchema'
+  'run-manifest.schema.json': 'runManifestSchema',
+  'run-quality-evaluation.schema.json': 'runQualityEvaluationSchema',
+  'research-lesson.schema.json': 'researchLessonSchema',
+  'policy-bundle.schema.json': 'policyBundleSchema',
+  'lesson-registry.schema.json': 'lessonRegistrySchema',
+  'promotion-event.schema.json': 'promotionEventSchema',
+  'policy-snapshot.schema.json': 'policySnapshotSchema',
+  'improvement-candidate.schema.json': 'improvementCandidateSchema',
+  'improvement-evaluation.schema.json': 'improvementEvaluationSchema'
 };
 
 function pointer(value, fragment, reference) {
@@ -59,8 +67,9 @@ function generatedBlock(schemas) {
 function generatedRegistry(schemas) {
   const records = [...schemas.values()];
   const find = (schema, key) => Object.values(schema.$defs ?? {}).find((value) => value.pattern?.startsWith(`^${key}`));
+  const manifestProperties = schemas.get('run-manifest.schema.json').properties ?? schemas.get('run-manifest.schema.json').$defs.base.properties;
   const ids = {
-    run_id: schemas.get('run-manifest.schema.json').properties.run_id.pattern,
+    run_id: manifestProperties.run_id.pattern,
     plan_id: find(schemas.get('research-plan.schema.json'), 'plan_')?.pattern,
     source_id: find(schemas.get('source.schema.json'), 'src_')?.pattern,
     claim_id: find(schemas.get('claim.schema.json'), 'clm_')?.pattern,

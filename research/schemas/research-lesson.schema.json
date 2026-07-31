@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "research-lesson.schema.json",
+  "title": "Adaptive research lesson",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["lesson_id", "type", "applicability_conditions", "exclusions", "observed_problem", "root_cause", "recommended_behavior", "target", "supporting_run_ids", "counterexample_run_ids", "evidence_authority", "confidence", "risk", "status", "expiry", "version", "constitution_compatibility"],
+  "properties": {
+    "lesson_id": { "type": "string", "pattern": "^les_[A-Za-z0-9][A-Za-z0-9_-]*$" },
+    "type": { "enum": ["quality", "friction", "runtime", "preference", "security", "domain"] },
+    "applicability_conditions": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1, "maxLength": 1000 } },
+    "exclusions": { "type": "array", "items": { "type": "string", "minLength": 1, "maxLength": 1000 } },
+    "observed_problem": { "type": "string", "minLength": 1, "maxLength": 4000 },
+    "root_cause": { "type": "string", "minLength": 1, "maxLength": 4000 },
+    "recommended_behavior": { "type": "string", "minLength": 1, "maxLength": 4000 },
+    "target": { "type": "object", "additionalProperties": false, "required": ["role", "policy_surface"], "properties": { "role": { "type": "string", "minLength": 1, "maxLength": 100 }, "policy_surface": { "enum": ["planner", "worker", "normalizer", "verifier", "adjudicator", "synthesizer", "persistence"] } } },
+    "supporting_run_ids": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "pattern": "^run_[A-Za-z0-9][A-Za-z0-9_-]*$" } },
+    "counterexample_run_ids": { "type": "array", "uniqueItems": true, "items": { "type": "string", "pattern": "^run_[A-Za-z0-9][A-Za-z0-9_-]*$" } },
+    "evidence_authority": { "enum": ["deterministic_evaluation", "independent_evaluation", "human_review"] },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "risk": { "enum": ["low", "medium", "high", "critical"] },
+    "status": { "enum": ["provisional", "active", "superseded", "expired", "rejected"] },
+    "expiry": { "oneOf": [{ "type": "object", "additionalProperties": false, "required": ["expires_at"], "properties": { "expires_at": { "type": "string", "format": "date-time" } } }, { "type": "object", "additionalProperties": false, "required": ["review_condition"], "properties": { "review_condition": { "type": "string", "minLength": 1, "maxLength": 1000 } } }] },
+    "promotion_event_id": { "type": "string", "pattern": "^prm_[A-Za-z0-9][A-Za-z0-9_-]*$" },
+    "superseded_by_lesson_id": { "type": "string", "pattern": "^les_[A-Za-z0-9][A-Za-z0-9_-]*$" },
+    "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "constitution_compatibility": { "type": "object", "additionalProperties": false, "required": ["constitution_version", "result"], "properties": { "constitution_version": { "type": "string", "minLength": 1 }, "result": { "enum": ["compatible", "incompatible"] }, "rationale": { "type": "string", "minLength": 1, "maxLength": 2000 } } }
+  },
+  "allOf": [
+    { "if": { "properties": { "status": { "const": "active" } }, "required": ["status"] }, "then": { "required": ["promotion_event_id"] } },
+    { "if": { "properties": { "status": { "const": "superseded" } }, "required": ["status"] }, "then": { "required": ["superseded_by_lesson_id"] } },
+    { "if": { "properties": { "status": { "enum": ["provisional", "rejected", "expired"] } }, "required": ["status"] }, "then": { "not": { "required": ["promotion_event_id"] } } }
+  ]
+}

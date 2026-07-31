@@ -1,5 +1,7 @@
 # Adaptive policy constitution
 
+Constitution version: `1.0.0`.
+
 ## Purpose
 
 The research swarm may adapt role prompts and policy overlay data. It improves neither model weights nor the immutable research system. Adaptation is probabilistic and cannot guarantee a better individual run.

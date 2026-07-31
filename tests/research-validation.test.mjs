@@ -6,6 +6,7 @@ import test from 'node:test';
 import { readJsonl } from '../scripts/lib/jsonl.mjs';
 import { reportUnitSha256, validateResearchRun } from '../scripts/lib/research-validation.mjs';
 import { generateResearchContracts } from '../scripts/generate-research-contracts.mjs';
+import { assertLearningEvidenceArchive } from '../scripts/lib/archive-version.mjs';
 
 const fixtures = path.join(process.cwd(), 'tests', 'fixtures');
 const fixture = (name) => path.join(fixtures, name);
@@ -22,8 +23,12 @@ async function workflowNormalizer() {
 }
 
 async function copiedValid(t) {
+  return copiedFixture(t, 'valid-run');
+}
+
+async function copiedFixture(t, name) {
   const directory = await mkdtemp(path.join(tmpdir(), 'research-validation-'));
-  await cp(fixture('valid-run'), directory, { recursive: true });
+  await cp(fixture(name), directory, { recursive: true });
   const manifestFile = path.join(directory, 'manifest.json');
   const manifest = await readJson(manifestFile);
   manifest.run_directory = directory;
@@ -68,13 +73,13 @@ test('a valid run and definitive-primary sufficiency rationale pass', async () =
   assert.equal(result.valid, true, JSON.stringify(result.errors));
 });
 
-test('archive schema version is exact, actionable, and validation does not rewrite archives', async (t) => {
+test('archive versions are exact, actionable, and validation does not rewrite archives', async (t) => {
   const directory = await copiedValid(t);
   const manifestFile = path.join(directory, 'manifest.json');
   const original = await readFile(manifestFile, 'utf8');
   assert.equal((await validateResearchRun(directory)).valid, true);
   assert.equal(await readFile(manifestFile, 'utf8'), original);
-  for (const [value, rule] of [[undefined, 'archive_schema_version.required'], ['0.9.0', 'archive_schema_version.unsupported'], ['2.0.0', 'archive_schema_version.major'], ['1.0', 'archive_schema_version.format'], [' 1.0.0 ', 'archive_schema_version.format'], [1, 'archive_schema_version.type']]) {
+  for (const [value, rule] of [[undefined, 'archive_schema_version.required'], ['0.9.0', 'archive_schema_version.unsupported'], ['1.0.1', 'archive_schema_version.unsupported'], ['3.0.0', 'archive_schema_version.major'], ['1.0', 'archive_schema_version.format'], [' 1.0.0 ', 'archive_schema_version.format'], [1, 'archive_schema_version.type']]) {
     const manifest = await readJson(manifestFile);
     if (value === undefined) delete manifest.archive_schema_version;
     else manifest.archive_schema_version = value;
@@ -90,8 +95,65 @@ test('persistence requires the current archive schema version', async () => {
   const workflow = await readFile(path.join(process.cwd(), '.claude', 'workflows', 'research-swarm.js'), 'utf8');
   const writer = await readFile(path.join(process.cwd(), '.claude', 'agents', 'research-persistence-writer.md'), 'utf8');
   assert.match(workflow, /manifest: runManifestSchema/);
-  assert.match(workflow, /archive_schema_version exactly "1\.0\.0"/);
-  assert.match(writer, /archive_schema_version` exactly `1\.0\.0`/);
+  assert.match(workflow, /archive_schema_version exactly "2\.0\.0"/);
+  assert.match(writer, /archive_schema_version` exactly `2\.0\.0`/);
+});
+
+test('v1 remains valid but cannot be registered as learning evidence', async () => {
+  const manifest = await readJson(path.join(fixture('valid-run'), 'manifest.json'));
+  assert.equal((await validateResearchRun(fixture('valid-run'))).valid, true);
+  assert.throws(() => assertLearningEvidenceArchive(manifest), /read-only-valid/);
+});
+
+test('v2 adaptive artifacts and references are enforced', async (t) => {
+  assert.equal((await validateResearchRun(fixture('valid-run-v2'))).valid, true);
+  for (const file of ['run-quality-evaluation.json', 'lessons.jsonl', 'policy-snapshot.json']) {
+    const directory = await copiedFixture(t, 'valid-run-v2');
+    await rm(path.join(directory, file));
+    await markInvalid(directory);
+    assert.equal((await validateResearchRun(directory)).valid, false, file);
+  }
+  const directory = await copiedFixture(t, 'valid-run-v2');
+  const evaluation = await readJson(path.join(directory, 'run-quality-evaluation.json'));
+  evaluation.generated_lesson_ids = ['les_unknown'];
+  await writeJson(path.join(directory, 'run-quality-evaluation.json'), evaluation); await markInvalid(directory);
+  assert.ok(hasRule(await validateResearchRun(directory), 'run_quality_evaluation.lesson'));
+  const lessonFile = path.join(directory, 'lessons.jsonl');
+  const lesson = (await readJsonl(lessonFile)).records[0];
+  lesson.supporting_run_ids = ['run_unknown'];
+  await writeFile(lessonFile, `${JSON.stringify(lesson)}\n`); await markInvalid(directory);
+  assert.ok(hasRule(await validateResearchRun(directory), 'lesson.run'));
+});
+
+test('v2 lesson status, expiry, policy bounds, constitution, and unknown policy lessons fail', async (t) => {
+  const directory = await copiedFixture(t, 'valid-run-v2');
+  const lessonFile = path.join(directory, 'lessons.jsonl');
+  const lesson = (await readJsonl(lessonFile)).records[0];
+  lesson.status = 'active';
+  lesson.expiry = { expires_at: '2026-07-27T00:00:00Z' };
+  await writeFile(lessonFile, `${JSON.stringify(lesson)}\n`); await markInvalid(directory);
+  let result = await validateResearchRun(directory);
+  assert.ok(hasRule(result, 'schema.required'));
+  assert.ok(hasRule(result, 'lesson.expiry'));
+  const snapshotFile = path.join(directory, 'policy-snapshot.json');
+  const snapshot = await readJson(snapshotFile);
+  snapshot.policy_bundle.selected_lesson_ids = ['les_unknown'];
+  snapshot.policy_bundle.role_directives[0].directive = 'x'.repeat(101);
+  snapshot.constitution_version = '2.0.0';
+  await writeJson(snapshotFile, snapshot); await markInvalid(directory);
+  result = await validateResearchRun(directory);
+  assert.ok(hasRule(result, 'policy.lesson'));
+  assert.ok(hasRule(result, 'policy.size'));
+  assert.ok(hasRule(result, 'policy.constitution'));
+});
+
+test('v2 adaptive records reject unexpected properties', async (t) => {
+  const directory = await copiedFixture(t, 'valid-run-v2');
+  const lessonFile = path.join(directory, 'lessons.jsonl');
+  const lesson = (await readJsonl(lessonFile)).records[0];
+  lesson.unexpected = true;
+  await writeFile(lessonFile, `${JSON.stringify(lesson)}\n`); await markInvalid(directory);
+  assert.ok(hasRule(await validateResearchRun(directory), 'schema.additionalProperties'));
 });
 
 test('a definitive primary authority with a sufficiency rationale passes', async () => {

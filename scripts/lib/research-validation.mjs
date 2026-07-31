@@ -11,6 +11,8 @@ const REQUIRED_PATHS = {
   discarded_claims: 'discarded-claims.jsonl', verification_events: 'verification-events.jsonl',
   conflicts: 'conflicts.json', coverage_gaps: 'coverage-gaps.json', semantic_validation: 'semantic-validation.json', repair_events: 'repair-events.jsonl', report: 'report.md', report_map: 'report-map.json', validation: 'validation.json',
 };
+const ADAPTIVE_PATHS = { run_quality_evaluation: 'run-quality-evaluation.json', lessons: 'lessons.jsonl', policy_snapshot: 'policy-snapshot.json' };
+const CONSTITUTION_VERSION = '1.0.0';
 const MATERIALITY = new Set(enumValues.materiality);
 const CONFIDENCE = new Set(enumValues.confidence);
 const OUTCOMES = new Set(enumValues.outcome);
@@ -166,8 +168,9 @@ export async function validateResearchRun(directory) {
   const versionError = archiveSchemaVersionError(manifest.archive_schema_version);
   if (versionError) error(errors, 'manifest.json', manifest.run_id, ...versionError);
 
+  const paths = manifest.archive_schema_version === '2.0.0' ? { ...REQUIRED_PATHS, ...ADAPTIVE_PATHS } : REQUIRED_PATHS;
   const files = {};
-  for (const [key, fallback] of Object.entries(REQUIRED_PATHS)) {
+  for (const [key, fallback] of Object.entries(paths)) {
     const declared = manifest.paths?.[key];
     if (declared !== fallback) error(errors, 'manifest.json', manifest.run_id, 'manifest.paths', `Path for ${key} must be ${fallback}.`);
     files[key] = validatePath(runDirectory, declared ?? fallback, key, errors);
@@ -182,6 +185,8 @@ export async function validateResearchRun(directory) {
   const semanticValidation = files.semantic_validation && await readJson(files.semantic_validation, errors);
   const reportMap = files.report_map && await readJson(files.report_map, errors);
   const validation = files.validation && await readJson(files.validation, errors);
+  const runQualityEvaluation = files.run_quality_evaluation && await readJson(files.run_quality_evaluation, errors);
+  const policySnapshot = files.policy_snapshot && await readJson(files.policy_snapshot, errors);
   let report = '';
   if (files.report) {
     try { report = await readFile(files.report, 'utf8'); }
@@ -199,7 +204,7 @@ export async function validateResearchRun(directory) {
   if (typeof validation?.valid !== 'boolean') error(errors, 'validation.json', null, 'validation.status', 'validation.json must include boolean valid.');
 
   const jsonl = {};
-  for (const key of ['sources', 'claims', 'discarded_claims', 'verification_events', 'repair_events']) {
+  for (const key of ['sources', 'claims', 'discarded_claims', 'verification_events', 'repair_events', 'lessons']) {
     jsonl[key] = files[key] ? await readJsonl(files[key]) : { records: [], errors: [] };
     for (const issue of jsonl[key].errors) error(errors, path.basename(issue.file), null, 'jsonl.parse', `Line ${issue.line ?? '?'}: ${issue.message}`);
   }
@@ -208,11 +213,13 @@ export async function validateResearchRun(directory) {
   const discarded = jsonl.discarded_claims.records;
   const events = jsonl.verification_events.records;
   const repairEvents = jsonl.repair_events.records;
+  const lessons = jsonl.lessons.records;
   const sourceIds = unique(sources, 'source_id', 'sources.jsonl', errors);
   const claimIds = unique(claims, 'claim_id', 'claims.jsonl', errors);
   const discardedIds = unique(discarded, 'claim_id', 'discarded-claims.jsonl', errors);
   unique(events, 'verification_event_id', 'verification-events.jsonl', errors);
   unique(repairEvents, 'repair_event_id', 'repair-events.jsonl', errors);
+  const lessonIds = unique(lessons, 'lesson_id', 'lessons.jsonl', errors);
   unique(Array.isArray(coverageGaps) ? coverageGaps : [], 'coverage_gap_id', 'coverage-gaps.json', errors);
   unique(Array.isArray(conflicts) ? conflicts : [], 'conflict_id', 'conflicts.json', errors);
   unique(reportMap?.report_units ?? [], 'report_unit_id', 'report-map.json', errors);
@@ -228,6 +235,11 @@ export async function validateResearchRun(directory) {
   for (const gap of Array.isArray(coverageGaps) ? coverageGaps : []) validateContract(validators['coverage-gap.schema.json'], gap, 'coverage-gaps.json', gap?.coverage_gap_id, errors);
   validateContract(validators['semantic-validation.schema.json'], semanticValidation, 'semantic-validation.json', semanticValidation?.semantic_validation_id, errors);
   for (const event of repairEvents) validateContract(validators['repair-event.schema.json'], event, 'repair-events.jsonl', event?.repair_event_id, errors);
+  if (manifest.archive_schema_version === '2.0.0') {
+    validateContract(validators['run-quality-evaluation.schema.json'], runQualityEvaluation, 'run-quality-evaluation.json', runQualityEvaluation?.run_quality_evaluation_id, errors);
+    validateContract(validators['policy-snapshot.schema.json'], policySnapshot, 'policy-snapshot.json', policySnapshot?.policy_snapshot_id, errors);
+    for (const lesson of lessons) validateContract(validators['research-lesson.schema.json'], lesson, 'lessons.jsonl', lesson?.lesson_id, errors);
+  }
   if (repairEvents.length > 2) error(errors, 'repair-events.jsonl', null, 'repair_events.budget', 'A run may execute no more than two repair rounds.');
   for (const [index, event] of repairEvents.entries()) if (event?.repair_round !== index + 1) error(errors, 'repair-events.jsonl', event?.repair_event_id, 'repair_events.rounds', 'Repair rounds must be sequential and shared across the workflow.');
 
@@ -287,6 +299,24 @@ export async function validateResearchRun(directory) {
     for (const eventId of claim?.verification_event_ids ?? []) if (!eventIds.has(eventId)) error(errors, 'discarded-claims.jsonl', claim?.claim_id, 'discarded_claim.verification_events', `Unknown verification_event_id ${eventId}.`);
   }
 
+  if (manifest.archive_schema_version === '2.0.0') {
+    if (runQualityEvaluation?.run_id !== manifest.run_id) error(errors, 'run-quality-evaluation.json', runQualityEvaluation?.run_quality_evaluation_id, 'run_quality_evaluation.run', 'Run-quality evaluation must reference this archive run_id.');
+    if (runQualityEvaluation?.policy_snapshot_id !== policySnapshot?.policy_snapshot_id) error(errors, 'run-quality-evaluation.json', runQualityEvaluation?.run_quality_evaluation_id, 'run_quality_evaluation.policy_snapshot', 'Run-quality evaluation must reference policy-snapshot.json.');
+    for (const lessonId of runQualityEvaluation?.generated_lesson_ids ?? []) if (!lessonIds.has(lessonId)) error(errors, 'run-quality-evaluation.json', runQualityEvaluation?.run_quality_evaluation_id, 'run_quality_evaluation.lesson', `Unknown generated lesson_id ${lessonId}.`);
+    for (const lesson of lessons) {
+      for (const runId of [...(lesson?.supporting_run_ids ?? []), ...(lesson?.counterexample_run_ids ?? [])]) if (runId !== manifest.run_id) error(errors, 'lessons.jsonl', lesson?.lesson_id, 'lesson.run', `Unknown run_id ${runId}; this archive only proves ${manifest.run_id}.`);
+      if (lesson?.constitution_compatibility?.constitution_version !== CONSTITUTION_VERSION || lesson?.constitution_compatibility?.result !== 'compatible') error(errors, 'lessons.jsonl', lesson?.lesson_id, 'lesson.constitution', `Lessons must be compatible with constitution version ${CONSTITUTION_VERSION}.`);
+      const expiry = lesson?.expiry?.expires_at;
+      if (expiry && Date.parse(expiry) <= Date.parse(manifest.created_at)) error(errors, 'lessons.jsonl', lesson?.lesson_id, 'lesson.expiry', 'Lesson expiry must be after the archived run creation time.');
+    }
+    const bundle = policySnapshot?.policy_bundle;
+    if (policySnapshot?.constitution_version !== CONSTITUTION_VERSION || bundle?.constitution_version !== CONSTITUTION_VERSION) error(errors, 'policy-snapshot.json', policySnapshot?.policy_snapshot_id, 'policy.constitution', `Policy snapshot and bundle must use constitution version ${CONSTITUTION_VERSION}.`);
+    for (const lessonId of bundle?.selected_lesson_ids ?? []) if (!lessonIds.has(lessonId)) error(errors, 'policy-snapshot.json', policySnapshot?.policy_snapshot_id, 'policy.lesson', `Unknown selected lesson_id ${lessonId}.`);
+    for (const lessonId of bundle?.exclusions ?? []) if (!lessonIds.has(lessonId)) error(errors, 'policy-snapshot.json', policySnapshot?.policy_snapshot_id, 'policy.lesson', `Unknown excluded lesson_id ${lessonId}.`);
+    const directiveCharacters = (bundle?.role_directives ?? []).reduce((total, directive) => total + (directive?.directive?.length ?? 0), 0);
+    if (directiveCharacters > (bundle?.maximum_character_count ?? 0)) error(errors, 'policy-snapshot.json', policySnapshot?.policy_snapshot_id, 'policy.size', `Generated policy uses ${directiveCharacters} characters, exceeding its ${bundle?.maximum_character_count ?? 0}-character limit.`);
+  }
+
   const mappedClaims = new Set();
   for (const unit of reportMap?.report_units ?? []) {
     for (const id of unit?.claim_ids ?? []) { mappedClaims.add(id); if (!claimIds.has(id)) error(errors, 'report-map.json', unit?.report_unit_id, 'report_map.claim', `Unknown or discarded claim_id ${id}.`); }
@@ -304,7 +334,7 @@ export async function validateResearchRun(directory) {
   inspectReportAnchors(report, reportMap, errors);
   for (const gap of Array.isArray(coverageGaps) ? coverageGaps : []) for (const claimId of gap?.related_claim_ids ?? []) if (!claimIds.has(claimId) && !discardedIds.has(claimId)) error(errors, 'coverage-gaps.json', gap?.coverage_gap_id, 'coverage_gap.claim', `Unknown claim_id ${claimId}.`);
 
-  const counts = { sources: sources.length, claims: claims.length, retained_claims: claims.length, discarded_claims: discarded.length, verification_events: events.length, conflicts: Array.isArray(conflicts) ? conflicts.length : 0, coverage_gaps: Array.isArray(coverageGaps) ? coverageGaps.length : 0, semantic_validations: semanticValidation ? 1 : 0, repair_events: repairEvents.length, report_units: reportMap?.report_units?.length ?? 0 };
+  const counts = { sources: sources.length, claims: claims.length, retained_claims: claims.length, discarded_claims: discarded.length, verification_events: events.length, conflicts: Array.isArray(conflicts) ? conflicts.length : 0, coverage_gaps: Array.isArray(coverageGaps) ? coverageGaps.length : 0, semantic_validations: semanticValidation ? 1 : 0, repair_events: repairEvents.length, report_units: reportMap?.report_units?.length ?? 0, ...(manifest.archive_schema_version === '2.0.0' ? { run_quality_evaluations: runQualityEvaluation ? 1 : 0, lessons: lessons.length, policy_snapshots: policySnapshot ? 1 : 0 } : {}) };
   for (const [key, actual] of Object.entries(counts)) if (manifest.counts?.[key] !== actual) error(errors, 'manifest.json', manifest.run_id, 'manifest.counts', `Count for ${key} is ${manifest.counts?.[key] ?? '(missing)'}, expected ${actual}.`);
   const valid = errors.length === 0;
   if (validation && validation.valid !== valid) error(errors, 'validation.json', null, 'validation.status', `validation.json valid must be ${valid}.`);

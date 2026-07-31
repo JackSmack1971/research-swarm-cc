@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "improvement-candidate.schema.json",
+  "title": "Adaptive improvement candidate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["improvement_candidate_id", "policy_snapshot_id", "baseline_policy_snapshot_id", "created_at", "status", "constitution_version"],
+  "properties": { "improvement_candidate_id": { "type": "string", "pattern": "^imp_[A-Za-z0-9][A-Za-z0-9_-]*$" }, "policy_snapshot_id": { "type": "string", "pattern": "^psn_[A-Za-z0-9][A-Za-z0-9_-]*$" }, "baseline_policy_snapshot_id": { "type": "string", "pattern": "^psn_[A-Za-z0-9][A-Za-z0-9_-]*$" }, "created_at": { "type": "string", "format": "date-time" }, "status": { "enum": ["candidate", "evaluated", "promoted", "rejected", "rolled_back"] }, "constitution_version": { "type": "string", "minLength": 1 } }
+}

@@ -3,18 +3,28 @@
   "$id": "run-manifest.schema.json",
   "title": "Archived research-run manifest",
   "type": "object",
-  "additionalProperties": false,
-  "required": ["archive_schema_version", "run_id", "created_at", "run_directory", "plan_id", "counts", "paths"],
-  "properties": {
-    "archive_schema_version": { "const": "1.0.0" },
-    "run_id": { "type": "string", "pattern": "^run_[A-Za-z0-9][A-Za-z0-9_-]*$" },
-    "created_at": { "type": "string", "format": "date-time" },
-    "run_directory": { "type": "string", "minLength": 1 },
-    "plan_id": { "$ref": "research-plan.schema.json#/$defs/planId" },
-    "counts": { "$ref": "#/$defs/counts" },
-    "paths": { "$ref": "#/$defs/paths" }
-  },
+  "oneOf": [{ "$ref": "#/$defs/v1" }, { "$ref": "#/$defs/v2" }],
   "$defs": {
+    "base": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["archive_schema_version", "run_id", "created_at", "run_directory", "plan_id", "counts", "paths"],
+      "properties": {
+        "archive_schema_version": { "type": "string" },
+        "run_id": { "type": "string", "pattern": "^run_[A-Za-z0-9][A-Za-z0-9_-]*$" },
+        "created_at": { "type": "string", "format": "date-time" },
+        "run_directory": { "type": "string", "minLength": 1 },
+        "plan_id": { "$ref": "research-plan.schema.json#/$defs/planId" },
+        "counts": { "type": "object" },
+        "paths": { "type": "object" }
+      }
+    },
+    "v1": {
+      "allOf": [{ "$ref": "#/$defs/base" }, { "type": "object", "properties": { "archive_schema_version": { "const": "1.0.0" }, "counts": { "$ref": "#/$defs/counts" }, "paths": { "$ref": "#/$defs/paths" } } }]
+    },
+    "v2": {
+      "allOf": [{ "$ref": "#/$defs/base" }, { "type": "object", "properties": { "archive_schema_version": { "const": "2.0.0" }, "counts": { "$ref": "#/$defs/v2Counts" }, "paths": { "$ref": "#/$defs/v2Paths" } } }]
+    },
     "counts": {
       "type": "object",
       "additionalProperties": false,
@@ -50,6 +60,18 @@
         "report_map": { "type": "string", "minLength": 1 },
         "validation": { "type": "string", "minLength": 1 }
       }
+    },
+    "v2Counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sources", "claims", "retained_claims", "discarded_claims", "verification_events", "conflicts", "coverage_gaps", "semantic_validations", "repair_events", "report_units", "run_quality_evaluations", "lessons", "policy_snapshots"],
+      "properties": { "sources": { "type": "integer", "minimum": 0 }, "claims": { "type": "integer", "minimum": 0 }, "retained_claims": { "type": "integer", "minimum": 0 }, "discarded_claims": { "type": "integer", "minimum": 0 }, "verification_events": { "type": "integer", "minimum": 0 }, "conflicts": { "type": "integer", "minimum": 0 }, "coverage_gaps": { "type": "integer", "minimum": 0 }, "semantic_validations": { "type": "integer", "minimum": 0 }, "repair_events": { "type": "integer", "minimum": 0 }, "report_units": { "type": "integer", "minimum": 0 }, "run_quality_evaluations": { "const": 1 }, "lessons": { "type": "integer", "minimum": 0 }, "policy_snapshots": { "const": 1 } }
+    },
+    "v2Paths": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["plan", "sources", "claims", "discarded_claims", "verification_events", "conflicts", "coverage_gaps", "semantic_validation", "repair_events", "report", "report_map", "validation", "run_quality_evaluation", "lessons", "policy_snapshot"],
+      "properties": { "plan": { "const": "plan.json" }, "sources": { "const": "sources.jsonl" }, "claims": { "const": "claims.jsonl" }, "discarded_claims": { "const": "discarded-claims.jsonl" }, "verification_events": { "const": "verification-events.jsonl" }, "conflicts": { "const": "conflicts.json" }, "coverage_gaps": { "const": "coverage-gaps.json" }, "semantic_validation": { "const": "semantic-validation.json" }, "repair_events": { "const": "repair-events.jsonl" }, "report": { "const": "report.md" }, "report_map": { "const": "report-map.json" }, "validation": { "const": "validation.json" }, "run_quality_evaluation": { "const": "run-quality-evaluation.json" }, "lessons": { "const": "lessons.jsonl" }, "policy_snapshot": { "const": "policy-snapshot.json" } }
     }
   }
 }

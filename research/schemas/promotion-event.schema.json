@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "promotion-event.schema.json",
+  "title": "Independent lesson promotion event",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["promotion_event_id", "lesson_id", "occurred_at", "independent_evaluator_id", "supporting_evaluation_ids", "outcome", "rationale", "constitution_version"],
+  "properties": { "promotion_event_id": { "type": "string", "pattern": "^prm_[A-Za-z0-9][A-Za-z0-9_-]*$" }, "lesson_id": { "type": "string", "pattern": "^les_[A-Za-z0-9][A-Za-z0-9_-]*$" }, "occurred_at": { "type": "string", "format": "date-time" }, "independent_evaluator_id": { "type": "string", "minLength": 1, "maxLength": 200 }, "supporting_evaluation_ids": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "pattern": "^rqe_[A-Za-z0-9][A-Za-z0-9_-]*$" } }, "outcome": { "enum": ["promoted", "rejected", "rolled_back"] }, "rationale": { "type": "string", "minLength": 1, "maxLength": 4000 }, "constitution_version": { "type": "string", "minLength": 1 } }
+}
