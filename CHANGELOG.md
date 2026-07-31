@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Added documented safeguards for future adaptive research policy, including human review and rollback requirements.
+
 ### Changed
 
 - Research archives now declare a version and clearly reject unsupported older or newer formats.

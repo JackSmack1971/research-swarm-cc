@@ -1,3 +1,4 @@
 artifacts/research-runs/*
 !artifacts/research-runs/.gitkeep
+artifacts/research-learning/
 node_modules/
