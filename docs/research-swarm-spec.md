@@ -125,6 +125,8 @@ Milestone 48's project-profile contract is an engineering derived-state input, n
 
 Milestone 50's engineering evidence packet is a derived, scoped export of an already valid research archive, not a research workflow input or archive migration. It must preserve run/version/hash provenance and exclude raw webpages, agent transcripts, report prose, discarded claims, and unrelated context. It may inform an explicit engineering decision only; it must not create a decision, requirement, authorization, or task, and research is never a universal engineering prerequisite.
 
+Milestone 51's engineering uncertainty and decision records are separate canonical contracts outside research archives. The Decision Router sends resolved/reversible details to no further inquiry, repository facts to inspection, material external facts to Research Swarm/evidence packets, experiential/UX/state/architecture questions to a prototype, normative/preference/policy/high-irreversibility/consequential decisions to a human, and reversible low-risk implementation choices to an agent. It never executes production work.
+
 ---
 
 # 4. Required directory structure

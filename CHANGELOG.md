@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- Added a manual `/build` decision router that records engineering uncertainty and asks people only for normative or consequential choices.
 - Added a strict, scoped engineering evidence-packet compiler that preserves validated research provenance without creating decisions or requirements.
 - Added a read-only `npm run profile -- <absolute-target-directory>` command that inventories target-project metadata, stamps it for drift detection, and reports optional code-intelligence capability data without building a repository map.
 - Added an engineering constitution that separates evidence, intent, and delivery without adding an executor or runtime surface.

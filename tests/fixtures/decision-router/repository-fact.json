@@ -1,0 +1,1 @@
+{"schema_version":"1.0.0","uncertainty_id":"unc_repository","question":"Which test command is declared by this repository?","kind":"repository_fact","status":"unresolved","materiality":"medium","reversibility":"easy","consequential":false,"downstream_dependency":true,"rationale":"Package metadata can answer this.","evidence_references":[]}

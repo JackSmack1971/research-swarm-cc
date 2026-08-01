@@ -1,0 +1,1 @@
+{"schema_version":"1.0.0","uncertainty_id":"unc_normative","question":"Which user group should receive priority when the goals conflict?","kind":"normative","status":"unresolved","materiality":"high","reversibility":"hard","consequential":true,"downstream_dependency":true,"rationale":"This is a product-value choice.","evidence_references":[]}

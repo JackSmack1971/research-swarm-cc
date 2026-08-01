@@ -1,0 +1,1 @@
+{"schema_version":"1.0.0","uncertainty_id":"unc_experience","question":"Will this state transition feel understandable to users?","kind":"experiential","status":"unresolved","materiality":"medium","reversibility":"moderate","consequential":false,"downstream_dependency":false,"rationale":"Repository inspection cannot establish user experience.","evidence_references":[]}

@@ -1,0 +1,1 @@
+{"schema_version":"1.0.0","uncertainty_id":"unc_implementation","question":"Which existing helper should format this reversible internal label?","kind":"implementation","status":"unresolved","materiality":"low","reversibility":"easy","consequential":false,"downstream_dependency":false,"rationale":"This is a local implementation choice.","evidence_references":[]}

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "decision-route.schema.json",
+  "title": "Engineering uncertainty route",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "route_id", "uncertainty_id", "route", "rationale"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "route_id": { "type": "string", "pattern": "^rte_[A-Za-z0-9][A-Za-z0-9_-]*$" },
+    "uncertainty_id": { "type": "string", "pattern": "^unc_[A-Za-z0-9][A-Za-z0-9_-]*$" },
+    "route": { "enum": ["no_inquiry", "repository_inspection", "research_evidence", "prototype", "human", "agent_choice"] },
+    "rationale": { "type": "string", "minLength": 1 },
+    "human_question": { "type": "string", "minLength": 1 }
+  },
+  "allOf": [
+    { "if": { "properties": { "route": { "const": "human" } }, "required": ["route"] }, "then": { "properties": { "human_question": true }, "required": ["human_question"] }, "else": { "not": { "required": ["human_question"] } } }
+  ]
+}

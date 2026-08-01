@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "decision.schema.json",
+  "title": "Engineering decision",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "decision_id", "scope", "outcome", "rationale", "alternatives", "evidence_references", "decided_by", "decided_at", "reversibility"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "decision_id": { "type": "string", "pattern": "^dec_[A-Za-z0-9][A-Za-z0-9_-]*$" },
+    "scope": { "type": "string", "minLength": 1 },
+    "outcome": { "type": "string", "minLength": 1 },
+    "rationale": { "type": "string", "minLength": 1 },
+    "alternatives": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+    "evidence_references": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+    "decided_by": { "type": "object", "additionalProperties": false, "required": ["kind", "identifier"], "properties": { "kind": { "enum": ["human", "agent", "system"] }, "identifier": { "type": "string", "minLength": 1 } } },
+    "decided_at": { "type": "string", "format": "date-time" },
+    "reversibility": { "enum": ["easy", "moderate", "hard"] }
+  }
+}

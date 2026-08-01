@@ -1,0 +1,1 @@
+{"schema_version":"1.0.0","uncertainty_id":"unc_external","question":"What current external standard applies to this integration?","kind":"external_fact","status":"unresolved","materiality":"high","reversibility":"moderate","consequential":true,"downstream_dependency":true,"rationale":"An external fact materially affects the direction.","evidence_references":[]}

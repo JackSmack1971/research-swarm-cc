@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "uncertainty.schema.json",
+  "title": "Engineering uncertainty",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "uncertainty_id", "question", "kind", "status", "materiality", "reversibility", "consequential", "downstream_dependency", "rationale", "evidence_references"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "uncertainty_id": { "type": "string", "pattern": "^unc_[A-Za-z0-9][A-Za-z0-9_-]*$" },
+    "question": { "type": "string", "minLength": 1 },
+    "kind": { "enum": ["detail", "repository_fact", "external_fact", "experiential", "normative", "preference", "policy", "implementation"] },
+    "status": { "enum": ["resolved", "unresolved"] },
+    "materiality": { "enum": ["critical", "high", "medium", "low"] },
+    "reversibility": { "enum": ["easy", "moderate", "hard"] },
+    "consequential": { "type": "boolean" },
+    "downstream_dependency": { "type": "boolean" },
+    "rationale": { "type": "string", "minLength": 1 },
+    "evidence_references": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true }
+  }
+}

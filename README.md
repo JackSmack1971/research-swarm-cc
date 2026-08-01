@@ -6,6 +6,7 @@ Research Swarm is a Claude Code dynamic workflow for people who need public-web 
 - Preserves sources, claims, conflicts, coverage gaps, verification events, repairs, and report-to-claim anchors in each archived run.
 - Uses deterministic Node.js validation so archive structure can be checked offline.
 - Includes a read-only project profiler for target repositories; it records metadata-backed commands, capability evidence, and a drift fingerprint without creating a repository map.
+- Includes a manual `/build` controller that routes engineering uncertainty to the smallest trustworthy source without implementing production changes.
 
 ## Contents
 
@@ -76,7 +77,7 @@ flowchart LR
   P --> A[Archived run + deterministic validation]
 ```
 
-The workflow owns fan-out, selection, bounded repairs, aggregation, and return values. Role documents provide behavioral instructions; canonical JSON Schemas and Node.js validation enforce archive contracts. See [the full workflow guide](research/README.md) for evidence standards, depth policy, archive layout, learning controls, and current runtime limitations. Future engineering work follows the separate [Engineering Constitution](docs/engineering-constitution.md); it adds no executor or runtime surface.
+The workflow owns fan-out, selection, bounded repairs, aggregation, and return values. Role documents provide behavioral instructions; canonical JSON Schemas and Node.js validation enforce archive contracts. See [the full workflow guide](research/README.md) for evidence standards, depth policy, archive layout, learning controls, and current runtime limitations. Use manual `/build` for interactive engineering routing: it inspects repository facts before asking questions, researches only material external facts, prototypes questions inspection cannot settle, and asks one high-value normative or consequential question when human judgment is required. It adds no executor or runtime surface.
 
 ## Directory structure
 
@@ -102,10 +103,11 @@ Use `/research-swarm` for a public-web research question. Use `light` for narrow
 | `npm test` | Run deterministic `node:test` coverage. | `package.json` |
 | `npm run profile -- <absolute-target-directory>` | Emit a deterministic, schema-validated profile of a target project. | `scripts/profile-project.mjs` |
 | `npm run evidence:packet -- <archive-directory> <packet-id> <engineering-question> <selection-rationale> <claim-id[,claim-id...]>` | Emit a scoped engineering evidence packet from a validated, confirmed research archive. | `scripts/compile-engineering-evidence-packet.mjs` |
+| `node scripts/route-engineering-uncertainty.mjs <uncertainty.json>` | Validate and deterministically route one engineering uncertainty. | `scripts/route-engineering-uncertainty.mjs` |
 | `node scripts/validate-research-run.mjs artifacts/research-runs/example-run` | Validate an archived run without changing it. | `research/README.md` |
 | `node scripts/finalize-research-run.mjs artifacts/research-runs/example-run` | Finalize a supplied archive; only the persistence writer should invoke this in normal workflow operation. | `research/README.md` |
 
-Claude Code commands for feedback, learning lifecycle operations, and review-only improvement proposals live in [`.claude/commands/`](.claude/commands/). The workflow entry point is [`.claude/workflows/research-swarm.js`](.claude/workflows/research-swarm.js).
+Claude Code commands for feedback, learning lifecycle operations, and review-only improvement proposals live in [`.claude/commands/`](.claude/commands/). The manual [`.claude/skills/build/SKILL.md`](.claude/skills/build/SKILL.md) provides `/build` decision routing only; the workflow entry point is [`.claude/workflows/research-swarm.js`](.claude/workflows/research-swarm.js).
 
 ## Configuration and safety
 
@@ -125,6 +127,8 @@ Worker and verifier permissions are behavioral rather than hard per-call restric
 Run `npm run contracts:check` before `npm test`; both are deterministic and offline. Validate a known-good archive with `node scripts/validate-research-run.mjs tests/fixtures/valid-run-v2`. No CI workflow is present.
 
 `npm run profile -- <absolute-target-directory>` reads project metadata and source files without installing dependencies or modifying the target. It reports only declared build/test/lint/typecheck/run commands, revision/dirty state when the target itself is a Git root, Claude Code configuration evidence, and explicit unknowns. Its fingerprint changes when profiled project content changes; regenerate a drifted profile before using it as engineering context. LSP and code-intelligence entries are optional configuration evidence, never a claim that a provider is runnable.
+
+`/build` is manually invoked and does not implement code. It records material uncertainties and routes repository facts to inspection, material external facts to Research Swarm/evidence packets, experiential or architecture uncertainty to a disposable prototype, and only normative, preference, policy, hard-to-reverse, or consequential decisions to one human question. Evidence never becomes a decision automatically.
 
 ## Troubleshooting
 
