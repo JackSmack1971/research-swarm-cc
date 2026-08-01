@@ -133,12 +133,10 @@ Run `npm run contracts:check` before `npm test`; both are deterministic and offl
 
 ## Stack inventory
 
-| Layer | Technology | Version | Source |
-| --- | --- | --- |
-| Runtime workflow | Claude Code Dynamic Workflows | 2.1.154+ required; 2.1.220 last checked | `research/README.md` |
-| Validation and tests | Node.js built-ins / `node:test` | Not declared | `package.json`, specification |
-| Schema enforcement | Ajv | 8.20.0 | `package.json` |
-| Package manager | npm | Lockfile present | `package-lock.json` |
+- **Runtime workflow:** Claude Code Dynamic Workflows — version 2.1.154 or later required; 2.1.220 last checked ([source](research/README.md)).
+- **Validation and tests:** Node.js built-ins and `node:test` — no Node.js version is declared ([sources](package.json)).
+- **Schema enforcement:** Ajv 8.20.0 ([source](package.json)).
+- **Package manager:** npm with a committed lockfile ([source](package-lock.json)).
 
 ## Reproducibility & maintenance
 
