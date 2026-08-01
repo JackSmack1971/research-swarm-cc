@@ -5,6 +5,7 @@ Research Swarm is a Claude Code dynamic workflow for people who need public-web 
 - Keeps research orchestration in a JavaScript workflow and role instructions in project-local Claude Code assets.
 - Preserves sources, claims, conflicts, coverage gaps, verification events, repairs, and report-to-claim anchors in each archived run.
 - Uses deterministic Node.js validation so archive structure can be checked offline.
+- Includes a read-only project profiler for target repositories; it records metadata-backed commands, capability evidence, and a drift fingerprint without creating a repository map.
 
 ## Contents
 
@@ -99,6 +100,7 @@ Use `/research-swarm` for a public-web research question. Use `light` for narrow
 | `npm run contracts:generate` | Regenerate workflow contract artifacts from canonical schemas. | `package.json` |
 | `npm run contracts:check` | Check generated contract artifacts for drift. | `package.json` |
 | `npm test` | Run deterministic `node:test` coverage. | `package.json` |
+| `npm run profile -- <absolute-target-directory>` | Emit a deterministic, schema-validated profile of a target project. | `scripts/profile-project.mjs` |
 | `node scripts/validate-research-run.mjs artifacts/research-runs/example-run` | Validate an archived run without changing it. | `research/README.md` |
 | `node scripts/finalize-research-run.mjs artifacts/research-runs/example-run` | Finalize a supplied archive; only the persistence writer should invoke this in normal workflow operation. | `research/README.md` |
 
@@ -120,6 +122,8 @@ Worker and verifier permissions are behavioral rather than hard per-call restric
 ## Testing & verification
 
 Run `npm run contracts:check` before `npm test`; both are deterministic and offline. Validate a known-good archive with `node scripts/validate-research-run.mjs tests/fixtures/valid-run-v2`. No CI workflow is present.
+
+`npm run profile -- <absolute-target-directory>` reads project metadata and source files without installing dependencies or modifying the target. It reports only declared build/test/lint/typecheck/run commands, revision/dirty state when the target itself is a Git root, Claude Code configuration evidence, and explicit unknowns. Its fingerprint changes when profiled project content changes; regenerate a drifted profile before using it as engineering context. LSP and code-intelligence entries are optional configuration evidence, never a claim that a provider is runnable.
 
 ## Troubleshooting
 

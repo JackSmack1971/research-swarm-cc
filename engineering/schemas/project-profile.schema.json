@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "project-profile.schema.json",
+  "title": "Project profile",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "generated_at", "target", "languages", "frameworks", "package_manager", "commands", "ci", "instructions", "manifests", "claude_code", "code_intelligence_providers", "known_unknowns"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "target": { "$ref": "#/$defs/target" },
+    "languages": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "frameworks": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "package_manager": { "type": ["string", "null"] },
+    "commands": { "type": "object", "additionalProperties": false, "required": ["build", "test", "lint", "typecheck", "run"], "properties": { "build": { "$ref": "#/$defs/command" }, "test": { "$ref": "#/$defs/command" }, "lint": { "$ref": "#/$defs/command" }, "typecheck": { "$ref": "#/$defs/command" }, "run": { "$ref": "#/$defs/command" } } },
+    "ci": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "instructions": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "manifests": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "claude_code": { "type": "object", "additionalProperties": false, "required": ["files", "capabilities"], "properties": { "files": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }, "capabilities": { "type": "array", "items": { "type": "string" }, "uniqueItems": true } } },
+    "code_intelligence_providers": { "type": "array", "items": { "$ref": "#/$defs/provider" } },
+    "known_unknowns": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
+  },
+  "$defs": {
+    "target": { "type": "object", "additionalProperties": false, "required": ["root", "git_revision", "git_dirty", "source_fingerprint"], "properties": { "root": { "type": "string", "minLength": 1 }, "git_revision": { "type": ["string", "null"] }, "git_dirty": { "type": ["boolean", "null"] }, "source_fingerprint": { "type": "string", "pattern": "^[a-f0-9]{64}$" } } },
+    "command": { "type": "object", "additionalProperties": false, "required": ["values", "source"], "properties": { "values": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true }, "source": { "type": ["string", "null"] } } },
+    "provider": { "type": "object", "additionalProperties": false, "required": ["provider_id", "capabilities", "availability", "evidence"], "properties": { "provider_id": { "type": "string", "minLength": 1 }, "capabilities": { "type": "array", "items": { "enum": ["symbol_lookup", "references", "architecture_query", "impact_analysis", "cross_artifact_links"] }, "uniqueItems": true }, "availability": { "enum": ["available", "unknown"] }, "evidence": { "type": "array", "items": { "type": "string" }, "uniqueItems": true } } }
+  }
+}

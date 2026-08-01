@@ -121,6 +121,8 @@ Use the built-in `node:test` test runner.
 
 This specification remains authoritative for the research workflow and archive contracts. The engineering system's truth planes, typed evidence-to-delivery boundaries, ownership, rigor/autonomy, drift, and Claude Code mechanism decisions are authoritative in [the Engineering Constitution](engineering-constitution.md). The existing Dynamic Workflow remains a bounded non-interactive research DAG; it is not an engineering executor or a general engineering Dynamic Workflow.
 
+Milestone 48's project-profile contract is an engineering derived-state input, not a research archive contract or workflow input. Its Node/Ajv implementation may inspect an explicit target repository read-only, but it must not change research schemas, generate a permanent repository map, or elevate optional code-intelligence results into canonical evidence or authorization.
+
 ---
 
 # 4. Required directory structure

@@ -5,7 +5,8 @@
   "scripts": {
     "contracts:generate": "node scripts/generate-research-contracts.mjs",
     "contracts:check": "node scripts/generate-research-contracts.mjs --check",
-    "test": "node --test tests/*.test.mjs"
+    "test": "node --test tests/*.test.mjs",
+    "profile": "node scripts/profile-project.mjs"
   },
   "dependencies": {
     "ajv": "8.20.0"

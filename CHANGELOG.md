@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- Added a read-only `npm run profile -- <absolute-target-directory>` command that inventories target-project metadata, stamps it for drift detection, and reports optional code-intelligence capability data without building a repository map.
 - Added an engineering constitution that separates evidence, intent, and delivery without adding an executor or runtime surface.
 - Added repository-specific contribution, conduct, and security reporting policies.
 - Research optimization benchmarks can now collect validated archive metrics and deterministic agent-path estimates without fabricating workflow token telemetry.

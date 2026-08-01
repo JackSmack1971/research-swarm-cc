@@ -1,0 +1,11 @@
+{
+  "name": "node-web-fixture",
+  "scripts": {
+    "build": "next build",
+    "test": "node --test",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "dev": "next dev"
+  },
+  "dependencies": { "next": "1.0.0", "react": "1.0.0" }
+}
