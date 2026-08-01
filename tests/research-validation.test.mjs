@@ -6,7 +6,7 @@ import test from 'node:test';
 import { readJsonl } from '../scripts/lib/jsonl.mjs';
 import { reportUnitSha256, validateResearchRun } from '../scripts/lib/research-validation.mjs';
 import { finalizeResearchRun } from '../scripts/lib/research-finalization.mjs';
-import { generateResearchContracts } from '../scripts/generate-research-contracts.mjs';
+import { assertGeneratedSchemaRequirements, generateResearchContracts } from '../scripts/generate-research-contracts.mjs';
 import { assertLearningEvidenceArchive } from '../scripts/lib/archive-version.mjs';
 
 const fixtures = path.join(process.cwd(), 'tests', 'fixtures');
@@ -327,7 +327,7 @@ test('publication-date conditionals and claim conditional fields fail canonical 
   assert.ok(hasRule(claim, 'schema.not'));
 });
 
-test('generation rejects stale workflow contracts, missing references, and duplicate schema IDs', async (t) => {
+test('generation preserves property names and rejects stale workflow contracts, missing references, and duplicate schema IDs', async (t) => {
   const directory = await mkdtemp(path.join(tmpdir(), 'research-contracts-'));
   const schemas = path.join(directory, 'schemas');
   const workflow = path.join(directory, 'research-swarm.js');
@@ -336,6 +336,15 @@ test('generation rejects stale workflow contracts, missing references, and dupli
   await cp(path.join(process.cwd(), '.claude', 'workflows', 'research-swarm.js'), workflow);
   t.after(() => rm(directory, { recursive: true, force: true }));
   await generateResearchContracts({ schemaDirectory: schemas, workflowPath: workflow, registryPath: registry });
+  const generated = await readFile(workflow, 'utf8');
+  const generatedBlock = (name, next) => generated.slice(generated.indexOf(`const ${name}`), generated.indexOf(next));
+  assert.match(generatedBlock('sourceSchema', 'const claimSchema'), /"title": \{/);
+  assert.match(generatedBlock('verificationEventSchema', 'const reportMapSchema'), /"title": \{/);
+  assert.match(generatedBlock('coverageGapSchema', 'const discardedClaimSchema'), /"description": \{/);
+  assert.match(generatedBlock('semanticValidationSchema', 'const repairEventSchema'), /"description": \{/);
+  assert.match(generatedBlock('runQualityEvaluationSchema', '// END GENERATED'), /"description": \{/);
+  assert.throws(() => assertGeneratedSchemaRequirements({ type: 'object', additionalProperties: false, required: ['title'], properties: {} }), /requires "title"/);
+  assert.doesNotThrow(() => assertGeneratedSchemaRequirements({ if: { properties: { status: { const: 'resolved' } }, required: ['status'] }, then: { required: ['resolution_rationale'] } }));
   await writeFile(workflow, (await readFile(workflow, 'utf8')).replace('const sourceSchema', 'const staleSourceSchema'));
   await assert.rejects(generateResearchContracts({ schemaDirectory: schemas, workflowPath: workflow, registryPath: registry, check: true }), /stale/);
   const claimFile = path.join(schemas, 'claim.schema.json');

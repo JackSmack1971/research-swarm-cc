@@ -46,6 +46,10 @@ const sourceSchema = {
       "type": "string",
       "pattern": "^src_[A-Za-z0-9][A-Za-z0-9_-]*$"
     },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
     "publisher": {
       "type": "string",
       "minLength": 1
@@ -535,6 +539,10 @@ const claimBundleSchema = {
             "type": "string",
             "pattern": "^src_[A-Za-z0-9][A-Za-z0-9_-]*$"
           },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
           "publisher": {
             "type": "string",
             "minLength": 1
@@ -877,6 +885,10 @@ const verificationEventSchema = {
             "type": "string",
             "pattern": "^tmp_src_[A-Za-z0-9][A-Za-z0-9_-]*$"
           },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
           "publisher": {
             "type": "string",
             "minLength": 1
@@ -1181,6 +1193,10 @@ const coverageGapSchema = {
     "coverage_gap_id": {
       "type": "string",
       "pattern": "^gap_[A-Za-z0-9][A-Za-z0-9_-]*$"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1
     },
     "severity": {
       "enum": [
@@ -1538,6 +1554,10 @@ const semanticValidationSchema = {
             ]
           },
           "report_location": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
             "type": "string",
             "minLength": 1
           },
@@ -2204,6 +2224,11 @@ const runQualityEvaluationSchema = {
               "medium",
               "low"
             ]
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
           }
         }
       }
