@@ -4,8 +4,8 @@ const CONFIDENCE_RISK = { low: 3, medium: 2, high: 1 };
 export const HARD_MAXIMA = Object.freeze({ maxWorkers: 8, maxSourcesPerWorker: 12, maxClaimsPerWorker: 15, maxCanonicalClaims: 40, maxVerificationTargets: 40, maxVerifierConcurrency: 8, maxGapFillWorkers: 2 });
 export const DEPTH_DEFAULTS = Object.freeze({
   light: { maxWorkers: 2, maxSourcesPerWorker: 4, maxClaimsPerWorker: 5, maxCanonicalClaims: 8, maxVerificationTargets: 8, maxVerifierConcurrency: 2, maxGapFillWorkers: 1 },
-  standard: { maxWorkers: 5, maxSourcesPerWorker: 8, maxClaimsPerWorker: 10, maxCanonicalClaims: 20, maxVerificationTargets: 20, maxVerifierConcurrency: 4, maxGapFillWorkers: 2 },
-  deep: { maxWorkers: 8, maxSourcesPerWorker: 12, maxClaimsPerWorker: 15, maxCanonicalClaims: 40, maxVerificationTargets: 40, maxVerifierConcurrency: 8, maxGapFillWorkers: 2 }
+  standard: { maxWorkers: 3, maxSourcesPerWorker: 5, maxClaimsPerWorker: 6, maxCanonicalClaims: 12, maxVerificationTargets: 12, maxVerifierConcurrency: 3, maxGapFillWorkers: 1 },
+  deep: { maxWorkers: 4, maxSourcesPerWorker: 6, maxClaimsPerWorker: 8, maxCanonicalClaims: 20, maxVerificationTargets: 20, maxVerifierConcurrency: 4, maxGapFillWorkers: 1 }
 });
 
 export function boundedInteger(value, fallback, maximum) {
@@ -52,6 +52,16 @@ export function escalationDecision({ depth, claims, conflicts, coverageGaps, sou
   const reasons = [conflictRisk && 'critical or high-materiality conflict', severeGap && 'high-severity coverage gap', lowConfidence && 'more than 25% low-confidence material claims', missingPrimary && 'key claim lacks primary or official evidence', highStakes && 'new high-stakes scope'].filter(Boolean);
   const nextDepth = depth === 'light' ? 'standard' : depth === 'standard' ? 'deep' : 'deep';
   return { escalate: reasons.length > 0 && depth !== 'deep', depth: reasons.length ? nextDepth : depth, policy: reasons.length ? 'all-material' : null, reasons };
+}
+
+export function gapFillDefects({ coverageGaps, sources, requiredSourceTypes = [], escalationReasons = [] }, maximum) {
+  const defects = coverageGaps
+    .filter((gap) => ['critical', 'high'].includes(gap.severity) && !['resolved', 'accepted'].includes(gap.status))
+    .map((gap) => ({ defect_id: gap.coverage_gap_id, reason: gap.description, related_claim_ids: gap.related_claim_ids ?? [], related_subquestion_ids: gap.related_subquestion_ids ?? [] }));
+  const present = new Set(sources.map(({ source_type }) => source_type));
+  for (const sourceType of requiredSourceTypes.filter((type) => !present.has(type))) defects.push({ defect_id: `gap_required_source_${sourceType}`, reason: `Required source type ${sourceType} is absent after normalization.`, related_claim_ids: [], related_subquestion_ids: [] });
+  for (const reason of escalationReasons) defects.push({ defect_id: `gap_escalation_${reason.replace(/[^a-z0-9]+/gi, '_').replace(/^_|_$/g, '')}`, reason, related_claim_ids: [], related_subquestion_ids: [] });
+  return defects.filter((defect, index, all) => all.findIndex(({ defect_id }) => defect_id === defect.defect_id) === index).slice(0, maximum);
 }
 
 const REPAIR_ACTIONS = Object.freeze({

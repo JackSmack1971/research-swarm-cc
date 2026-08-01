@@ -56,6 +56,16 @@ At that time, no `CLAUDE.md`, `.claude/` configuration, package manifest, lockfi
 | 33 | Add learning diagnostics and retention controls | complete |
 | 34 | Validate compatibility and adversarial policy boundaries | complete |
 | 35 | Run adaptive Light and Deep runtime acceptance | incomplete — no current-runtime version-2 archive validated |
+| 36 | Map optimization playbook to repository controls | complete |
+| 37 | Reduce startup and recovery overhead | complete |
+| 38 | Compact durable agent instructions | complete |
+| 39 | Lean fanout and bounded gap fill | complete |
+| 40 | Route workflow stages to documented model aliases | complete |
+| 41 | Reduce stage payload and policy context | complete |
+| 42 | Make adaptive learning modes explicit and avoid unnecessary evaluator calls | complete |
+| 43 | Deterministic archive finalization and persistence simplification | complete |
+| 44 | Add offline optimization benchmark | complete |
+| 45 | Optimization acceptance and bounded runtime check | incomplete — all offline gates pass; Dynamic Workflow review approval blocked the one Light attempt before execution, so no runtime archive or telemetry exists |
 
 ## Decisions log
 
@@ -229,3 +239,79 @@ Completed the final deterministic/adversarial acceptance audit. The canonical le
 | 2026-07-31 | `npm ci`; `npm run contracts:generate`; `npm run contracts:check`; `npm test`; v1/v2 fixture validation; invalid fixture rejection; bounded Claude Code Light invocation; Context7 Claude Code workflow/hook review | Deterministic gates passed. The Light CLI invocation timed out after 124 seconds without a persisted archive; Deep was not attempted. Runtime acceptance and production readiness remain incomplete. Current documentation states workflow arguments should be JSON values; the repository keeps string JSON parsing as a compatibility fallback because the earlier local runtime supplied serialized `args`. |
 
 Milestone 35 deterministic acceptance is complete, but its runtime gate is not. Milestone 24 remains incomplete: Light has not produced a validated archive and Deep was not attempted. Production readiness remains unavailable until successful current-runtime Light and Deep version-2 archives validate.
+
+## Milestone 36
+
+The active goal explicitly authorizes Milestone 36 as a documentation-only optimization plan, despite older authorization wording. Added `docs/optimization-plan.md`, which maps the supplied Claude Code Optimization Playbook to the current native dynamic workflow and classifies every recommendation as implement now, already implemented, operational guidance only, not applicable, or deferred pending measurable evidence. The plan preserves canonical schemas, provenance and risk-based verification, Deep all-material verification, the two-round repair ceiling, adaptive-learning safety boundaries, archive compatibility, and deterministic validation. It defines comparable-run before/after fields for initial workers, verifier and repair agents, total agents, retained claims, coverage gaps, semantic/archive validation, and `/workflows` per-phase tokens when available.
+
+It records that the existing current-runtime acceptance gaps remain open: Milestone 24 still lacks validated Light and Deep version-2 archives, and Milestone 35's runtime gate and production readiness are not closed. No implementation, schema, settings, agent, hook, or runtime behavior changed.
+
+| 2026-08-01 | Current official Claude Code workflow/settings/model/hooks/MCP documentation via Context7; local `claude --version`/help; current workflow/control/settings/learning inspection; documentation diff check | Planned: implementation is intentionally deferred. The plan relies only on documented workflow interfaces, identifies unsupported playbook claims as unverified, and requires current-runtime baselines before optimization experiments. |
+
+## Milestone 37
+
+Reduced recurring Claude Code overhead without changing research or archive semantics. `workflowSizeGuideline` is now the documented advisory `small` setting. A documented SessionStart command hook checks whether Ajv is importable and exits silently when dependencies are already usable; only a missing or unusable dependency triggers `npm ci` with the lockfile, or `npm install` without one. The Windows Git Bash hook normalizes a native project path before its local check.
+
+Stop recovery now reads the compact learning manifest and each run manifest before deciding whether a run is new. It skips paused learning and registered IDs without archive validation, while `register-research-learning.mjs` remains the sole full validation point for a new candidate. This retains best-effort, non-blocking behavior and does not alter archives, evidence, claims, or policy semantics. Official Claude Code Context7 documentation verified the `workflowSizeGuideline` project setting and command-hook configuration; the existing Stop recursion guard remains unchanged.
+
+| 2026-08-01 | `node --test tests/research-learning-hook.test.mjs`; `node scripts/doctor-research-learning-hooks.mjs`; `npm run contracts:check`; `npm test`; `node scripts/validate-research-run.mjs tests/fixtures/valid-run-v2`; syntax checks for changed Node scripts; `bash -n .claude/hooks/session-start.sh`; `git diff --check` | Passed: 80 offline tests, generated contracts, valid v2 archive validation, hook configuration, Node/Bash syntax, and whitespace checks all pass. Focused coverage proves the usable-dependency SessionStart no-op and that the second Stop recovery processes zero archives after a registered run, so no full archive validation or registration occurs. Claude Code runtime execution was not performed. |
+
+## Milestone 38
+
+Refactored `AGENTS.md` from 216 lines of repeated contracts, historical remediation authorization, and completion prose into a concise durable instruction layer. It retains the Claude Code-only boundary, current-goal authority, documented-deviation requirement, JavaScript orchestration, schema and deterministic-validator enforcement, behavioral shared-write isolation, targeted documentation verification, milestone isolation, truthful runtime claims, validation, and conditional changelog obligations. Detailed evidence provenance and role standards remain authoritative in `.claude/rules/deep-research.md`, `.claude/skills/research-standards/SKILL.md`, and `research/schemas/`; no second `CLAUDE.md` was created.
+
+Current official Claude Code guidance confirms that always-loaded project instructions should be concise and under 200 lines, rules can hold scoped guidance, and skills are appropriate for on-demand multi-step procedures. The existing milestones apply universally, so retaining their compact procedure in `AGENTS.md` avoids an additional skill-discovery dependency. `AGENTS.md` remains the repository's Claude-equivalent by current-goal direction; its deliberately uncreated `CLAUDE.md` bridge is unchanged.
+
+| 2026-08-01 | Current official Claude Code memory/rules/skills documentation; local `claude --version` (`2.1.220`) and help; targeted spec §§3–5 and 20–21; active progress; rules, standards skill, and canonical schemas; `npm run contracts:check`; `npm test`; `node scripts/validate-research-run.mjs tests/fixtures/valid-run-v2`; AGENTS static checks; `git diff --check` | Passed: generated contracts are current, all 80 offline tests pass, the v2 fixture validates, `AGENTS.md` is 40 lines with no stale milestone authorization or duplicated evidence heading, and the diff has no whitespace errors. This documentation-only refactor changes no runtime, schema, dependency, workflow, agent, skill, rule, settings, archive, or research behavior. Claude Code runtime execution was not performed. |
+
+## Milestone 39
+
+Retuned normal research to lean initial defaults: Light remains 2 workers/8 canonical claims, Standard is 3/12, and Deep is 4/20. Per-worker source and claim limits and verifier concurrency were reduced proportionally, while `HARD_MAXIMA` remains 8 workers, 12 sources, 15 claims, 40 canonical claims/verification targets, 8 concurrent verifiers, and 2 gap-fill workers. Explicit structured arguments still override defaults up to those maxima.
+
+The planner now merges overlapping angles and creates only distinct coverage subquestions. After initial normalization, at most `maxGapFillWorkers` direct focused workers may address a high/critical unresolved gap, a missing required source type, or an existing escalation signal. There is no generic second research wave, only incremental normalization for qualifying evidence, and canonical overflow remains visible as a coverage gap. Deep still selects every admitted canonical claim for adversarial verification.
+
+| 2026-08-01 | `node --test tests/research-workflow-controls.test.mjs`; `npm run contracts:check`; `npm test`; `node scripts/validate-research-run.mjs tests/fixtures/valid-run-v2`; wrapped workflow syntax check; `git diff --check` | Passed: focused controls (10 tests), all 81 offline tests, generated contracts, valid v2 archive validation, workflow syntax, and whitespace checks. Coverage proves lean defaults, structured overrides and hard maxima, qualifying bounded gap-fill selection, retained overflow gaps, no generic second wave/nested delegation, and Deep all-admitted verification. Claude Code runtime execution was not performed. |
+
+## Milestone 40
+
+Workflow model routing is centralized by stage: retrieval/filtering workers use `haiku`; normalization, verification, adjudication, semantic review, quality evaluation, and persistence use `sonnet`; planning and synthesis deliberately inherit the session model. Reusable custom-agent frontmatter remains `model: inherit`; the Dynamic Workflow per-invocation choice is the active routing mechanism. `CLAUDE_CODE_SUBAGENT_MODEL`, if set by a user or environment, intentionally overrides these per-invocation choices.
+
+| 2026-08-01 | Current official Claude Code Dynamic Workflows, subagents, model-configuration documentation, and changelog; installed `claude --version` (`2.1.220`); centralized workflow route table; `npm run contracts:check`; `npm test`; wrapped workflow syntax check; `git diff --check` | Implemented and offline-verified: 82 offline tests pass, generated contracts are current, the workflow parses in its supported top-level-return wrapper shape, and no whitespace errors remain. Explicit current official documentation is sufficient for a documented workflow runtime API when the installed version meets the documented requirement or the documentation establishes earlier support, and no bounded runtime test contradicts it. Local `claude --help` remains evidence for CLI flags/commands only; its omission of an internal workflow option is not a compatibility blocker. |
+
+## Milestone 41
+
+The workflow keeps the untrusted-data rule as one static common prefix. Its agent wrapper deterministically projects the bounded adaptive policy to the receiving role only, preserving the existing four-directive and character ceilings while leaving the full bundle in the archived policy snapshot. Normalization receives a small plan projection, synthesis receives interpreted scope and source metadata only for retained claims, semantic review receives the required adjudicated support, and quality evaluation uses structured evidence without the full adaptive history. Canonical schemas and archive contents are unchanged.
+
+The durable interface-verification rule is explicitly an OR-with-compatibility check: official Claude Code documentation is sufficient for APIs that CLI help does not enumerate when the installed version meets the documented requirement and local evidence does not contradict it. Workflow model routing remains per invocation; reusable custom-agent definitions retain `model: inherit`.
+
+| 2026-08-01 | `npm run contracts:check`; `npm test`; `node scripts/validate-research-run.mjs tests/fixtures/valid-run-v2`; wrapped workflow syntax check; `git diff --check` | Passed: generated contracts are current, all 83 offline tests pass, the v2 fixture validates, the workflow parses in its supported wrapper shape, and no whitespace errors remain. Static coverage proves no adaptive bundle is appended to the shared untrusted-data rule, directives are role matched and bounded, and downstream normalizer, synthesizer, semantic-validator, and evaluator payloads use role/stage projections. Claude Code runtime execution was not performed. |
+
+## Milestone 42
+
+`off` now uses the baseline policy and deterministic non-learning quality/friction representation with no lessons; `evaluate` uses the same baseline during research but retains model quality evaluation for reviewable lessons; `adapt` alone selects bounded active policy before research. The friction evaluator is now gated by deterministic lifecycle anomalies (failed run, repair, significant unresolved gap, canonical-claim resource ceiling, or validation defect); a clean run persists canonical no-detected-friction data without that agent call. The optional `learning_mode` policy-snapshot field makes new archives auditable while legacy version-2 archives without it remain valid. Registration remains `adapt`-only and the existing pause/idempotence and hook boundaries are unchanged.
+
+| 2026-08-01 | `npm test`; `npm run contracts:generate`; `npm run contracts:check`; v1/v2 fixture validation; wrapped workflow syntax check; `git diff --check` | Passed: 85 deterministic tests, generated workflow contracts, both valid fixtures, workflow syntax, and whitespace checks. Coverage includes all learning modes, deterministic clean-run friction skipping, anomaly-triggered friction evaluation, v1/v2 compatibility, pause behavior, idempotent registration, and protected learning surfaces. Claude Code runtime execution was not performed. |
+
+## Milestone 43
+
+The persistence writer now writes only the supplied archive objects and invokes `scripts/finalize-research-run.mjs`. The Node finalizer canonicalizes JSON/JSONL serialization, derives fixed manifest paths and counts, recomputes report-unit SHA-256 values only where matching anchors already exist, and captures the deterministic validation result. It does not infer or repair anchors, evidence, claims, verification outcomes, conflicts, conclusions, report mappings other than hashes, or semantic-validation decisions. Existing safe manifest-path and Ajv schema checks remain in the deterministic validator; no MCP or LSP use case applies.
+
+| 2026-08-01 | Context7 Ajv 8.17.1 API review; `node --test tests/research-validation.test.mjs`; `node scripts/validate-research-run.mjs tests/fixtures/valid-run-v2`; Node syntax checks; `git diff --check` | Passed: the focused validation suite proves finalization repairs a stale report hash while preserving evidence, claims, verification events, conflicts, semantic validation, and report prose; canonical schemas and validation remain deterministic. Claude Code runtime execution was not performed. |
+
+## Milestone 44
+
+Added an offline optimization benchmark that separates reproducible archive facts from `/workflows`-only telemetry. The collector revalidates an archive and reports its effective depth, initial workers, verifier events, repair-agent count, model-evaluator count, source/claim/disposition counts, unresolved gaps/conflicts, semantic result, and recorded/fresh deterministic validation. It intentionally leaves requested depth, gap-fill workers, verification targets, total agents, elapsed time, and token totals as null/manual where the archive cannot prove them. The structural predictor uses the current depth limits and supplied configuration to count successful Light, Standard, and Deep paths without web research; it rejects a Deep path that verifies fewer agents than admitted claims.
+
+The benchmark records the supplied coarse external baseline: recent usage was subagent-heavy and research-swarm subagents were the largest identified contributor. This is context only, never additive accounting. Comparable-run gates reject invalid archives, failed semantic review, concealed material gaps/conflicts, weakened Deep all-admitted verification, and materially reduced supported-claim coverage. The target is approximately 25% fewer agents/tokens on representative Standard runs than the historical 2/5/8 worker defaults, only when all quality gates remain equal. No workflow, schema, archive, dependency, or runtime behavior changed.
+
+| 2026-08-01 | `node --test tests/research-optimization-benchmark.test.mjs`; `node scripts/benchmark-research-optimization.mjs tests/fixtures/valid-run-v2`; `npm run contracts:check`; `npm test`; `node scripts/validate-research-run.mjs tests/fixtures/valid-run-v2`; `git diff --check` | Passed: focused benchmark tests, valid-fixture metric collection and fresh validation, generated-contract drift check, all 88 deterministic tests, fixture validation, and whitespace check. Claude Code runtime execution was not performed. |
+
+## Milestone 45
+
+Completed deterministic acceptance with `npm ci`, `npm run contracts:check`, `npm test` (88 passing tests), valid v1/v2 fixture validation, all three required invalid-fixture rejections, benchmark test/collector, workflow serialization and LF checks, Node/Bash hook and script syntax checks, hook doctor, and `git diff --check`. Static review found and corrected two quality defects: every Dynamic Workflow prompt now prohibits nested delegation, and a Deep ledger repair verifies each changed or newly admitted canonical claim before readjudication. The correction adds no dependency or runtime surface and preserves hard maxima, archive compatibility, and protected learning records.
+
+Claude Code 2.1.220 and current Dynamic Workflow documentation were available. One Light run with a narrow public fact, lean limits, and learning off was attempted once. The runtime returned `Review dynamic workflow before running`; no workflow agent ran, no archive was created, and no `/workflows` metrics were exposed. Deep was deliberately not attempted, so runtime acceptance remains incomplete and no measured savings claim is made.
+
+Repository hygiene upgraded Ajv from 8.17.1 to 8.20.0 after `npm audit` reported its direct moderate `$data` ReDoS advisory. Current Ajv documentation confirms the later v8 path uses the configured regular-expression engine for `$data` patterns; `npm audit` is now clean. The project skill's stale test count was also corrected; its isolated driver passes all checks.
+
+| 2026-08-01 | `npm ci`; `npm run contracts:check`; `npm test`; valid v1/v2 and invalid fixture validation; benchmark test/collector; wrapped workflow serialization + LF checks; Node/Bash syntax; hook doctor; `git diff --check`; one bounded Claude Code Light attempt | Passed offline: all listed deterministic gates. Runtime: blocked before execution by the explicit Dynamic Workflow review gate; no retry and no Deep run. |

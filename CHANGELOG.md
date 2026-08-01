@@ -8,9 +8,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- Research optimization benchmarks can now collect validated archive metrics and deterministic agent-path estimates without fabricating workflow token telemetry.
 - Research learning can now be paused, resumed, inspected, rebuilt, and restored from an auditable snapshot without exposing research content.
-- Research policy candidates can now be compared against preserved evidence ledgers without mistaking fixed-ledger results for search improvements.
 - Research improvement proposals can now be prepared with independent evidence and tested safely before human review.
+- Low-risk generated research policies can now be canaried, promoted after independent wins, and rolled back with preserved prior snapshots.
+- Research policy candidates can now be compared against preserved evidence ledgers without mistaking fixed-ledger results for search improvements.
 - Research learning now keeps auditable lesson lifecycle decisions, including expiry, supersession, and rollback.
 - People can now add scoped corrections, preferences, usefulness ratings, and outcomes to a completed research run without changing its historical archive.
 - Research runs can now safely reuse bounded, relevant lessons from prior validated runs.
@@ -20,6 +22,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+- Deep ledger repairs now adversarially reverify changed or newly admitted canonical claims, and every workflow role is explicitly prohibited from nested delegation.
+- Research archive finalization now deterministically serializes records, refreshes structural metadata and report hashes, and captures validation without changing research decisions.
+- Research learning now distinguishes `off`, baseline `evaluate`, and adaptive `adapt` modes; clean runs avoid friction-evaluator calls while retaining compatible audit records.
+- Research workflow prompts now receive only role-scoped adaptive guidance and the evidence needed for their stage.
+- Research workflow stages now use documented per-invocation model routing, keeping planning and synthesis on the session model.
+- Research runs now start with leaner Standard and Deep evidence budgets, adding bounded focused gap filling only when normalized evidence exposes a qualifying defect.
+- Claude Code startup now skips dependency installation when the research tools are already ready, and research recovery avoids reprocessing previously registered runs.
+- Research workflows now restore the bounded depth resource limits required to start planning on the current runtime.
+- Research workflows now accept serialized request arguments, avoid unsupported direct clock/random calls at startup, and give each worker a web-call budget aligned with its source limit.
+- Research workflows now split normalization into source, claim, and relationship outputs to fit the current runtime's structured-output limits.
 - Research archives now declare a version and clearly reject unsupported older or newer formats.
 - Research runs can now repair evidence, verification, and archive-format defects through one auditable two-round limit.
 - Claude Code now launches the research workflow reliably before validating its request.
@@ -35,4 +47,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Security
 
+- Updated Ajv to 8.20.0 to remove the known ReDoS risk in schema validation.
 - Research policy rollback now requires two counterexamples, preventing an evaluator from lowering its own safety threshold.

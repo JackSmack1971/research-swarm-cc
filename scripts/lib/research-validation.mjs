@@ -161,7 +161,7 @@ function validatePath(runDirectory, value, key, errors) {
   return resolved;
 }
 
-export async function validateResearchRun(directory) {
+export async function validateResearchRun(directory, { ignoreValidationStatus = false } = {}) {
   const runDirectory = path.resolve(directory);
   const errors = [];
   const validators = contractValidators();
@@ -317,9 +317,10 @@ export async function validateResearchRun(directory) {
       if (SOURCE_INSTRUCTION.test(lessonText)) error(errors, 'lessons.jsonl', lesson?.lesson_id, 'lesson.source_instruction', 'Lessons must not copy instructions from research material.');
       if (PROTECTED_SURFACE.test(lessonText)) error(errors, 'lessons.jsonl', lesson?.lesson_id, 'lesson.protected_surface', 'Lessons must not propose protected-surface changes.');
     }
-    const expectedEvaluators = new Set(['research-run-evaluator', 'research-friction-evaluator']);
+    const expectedEvaluatorSets = [new Set(['research-run-evaluator', 'research-friction-evaluator']), new Set(['research-run-evaluator', 'deterministic-friction-evaluator']), new Set(['deterministic-run-evaluator', 'deterministic-friction-evaluator'])];
     const evaluators = new Set(runQualityEvaluation?.evaluator_identities ?? []);
-    if (evaluators.size !== expectedEvaluators.size || [...expectedEvaluators].some((id) => !evaluators.has(id))) error(errors, 'run-quality-evaluation.json', runQualityEvaluation?.run_quality_evaluation_id, 'run_quality_evaluation.evaluators', 'Both fixed evaluator identities are required.');
+    if (!expectedEvaluatorSets.some((expected) => evaluators.size === expected.size && [...expected].every((id) => evaluators.has(id)))) error(errors, 'run-quality-evaluation.json', runQualityEvaluation?.run_quality_evaluation_id, 'run_quality_evaluation.evaluators', 'Evaluation must identify the quality and friction evaluators used, including permitted deterministic fallbacks.');
+    if (policySnapshot?.learning_mode === 'off' && (lessons.length || !evaluators.has('deterministic-run-evaluator'))) error(errors, 'run-quality-evaluation.json', runQualityEvaluation?.run_quality_evaluation_id, 'run_quality_evaluation.off_mode', 'Learning-off archives must use deterministic evaluation and contain no lessons.');
     if (runQualityEvaluation?.evaluator_uncertainty > 0.5 && lessons.length) error(errors, 'run-quality-evaluation.json', runQualityEvaluation?.run_quality_evaluation_id, 'run_quality_evaluation.uncertainty', 'High evaluator uncertainty requires no provisional lessons.');
     if (runQualityEvaluation?.run_outcome === 'failed' && lessons.some((lesson) => !['friction', 'runtime'].includes(lesson?.type))) error(errors, 'lessons.jsonl', null, 'lesson.failed_run_type', 'Failed runs may produce only friction or runtime lessons.');
     const bundle = policySnapshot?.policy_bundle;
@@ -351,6 +352,6 @@ export async function validateResearchRun(directory) {
   const counts = { sources: sources.length, claims: claims.length, retained_claims: claims.length, discarded_claims: discarded.length, verification_events: events.length, conflicts: Array.isArray(conflicts) ? conflicts.length : 0, coverage_gaps: Array.isArray(coverageGaps) ? coverageGaps.length : 0, semantic_validations: semanticValidation ? 1 : 0, repair_events: repairEvents.length, report_units: reportMap?.report_units?.length ?? 0, ...(manifest.archive_schema_version === '2.0.0' ? { run_quality_evaluations: runQualityEvaluation ? 1 : 0, lessons: lessons.length, policy_snapshots: policySnapshot ? 1 : 0 } : {}) };
   for (const [key, actual] of Object.entries(counts)) if (manifest.counts?.[key] !== actual) error(errors, 'manifest.json', manifest.run_id, 'manifest.counts', `Count for ${key} is ${manifest.counts?.[key] ?? '(missing)'}, expected ${actual}.`);
   const valid = errors.length === 0;
-  if (validation && validation.valid !== valid) error(errors, 'validation.json', null, 'validation.status', `validation.json valid must be ${valid}.`);
+  if (!ignoreValidationStatus && validation && validation.valid !== valid) error(errors, 'validation.json', null, 'validation.status', `validation.json valid must be ${valid}.`);
   return { valid: errors.length === 0, run_directory: runDirectory, errors, counts };
 }

@@ -1003,11 +1003,13 @@ When validation fails after the allowed repair rounds, return a transparent fail
 
 ## 11.4 Custom-agent routing compatibility
 
+Dynamic Workflow calls may select a documented per-invocation model alias. The workflow must centralize that policy, use stable `haiku`, `sonnet`, or documented inheritance rather than dated IDs, and leave session-model stages unpinned. `CLAUDE_CODE_SUBAGENT_MODEL` intentionally takes precedence if the user or environment sets it. This model selection is separate from named custom-agent selection and does not change reusable custom-agent `model: inherit` defaults.
+
 The documented workflow interface does not establish an `agent()` option for selecting a named project custom agent. Do not invent one.
 
 Use this implementation rule:
 
-1. inspect any locally available Claude Code workflow API documentation;
+1. inspect locally available Claude Code workflow API documentation or current official documentation; official documentation is sufficient when CLI help does not enumerate the API, provided the installed version meets its documented compatibility requirement and no local evidence contradicts it;
 2. when explicit custom-agent routing is officially supported, use it;
 3. otherwise inline each role contract in the applicable workflow agent prompt;
 4. still create `.claude/agents/*.md` so the roles are reusable outside the workflow.

@@ -5,6 +5,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { readJsonl } from '../scripts/lib/jsonl.mjs';
 import { reportUnitSha256, validateResearchRun } from '../scripts/lib/research-validation.mjs';
+import { finalizeResearchRun } from '../scripts/lib/research-finalization.mjs';
 import { generateResearchContracts } from '../scripts/generate-research-contracts.mjs';
 import { assertLearningEvidenceArchive } from '../scripts/lib/archive-version.mjs';
 
@@ -73,6 +74,22 @@ test('a valid run and definitive-primary sufficiency rationale pass', async () =
   assert.equal(result.valid, true, JSON.stringify(result.errors));
 });
 
+test('deterministic finalization repairs only serialization, counts, and report hashes', async (t) => {
+  const directory = await copiedFixture(t, 'valid-run-v2');
+  const protectedFiles = ['sources.jsonl', 'claims.jsonl', 'discarded-claims.jsonl', 'verification-events.jsonl', 'conflicts.json', 'coverage-gaps.json', 'semantic-validation.json', 'report.md'];
+  const before = Object.fromEntries(await Promise.all(protectedFiles.map(async (file) => [file, file.endsWith('.jsonl') ? (await readJsonl(path.join(directory, file))).records : file.endsWith('.json') ? await readJson(path.join(directory, file)) : await readFile(path.join(directory, file), 'utf8')])));
+  const map = await readJson(path.join(directory, 'report-map.json'));
+  map.report_units[0].text_sha256 = '0'.repeat(64);
+  await writeJson(path.join(directory, 'report-map.json'), map);
+  const result = await finalizeResearchRun(directory);
+  assert.equal(result.valid, true, JSON.stringify(result.errors));
+  for (const file of protectedFiles) assert.deepEqual(file.endsWith('.jsonl') ? (await readJsonl(path.join(directory, file))).records : file.endsWith('.json') ? await readJson(path.join(directory, file)) : await readFile(path.join(directory, file), 'utf8'), before[file], file);
+  const after = await readJson(path.join(directory, 'report-map.json'));
+  assert.equal(after.report_units[0].text_sha256, reportUnitSha256('The fixture authority published the record.'));
+  assert.deepEqual(after.report_units[0].claim_ids, map.report_units[0].claim_ids);
+  assert.equal((await validateResearchRun(directory)).valid, true);
+});
+
 test('archive versions are exact, actionable, and validation does not rewrite archives', async (t) => {
   const directory = await copiedValid(t);
   const manifestFile = path.join(directory, 'manifest.json');
@@ -95,7 +112,8 @@ test('persistence requires the current archive schema version', async () => {
   const workflow = await readFile(path.join(process.cwd(), '.claude', 'workflows', 'research-swarm.js'), 'utf8');
   const writer = await readFile(path.join(process.cwd(), '.claude', 'agents', 'research-persistence-writer.md'), 'utf8');
   assert.match(workflow, /manifest: runManifestSchema/);
-  assert.match(workflow, /archive_schema_version exactly "2\.0\.0"/);
+  assert.match(workflow, /fixed version-2 archive files/);
+  assert.match(workflow, /finalize-research-run\.mjs/);
   assert.match(writer, /archive_schema_version` exactly `2\.0\.0`/);
 });
 
@@ -165,6 +183,14 @@ test('v2 lessons cannot lower the fixed two-counterexample rollback threshold', 
   assert.ok(hasRule(await validateResearchRun(directory), 'schema.const'));
 });
 
+test('initial runtime adjudication keeps claim decisions and relationship schemas bounded', async () => {
+  const workflow = await readFile('.claude/workflows/research-swarm.js', 'utf8');
+  for (const label of ['adjudicate claim decisions', 'adjudicate relationships']) assert.match(workflow, new RegExp(label));
+  assert.match(workflow, /schema: adjudicatedClaimDecisionsSchema/);
+  assert.match(workflow, /schema: adjudicatedRelationshipsSchema/);
+  assert.match(workflow, /materializeAdjudicatedClaims\(adjudicationDecisions, verificationNormalized\.claims\)/);
+});
+
 test('Milestone 27 evaluates a policy-independent successful run without lessons', async (t) => {
   const directory = await copiedFixture(t, 'valid-run-v2');
   const evaluationFile = path.join(directory, 'run-quality-evaluation.json');
@@ -199,7 +225,7 @@ test('Milestone 27 rejects non-friction lessons for failed runs and unsafe lesso
   }
 });
 
-test('Milestone 27 requires both evaluators and rejects malformed evaluation output', async (t) => {
+test('Milestone 27 requires a permitted quality/friction evaluator pair and rejects malformed evaluation output', async (t) => {
   const directory = await copiedFixture(t, 'valid-run-v2');
   const file = path.join(directory, 'run-quality-evaluation.json');
   const evaluation = await readJson(file);
@@ -212,6 +238,26 @@ test('Milestone 27 requires both evaluators and rejects malformed evaluation out
   await writeJson(file, evaluation); await markInvalid(directory);
   result = await validateResearchRun(directory);
   assert.ok(hasRule(result, 'schema.required'));
+});
+
+test('Milestone 42 keeps legacy v2 archives valid and permits a deterministic off-mode record', async (t) => {
+  assert.equal((await validateResearchRun(fixture('valid-run-v2'))).valid, true);
+  const directory = await copiedFixture(t, 'valid-run-v2');
+  const evaluationFile = path.join(directory, 'run-quality-evaluation.json');
+  const evaluation = await readJson(evaluationFile);
+  evaluation.evaluator_identities = ['deterministic-run-evaluator', 'deterministic-friction-evaluator'];
+  evaluation.overall_disposition = 'ineligible';
+  evaluation.generated_lesson_ids = [];
+  await writeJson(evaluationFile, evaluation);
+  await writeFile(path.join(directory, 'lessons.jsonl'), '');
+  const snapshotFile = path.join(directory, 'policy-snapshot.json');
+  const snapshot = await readJson(snapshotFile);
+  snapshot.learning_mode = 'off';
+  await writeJson(snapshotFile, snapshot);
+  const manifest = await readJson(path.join(directory, 'manifest.json'));
+  manifest.counts.lessons = 0;
+  await writeJson(path.join(directory, 'manifest.json'), manifest);
+  assert.equal((await validateResearchRun(directory)).valid, true);
 });
 
 test('a definitive primary authority with a sufficiency rationale passes', async () => {

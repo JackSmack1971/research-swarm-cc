@@ -672,6 +672,13 @@ export const canonicalSchemas = [
       "policy_bundle": {
         "$ref": "policy-bundle.schema.json"
       },
+      "learning_mode": {
+        "enum": [
+          "off",
+          "evaluate",
+          "adapt"
+        ]
+      },
       "constitution_version": {
         "type": "string",
         "minLength": 1
@@ -2053,11 +2060,14 @@ export const canonicalSchemas = [
       "evaluator_identities": {
         "type": "array",
         "minItems": 2,
+        "maxItems": 2,
         "uniqueItems": true,
         "items": {
           "enum": [
             "research-run-evaluator",
-            "research-friction-evaluator"
+            "research-friction-evaluator",
+            "deterministic-run-evaluator",
+            "deterministic-friction-evaluator"
           ]
         }
       },

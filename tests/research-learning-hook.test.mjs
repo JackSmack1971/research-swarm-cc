@@ -5,6 +5,8 @@ import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { readState, writeState } from '../scripts/lib/research-learning.mjs';
+import { recoverResearchLearning } from '../scripts/recover-research-learning.mjs';
+import { ensureResearchDependencies } from '../scripts/ensure-research-dependencies.mjs';
 
 const root = () => mkdtemp(path.join(os.tmpdir(), 'research-learning-hook-'));
 const command = (file, args = [], env = {}) => new Promise((resolve, reject) => execFile(process.execPath, [file, ...args], { env: { ...process.env, ...env }, windowsHide: true }, (error, stdout, stderr) => error ? reject(Object.assign(error, { stdout, stderr })) : resolve(JSON.parse(stdout))));
@@ -48,8 +50,26 @@ test('Stop recovery registers a validated v2 archive exactly once', async (t) =>
   const state = await readState(stateRoot); assert.deepEqual(state.manifest.registered_run_ids, ['run_fixture']); assert.equal(state.provisional.length, 1);
 });
 
+test('second Stop recovery only reads cheap manifests when no run is new', async (t) => {
+  const runs = await root(); const stateRoot = await root(); t.after(() => Promise.all([rm(runs, { recursive: true, force: true }), rm(stateRoot, { recursive: true, force: true })]));
+  const archive = path.join(runs, 'run_fixture'); await cp('tests/fixtures/valid-run-v2', archive, { recursive: true }); const manifest = JSON.parse(await readFile(path.join(archive, 'manifest.json'), 'utf8')); manifest.run_directory = archive; await writeFile(path.join(archive, 'manifest.json'), JSON.stringify(manifest));
+  let validations = 0;
+  const register = async () => { validations += 1; await writeState(stateRoot, { manifest: { registered_run_ids: ['run_fixture'] }, provisional: [], active: [], rejected: [], expired: [], superseded: [], rolledBack: [], promotions: [], events: [], feedback: [], critic: [], candidates: [], canary_assignments: [] }); };
+  assert.deepEqual(await recoverResearchLearning({ project: process.cwd(), runs, root: stateRoot, register }), { processed: 1 });
+  assert.deepEqual(await recoverResearchLearning({ project: process.cwd(), runs, root: stateRoot, register }), { processed: 0 });
+  assert.equal(validations, 1);
+});
+
+test('SessionStart dependency setup fast-path is a no-op and retains lockfile-aware recovery', async () => {
+  const source = await readFile('.claude/hooks/session-start.sh', 'utf8');
+  assert.match(source, /ensure-research-dependencies/);
+  let calls = 0; assert.deepEqual(await ensureResearchDependencies({ importAjv: async () => {}, execute: async () => { calls += 1; } }), { action: 'noop' }); assert.equal(calls, 0);
+  const project = await root(); try { await writeFile(path.join(project, 'package-lock.json'), '{}'); let args; assert.deepEqual(await ensureResearchDependencies({ cwd: project, importAjv: async () => { throw new Error('missing'); }, execute: async (_, value) => { args = value; } }), { action: 'ci' }); assert.deepEqual(args, ['ci', '--ignore-scripts', '--no-audit', '--no-fund']); } finally { await rm(project, { recursive: true, force: true }); }
+});
+
 test('hook config, commands, and Windows quoting are locally valid', async () => {
   assert.deepEqual(await command('scripts/doctor-research-learning-hooks.mjs'), { valid: true });
   const settings = await readFile('.claude/settings.json', 'utf8'); assert.match(settings, /node \\\"\$\{CLAUDE_PROJECT_DIR\}\/scripts\/recover-research-learning\.mjs\\\"/);
+  assert.match(settings, /workflowSizeGuideline": "small"/); assert.match(settings, /session-start\.sh/);
   for (const name of ['status', 'explain', 'pause', 'resume', 'rollback', 'rebuild']) assert.match(await readFile(`.claude/commands/research-learning-${name}.md`, 'utf8'), /research-learning-control\.mjs/);
 });

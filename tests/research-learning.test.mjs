@@ -72,7 +72,7 @@ test('missing state yields a safe empty bundle and oversized or incompatible les
 test('workflow exposes off, evaluate, and adapt learning controls with policy snapshot and registration', async () => {
   const workflow = await readFile('.claude/workflows/research-swarm.js', 'utf8');
   assert.match(workflow, /learning: "adapt"/); assert.match(workflow, /new Set\(\["off", "evaluate", "adapt"\]\)/);
-  assert.match(workflow, /policy_bundle: policyBundle/); assert.match(workflow, /policySnapshotFor\(runId, policyBundle\)/);
+  assert.match(workflow, /policy_bundle: policyBundle/); assert.match(workflow, /policySnapshotFor\(runId, policyBundle, config\.learning\)/); assert.match(workflow, /learning_mode: learningMode/);
   assert.match(workflow, /config\.learning === "adapt" && persistence\.validation_status\.valid/);
   assert.match(workflow, /register-research-learning\.mjs/);
 });

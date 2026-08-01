@@ -10,7 +10,7 @@
     "run_id": { "type": "string", "pattern": "^run_[A-Za-z0-9][A-Za-z0-9_-]*$" },
     "policy_snapshot_id": { "type": "string", "pattern": "^psn_[A-Za-z0-9][A-Za-z0-9_-]*$" },
     "evaluated_at": { "type": "string", "format": "date-time" },
-    "evaluator_identities": { "type": "array", "minItems": 2, "uniqueItems": true, "items": { "enum": ["research-run-evaluator", "research-friction-evaluator"] } },
+    "evaluator_identities": { "type": "array", "minItems": 2, "maxItems": 2, "uniqueItems": true, "items": { "enum": ["research-run-evaluator", "research-friction-evaluator", "deterministic-run-evaluator", "deterministic-friction-evaluator"] } },
     "run_outcome": { "enum": ["completed", "failed"] },
     "correctness_risk_findings": { "type": "array", "items": { "$ref": "#/$defs/finding" } },
     "coverage_assessment": { "$ref": "#/$defs/assessment" },
