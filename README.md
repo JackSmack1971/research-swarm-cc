@@ -148,11 +148,11 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) before proposing changes, [CODE_OF_CONDU
 
 No license file was found. Add a license before publishing or accepting contributions.
 
-The implementation roadmap and open runtime-acceptance limitations are recorded in [docs/research-swarm-progress.md](docs/research-swarm-progress.md). The architecture and canonical contracts are defined in [docs/research-swarm-spec.md](docs/research-swarm-spec.md).
+The forward-looking, outcome-led roadmap is [docs/ROADMAP.md](docs/ROADMAP.md). Implemented work and open runtime-acceptance limitations are recorded in [docs/research-swarm-progress.md](docs/research-swarm-progress.md). The architecture and canonical contracts are defined in [docs/research-swarm-spec.md](docs/research-swarm-spec.md).
 
 ## Roadmap
 
-The current progress record identifies bounded current-runtime Light and Deep acceptance as incomplete. No further roadmap commitments are made here.
+The immediate roadmap priority is bounded current-runtime Light and Deep acceptance. Future work is conditional on that evidence and is documented with explicit gates rather than delivery-date commitments.
 
 ## License
 
