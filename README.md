@@ -144,7 +144,7 @@ For a reproducible local check, start from a fresh clone and use `npm ci`, `npm 
 
 ## Contributing and governance
 
-Contribution guidelines, a code of conduct, and security policy are not yet formalized. Open an issue before large changes and follow [AGENTS.md](AGENTS.md) for repository rules.
+Read [CONTRIBUTING.md](CONTRIBUTING.md) before proposing changes, [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) before participating, and [SECURITY.md](SECURITY.md) to report a vulnerability safely. Open an issue before large changes and follow [AGENTS.md](AGENTS.md) for repository rules.
 
 No license file was found. Add a license before publishing or accepting contributions.
 
