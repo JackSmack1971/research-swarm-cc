@@ -131,6 +131,8 @@ Milestone 52's change contract is separate canonical Intent-plane state outside 
 
 Milestone 53's prototype lane is separate canonical experiment evidence outside research archives. A record links one draft-contract uncertainty to a hypothesis/variants, exact base revision, disposable isolated worktree, bounded local instructions, observations, accepted/rejected/inconclusive verdict, resulting decision references, artifact identities, and disposal state. Required experiential prototype uncertainty keeps a contract draft. The record never authorizes execution or direct promotion of prototype code; a separate explicit decision may use its finding, after which the existing validated contract path applies. It adds no production executor, workflow, service, or generic prototype swarm.
 
+Milestone 54's task graph and context capsules are derived Delivery-plane planning records outside research archives. A deterministic compiler accepts only a valid accepted Change Contract at its exact profiled base, validates criterion lineage, dependencies, collision and migration ordering, and emits disposable task-local capsules. It does not infer decisions, authorize execution, execute work, or make optional Graphify data mandatory.
+
 ---
 
 # 4. Required directory structure

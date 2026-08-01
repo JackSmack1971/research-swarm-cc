@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- Added deterministic task-graph and minimal context-capsule compilation for accepted, current Change Contracts, with dependency, collision, and drift safeguards.
 - Added a disposable, revision-checked prototype lane that records bounded experiment evidence, cleans isolated worktrees, and blocks direct prototype-code promotion.
 - Added a durable, machine-validatable Change Contract with decision-to-requirement lineage, observable acceptance criteria, revision drift checks, and deterministic Markdown rendering.
 - Added a manual `/build` decision router that records engineering uncertainty and asks people only for normative or consequential choices.

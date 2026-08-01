@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "task-graph.schema.json",
+  "title": "Derived engineering task graph",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "graph_id", "contract", "base_repository", "tasks"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "graph_id": { "type": "string", "pattern": "^tgr_[A-Za-z0-9][A-Za-z0-9_-]*$" },
+    "contract": { "type": "object", "additionalProperties": false, "required": ["contract_id", "sha256"], "properties": { "contract_id": { "type": "string", "pattern": "^chg_[A-Za-z0-9][A-Za-z0-9_-]*$" }, "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" } } },
+    "base_repository": { "$ref": "project-profile.schema.json#/$defs/target" },
+    "tasks": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/task" } }
+  },
+  "$defs": {
+    "anchor": { "type": "object", "additionalProperties": false, "required": ["path", "reason"], "properties": { "path": { "type": "string", "minLength": 1, "pattern": "^(?!/)(?![A-Za-z]:)[^\\\\]+$" }, "reason": { "type": "string", "minLength": 1 } } },
+    "verification": { "type": "object", "additionalProperties": false, "required": ["commands", "proofs"], "properties": { "commands": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 }, "uniqueItems": true }, "proofs": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 }, "uniqueItems": true } } },
+    "task": { "type": "object", "additionalProperties": false, "required": ["task_id", "title", "objective", "slice", "criterion_ids", "depends_on", "code_anchors", "verification"], "properties": { "task_id": { "type": "string", "pattern": "^tsk_[A-Za-z0-9][A-Za-z0-9_-]*$" }, "title": { "type": "string", "minLength": 1 }, "objective": { "type": "string", "minLength": 1 }, "slice": { "enum": ["vertical", "expand", "migrate", "contract"] }, "criterion_ids": { "type": "array", "minItems": 1, "items": { "type": "string", "pattern": "^ac_[A-Za-z0-9][A-Za-z0-9_-]*$" }, "uniqueItems": true }, "depends_on": { "type": "array", "items": { "type": "string", "pattern": "^tsk_[A-Za-z0-9][A-Za-z0-9_-]*$" }, "uniqueItems": true }, "code_anchors": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/anchor" }, "uniqueItems": true }, "verification": { "$ref": "#/$defs/verification" } } }
+  }
+}

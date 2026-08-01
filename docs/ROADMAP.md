@@ -70,7 +70,7 @@ The critical gap is live-runtime acceptance. No validated version-2 archive has 
 | **51 — Decision router** | **Complete:** Route uncertainty to no further inquiry, codebase inspection, research, a prototype, a human, or an agent choice. | Strict records and fixtures prove factual uncertainty does not interrupt the human while normative, hard-to-reverse, and consequential choices do. | Follows 50. Ask one high-value question at a time. |
 | **52 — Change contract** | **Complete:** Make draft requirements, acceptance criteria, constraints, risks, and base revision machine-validatable and renderable for people. | Stable IDs link every requirement and criterion; delta changes and repository drift are represented and tested. | Follows 51. The contract is durable; a prose plan is not the source of truth. It does not authorize execution. |
 | **53 — Prototype lane** | **Complete:** Resolve draft-contract UX, state, or architecture uncertainty through disposable isolated experiments. | Prototype output is explicitly classified as evidence, accepted/rejected/inconclusive, revision-stamped, cleaned up, and cannot silently become production code. | Follows 52. Required whenever inspection leaves execution-relevant uncertainty. |
-| **54 — Task graph and context compiler** | Produce vertical slices and minimal task capsules from an accepted contract and current repository state. | Every task maps to acceptance criteria; capsules invalidate and regenerate on source drift. | Follows 48, 52, and any required 53 prototype; uses 49 only when its benchmark earns it. |
+| **54 — Task graph and context compiler** | **Complete:** Produce vertical slices and minimal task capsules from an accepted contract and current repository state. | Every task maps to acceptance criteria; capsules invalidate and regenerate on source drift. | Follows 48, 52, and any required 53 prototype; uses 49 only when its benchmark earns it. |
 
 ### Later — deliver with independent proof
 
@@ -126,4 +126,4 @@ Review this roadmap after each completed milestone and after any material platfo
 
 ## Near-term decision
 
-Milestone 51 is complete. The next action is **Milestone 46**: obtain current-runtime Light and Deep acceptance evidence. The completed router does not authorize executor work. Do not begin executor work before the contract-to-context path (milestones 50–54), basic risk authorization (55), and the engineering benchmark harness (56) are proven.
+Milestone 54 is complete. The next action is **Milestone 46**: obtain current-runtime Light and Deep acceptance evidence. Planning does not authorize executor work; do not begin it before Milestone 55 and the engineering benchmark harness (56) are proven.

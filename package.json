@@ -7,7 +7,8 @@
     "contracts:check": "node scripts/generate-research-contracts.mjs --check",
     "test": "node --test tests/*.test.mjs",
     "profile": "node scripts/profile-project.mjs",
-    "evidence:packet": "node scripts/compile-engineering-evidence-packet.mjs"
+    "evidence:packet": "node scripts/compile-engineering-evidence-packet.mjs",
+    "tasks:compile": "node scripts/compile-task-graph.mjs"
   },
   "dependencies": {
     "ajv": "8.20.0"

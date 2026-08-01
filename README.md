@@ -6,7 +6,7 @@ Research Swarm is a Claude Code dynamic workflow for people who need public-web 
 - Preserves sources, claims, conflicts, coverage gaps, verification events, repairs, and report-to-claim anchors in each archived run.
 - Uses deterministic Node.js validation so archive structure can be checked offline.
 - Includes a read-only project profiler for target repositories; it records metadata-backed commands, capability evidence, and a drift fingerprint without creating a repository map.
-- Includes a manual `/build` controller and disposable prototype lane for resolving draft-contract uncertainty without implementing production changes, plus a canonical change contract that records accepted intent without authorizing execution.
+- Includes a manual `/build` controller, disposable prototype lane, and drift-aware task-capsule compiler that plan accepted work without authorizing execution.
 
 ## Contents
 
@@ -106,6 +106,7 @@ Use `/research-swarm` for a public-web research question. Use `light` for narrow
 | `node scripts/route-engineering-uncertainty.mjs <uncertainty.json>` | Validate and deterministically route one engineering uncertainty. | `scripts/route-engineering-uncertainty.mjs` |
 | `node scripts/render-change-contract.mjs <contract.json> [--check-base <target-directory>]` | Validate and render a canonical Change Contract; optionally reject a drifted repository base. | `scripts/render-change-contract.mjs` |
 | `node scripts/prototype-worktree.mjs <create\|cleanup> <experiment.json> <repository-root>` | Create or dispose a revision-checked disposable prototype worktree. | `scripts/prototype-worktree.mjs` |
+| `npm run tasks:compile -- <contract.json> <task-drafts.json> <absolute-target-directory>` | Validate accepted intent, compile a dependency-aware task graph, and emit disposable minimal task capsules. | `scripts/compile-task-graph.mjs` |
 | `node scripts/validate-research-run.mjs artifacts/research-runs/example-run` | Validate an archived run without changing it. | `research/README.md` |
 | `node scripts/finalize-research-run.mjs artifacts/research-runs/example-run` | Finalize a supplied archive; only the persistence writer should invoke this in normal workflow operation. | `research/README.md` |
 
@@ -135,6 +136,8 @@ Run `npm run contracts:check` before `npm test`; both are deterministic and offl
 A Change Contract is the durable Intent-plane JSON record after decisions exist: requirements link to their authorizing decisions, criteria describe observable proof, and the contract captures constraints, non-goals, risks, unresolved uncertainty, optional prototype evidence, and a profiled base revision/fingerprint. Its Markdown rendering is a view, not authority. A required experiential prototype question keeps the contract `draft`; its accepted, rejected, or inconclusive record is evidence only, and a separate explicit decision is still required. No lifecycle state authorizes task execution, accepted contracts reject execution-relevant unresolved uncertainty, and a changed profile invalidates the base context.
 
 Prototype work uses an absolute, disposable Git worktree outside the production repository and records the exact base revision, bounded local instructions, observations, verdict, decision references, artifacts, and cleanup state. The helper refuses source drift and direct prototype-artifact promotion. Dispose it after recording the result; dirty worktrees are preserved for manual inspection rather than force-deleted.
+
+Task graphs are derived from an accepted, current Change Contract plus explicit task drafts. Each task maps to observable criteria, names code anchors and verification, carries explicit dependencies, and rejects unordered anchor collisions. Broad migrations may use `expand`, `migrate`, and `contract` slices; reversed dependencies fail. Capsules include only the mapped criteria and decision evidence, non-goals, base revision, anchors, verification, risks, and stop conditions. They deliberately exclude the full contract, research archives, specifications, conversation history, and permanent repository maps; any revision, fingerprint, contract, or anchor drift fails closed and requires regeneration.
 
 ## Troubleshooting
 
