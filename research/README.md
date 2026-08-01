@@ -16,7 +16,7 @@ For example:
 
 Dynamic workflows require Claude Code 2.1.154 or later. This repository was checked with 2.1.220. The included `.claude/settings.json` uses the documented `workflowSizeGuideline` setting, which requires Claude Code 2.1.219 or later.
 
-The workflow routes retrieval/filtering stages to `haiku`, evidence reasoning and persistence to `sonnet`, and planning/synthesis to the current session model. If `CLAUDE_CODE_SUBAGENT_MODEL` is set in the user environment, it intentionally overrides every per-stage route; do not set it for this selective policy.
+The workflow routes every substantive schema-producing/canonical-output stage to `sonnet`; planning and synthesis intentionally inherit the current session model. This minimum follows a repository-specific Haiku structured-output retry failure, not a universal model-capability claim. If `CLAUDE_CODE_SUBAGENT_MODEL` is set in the user environment, it intentionally overrides every per-stage route; do not set it for this selective policy.
 
 Enable **Dynamic workflows** in Claude Code’s `/config` when your plan exposes that setting. It is not enabled by a project `settings.json` key. Public-web research also requires that Claude Code makes `WebSearch` and `WebFetch` available to the worker and verifier roles.
 

@@ -3372,7 +3372,7 @@ const runDirectory = createRunDirectory(config.outputRoot, config.query);
 knownRunDirectory = runDirectory;
 const runId = runDirectory.split("/").at(-1);
 const WORKFLOW_MODEL_ROUTING = Object.freeze({
-  adaptive_policy_selector: "haiku", research_planner: "inherit", initial_research_worker: "haiku", focused_research_worker: "haiku", research_normalizer: "sonnet", adversarial_verifier: "sonnet", research_adjudicator: "sonnet", research_synthesizer: "inherit", semantic_validator: "sonnet", completed_run_quality_evaluator: "sonnet", friction_evaluator: "haiku", persistence_writer: "sonnet"
+  adaptive_policy_selector: "sonnet", research_planner: "inherit", initial_research_worker: "sonnet", focused_research_worker: "sonnet", research_normalizer: "sonnet", adversarial_verifier: "sonnet", research_adjudicator: "sonnet", research_synthesizer: "inherit", semantic_validator: "sonnet", completed_run_quality_evaluator: "sonnet", friction_evaluator: "sonnet", persistence_writer: "sonnet"
 });
 const modelStageFor = (label) => {
   if (label === "select research policy") return "adaptive_policy_selector";

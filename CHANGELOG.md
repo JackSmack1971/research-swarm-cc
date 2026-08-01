@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Research workflow structured-output stages now use Sonnet at minimum after a Haiku-routed stage exhausted its retry budget during runtime acceptance.
+
 ### Added
 
 - Added repository-specific contribution, conduct, and security reporting policies.

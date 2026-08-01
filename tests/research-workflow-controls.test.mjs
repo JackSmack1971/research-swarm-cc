@@ -71,7 +71,11 @@ test('workflow uses one shared repair budget and a sanitized stage diagnostic', 
 test('every workflow agent call has an intentional stable-alias model route', async () => {
   const workflow = await readFile('.claude/workflows/research-swarm.js', 'utf8');
   const settings = JSON.parse(await readFile('.claude/settings.json', 'utf8'));
-  for (const [stage, model] of Object.entries({ adaptive_policy_selector: 'haiku', research_planner: 'inherit', initial_research_worker: 'haiku', focused_research_worker: 'haiku', research_normalizer: 'sonnet', adversarial_verifier: 'sonnet', research_adjudicator: 'sonnet', research_synthesizer: 'inherit', semantic_validator: 'sonnet', completed_run_quality_evaluator: 'sonnet', friction_evaluator: 'haiku', persistence_writer: 'sonnet' })) assert.match(workflow, new RegExp(`${stage}: "${model}"`));
+  const routeBlock = workflow.match(/const WORKFLOW_MODEL_ROUTING = Object\.freeze\(\{([\s\S]*?)\}\);/);
+  assert.ok(routeBlock);
+  const routes = Object.fromEntries([...routeBlock[1].matchAll(/(\w+): "(inherit|sonnet|haiku)"/g)].map(([, stage, model]) => [stage, model]));
+  assert.deepEqual(routes, { adaptive_policy_selector: 'sonnet', research_planner: 'inherit', initial_research_worker: 'sonnet', focused_research_worker: 'sonnet', research_normalizer: 'sonnet', adversarial_verifier: 'sonnet', research_adjudicator: 'sonnet', research_synthesizer: 'inherit', semantic_validator: 'sonnet', completed_run_quality_evaluator: 'sonnet', friction_evaluator: 'sonnet', persistence_writer: 'sonnet' });
+  assert.equal(Object.values(routes).includes('haiku'), false);
   for (const label of ['select research policy', 'plan research', 'fill gap', 'repair ledger', 'normalize', 'verify', 'repair verification', 'adjudicate', 'synthesize', 'repair report', 'validate report semantics', 'evaluate run quality', 'evaluate run friction', 'persist research run', 'register research learning']) assert.match(workflow, new RegExp(label));
   assert.match(workflow, /const nativeAgent = agent;/);
   assert.match(workflow, /const agent = \(prompt, options\) => \{/);

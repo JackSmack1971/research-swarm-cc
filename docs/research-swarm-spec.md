@@ -1003,7 +1003,7 @@ When validation fails after the allowed repair rounds, return a transparent fail
 
 ## 11.4 Custom-agent routing compatibility
 
-Dynamic Workflow calls may select a documented per-invocation model alias. The workflow must centralize that policy, use stable `haiku`, `sonnet`, or documented inheritance rather than dated IDs, and leave session-model stages unpinned. `CLAUDE_CODE_SUBAGENT_MODEL` intentionally takes precedence if the user or environment sets it. This model selection is separate from named custom-agent selection and does not change reusable custom-agent `model: inherit` defaults.
+Dynamic Workflow calls may select a documented per-invocation model alias. The workflow must centralize that policy, use stable `sonnet` or documented inheritance rather than dated IDs, and leave session-model stages unpinned. Every substantive schema-producing or canonical-output stage uses Sonnet at minimum; planning and synthesis intentionally inherit the session model. `CLAUDE_CODE_SUBAGENT_MODEL` intentionally takes precedence if the user or environment sets it. This model selection is separate from named custom-agent selection and does not change reusable custom-agent `model: inherit` defaults.
 
 The documented workflow interface does not establish an `agent()` option for selecting a named project custom agent. Do not invent one.
 
