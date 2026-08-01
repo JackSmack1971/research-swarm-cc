@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "engineering-benchmark.schema.json",
+  "title": "Engineering benchmark run",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "run_id", "arm", "suite", "runtime", "results", "raw_evidence"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "run_id": { "type": "string", "pattern": "^bnr_[A-Za-z0-9][A-Za-z0-9_-]*$" },
+    "arm": { "enum": ["plain_claude", "candidate"] },
+    "suite": { "$ref": "#/$defs/suite" },
+    "runtime": { "$ref": "#/$defs/runtime" },
+    "results": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/result" }, "uniqueItems": true },
+    "raw_evidence": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1, "pattern": "^(?!/)(?![A-Za-z]:)[^\\\\]+$" }, "uniqueItems": true }
+  },
+  "$defs": {
+    "suite": { "type": "object", "additionalProperties": false, "required": ["suite_id", "fixture_root", "tasks"], "properties": {
+      "suite_id": { "type": "string", "pattern": "^ens_[A-Za-z0-9][A-Za-z0-9_-]*$" },
+      "fixture_root": { "type": "string", "minLength": 1, "pattern": "^(?!/)(?![A-Za-z]:)[^\\\\]+$" },
+      "tasks": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/task" }, "uniqueItems": true }
+    } },
+    "task": { "type": "object", "additionalProperties": false, "required": ["task_id", "class", "title", "prompt", "acceptance_criteria", "verification", "risk_gates"], "properties": {
+      "task_id": { "type": "string", "pattern": "^ebt_[A-Za-z0-9][A-Za-z0-9_-]*$" }, "class": { "enum": ["local_bug_fix", "small_feature", "cross_file_feature", "refactor_migration", "external_api", "ui_behavior", "auth_security", "dependency_decision", "ambiguous_requirement"] },
+      "title": { "type": "string", "minLength": 1 }, "prompt": { "type": "string", "minLength": 1 },
+      "acceptance_criteria": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+      "verification": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+      "risk_gates": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 }, "uniqueItems": true }
+    } },
+    "runtime": { "type": "object", "additionalProperties": false, "required": ["tool", "version", "model", "command", "started_at", "finished_at"], "properties": {
+      "tool": { "const": "claude-code" }, "version": { "type": "string", "minLength": 1 }, "model": { "type": ["string", "null"] }, "command": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+      "started_at": { "type": "string", "format": "date-time" }, "finished_at": { "type": "string", "format": "date-time" }
+    } },
+    "result": { "type": "object", "additionalProperties": false, "required": ["task_id", "acceptance", "repair_rounds", "human_attention", "telemetry", "regressions", "complexity_delta", "safety_gates", "context_cost"], "properties": {
+      "task_id": { "type": "string", "pattern": "^ebt_[A-Za-z0-9][A-Za-z0-9_-]*$" },
+      "acceptance": { "type": "object", "additionalProperties": false, "required": ["passed", "total", "first_pass"], "properties": { "passed": { "type": "integer", "minimum": 0 }, "total": { "type": "integer", "minimum": 1 }, "first_pass": { "type": "boolean" } } },
+      "repair_rounds": { "type": "integer", "minimum": 0 }, "human_attention": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+      "telemetry": { "$ref": "#/$defs/optional-metrics" }, "regressions": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+      "complexity_delta": { "type": "object", "additionalProperties": false, "required": ["dependencies", "services", "configuration", "public_apis", "abstractions"], "properties": { "dependencies": { "type": "integer" }, "services": { "type": "integer" }, "configuration": { "type": "integer" }, "public_apis": { "type": "integer" }, "abstractions": { "type": "integer" } } },
+      "safety_gates": { "type": "array", "minItems": 1, "items": { "type": "object", "additionalProperties": false, "required": ["gate", "status"], "properties": { "gate": { "type": "string", "minLength": 1 }, "status": { "enum": ["passed", "failed", "not_applicable", "not_run"] } } }, "uniqueItems": true },
+      "context_cost": { "$ref": "#/$defs/optional-metrics" }
+    } },
+    "optional-metrics": { "type": "object", "additionalProperties": false, "required": ["tokens", "milliseconds"], "properties": { "tokens": { "type": ["number", "null"], "minimum": 0 }, "milliseconds": { "type": ["number", "null"], "minimum": 0 } } }
+  }
+}

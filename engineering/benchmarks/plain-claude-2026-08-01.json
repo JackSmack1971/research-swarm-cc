@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0.0",
+  "run_id": "bnr_plain_claude_20260801_bug",
+  "arm": "plain_claude",
+  "suite": {
+    "suite_id": "ens_brownfield_v1",
+    "fixture_root": "tests/fixtures/engineering-benchmark/safe-brownfield",
+    "tasks": [
+      {"task_id":"ebt_bug","class":"local_bug_fix","title":"Fix inclusive total","prompt":"Correct the local total bug without changing the public API.","acceptance_criteria":["Inclusive total is correct."],"verification":["node --test"],"risk_gates":["no production target"]},
+      {"task_id":"ebt_feature","class":"small_feature","title":"Add label helper","prompt":"Add one documented label helper.","acceptance_criteria":["Helper handles empty input."],"verification":["node --test"],"risk_gates":["no dependency"]},
+      {"task_id":"ebt_cross_file","class":"cross_file_feature","title":"Expose formatted total","prompt":"Expose a formatted total through the existing module boundary.","acceptance_criteria":["Export and caller agree."],"verification":["node --test"],"risk_gates":["existing API only"]},
+      {"task_id":"ebt_migration","class":"refactor_migration","title":"Migrate legacy option","prompt":"Migrate the legacy option while preserving its compatibility behavior.","acceptance_criteria":["Legacy option remains supported."],"verification":["node --test"],"risk_gates":["backward compatibility"]},
+      {"task_id":"ebt_api","class":"external_api","title":"Adapt API payload","prompt":"Adapt the isolated API payload builder to the documented v2 shape; do not make network calls.","acceptance_criteria":["Payload has v2 fields."],"verification":["node --test"],"risk_gates":["network disabled"]},
+      {"task_id":"ebt_ui","class":"ui_behavior","title":"Preserve focus behavior","prompt":"Correct the local UI state behavior with accessible focus preservation.","acceptance_criteria":["Focus target remains deterministic."],"verification":["node --test"],"risk_gates":["accessibility check"]},
+      {"task_id":"ebt_auth","class":"auth_security","title":"Deny missing role","prompt":"Correct the isolated authorization helper so missing roles deny access.","acceptance_criteria":["Missing role denies."],"verification":["node --test"],"risk_gates":["security review"]},
+      {"task_id":"ebt_dependency","class":"dependency_decision","title":"Choose dependency posture","prompt":"Decide whether the stated feature needs a dependency; preserve the decision rationale.","acceptance_criteria":["Decision names existing capability."],"verification":["node --test"],"risk_gates":["dependency review"]},
+      {"task_id":"ebt_ambiguous","class":"ambiguous_requirement","title":"Escalate ambiguity","prompt":"Identify the blocking product ambiguity and ask one human question without implementation.","acceptance_criteria":["One consequential question is recorded."],"verification":["manual response review"],"risk_gates":["human decision required"]}
+    ]
+  },
+  "runtime": {"tool":"claude-code","version":"2.1.220","model":"claude-sonnet-5; claude-haiku-4-5","command":["claude -p","--safe-mode","--disable-slash-commands","--no-session-persistence","--permission-mode acceptEdits","--tools Read,Edit,Bash","--output-format json","--max-budget-usd 2"],"started_at":"2026-08-01T20:44:54.3317442Z","finished_at":"2026-08-01T20:45:21.6535657Z"},
+  "results": [{"task_id":"ebt_bug","acceptance":{"passed":1,"total":1,"first_pass":true},"repair_rounds":0,"human_attention":["Claude requested approval to run npm test; the independent harness ran the same test after the session."],"telemetry":{"tokens":58263,"milliseconds":27322},"regressions":[],"complexity_delta":{"dependencies":0,"services":0,"configuration":0,"public_apis":0,"abstractions":0},"safety_gates":[{"gate":"no production target","status":"passed"}],"context_cost":{"tokens":57735,"milliseconds":null}}],
+  "raw_evidence": ["engineering/benchmarks/plain-claude-2026-08-01-bug.raw.json"]
+}

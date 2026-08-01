@@ -6,7 +6,7 @@ Research Swarm is a Claude Code dynamic workflow for people who need public-web 
 - Preserves sources, claims, conflicts, coverage gaps, verification events, repairs, and report-to-claim anchors in each archived run.
 - Uses deterministic Node.js validation so archive structure can be checked offline.
 - Includes a read-only project profiler for target repositories; it records metadata-backed commands, capability evidence, and a drift fingerprint without creating a repository map.
-- Includes a manual `/build` controller, disposable prototype lane, and drift-aware task-capsule compiler that plan accepted work without authorizing execution.
+- Includes a manual `/build` controller, disposable prototype lane, drift-aware task-capsule compiler, and a safe engineering benchmark harness; none authorizes execution.
 
 ## Contents
 
@@ -108,6 +108,7 @@ Use `/research-swarm` for a public-web research question. Use `light` for narrow
 | `node scripts/prototype-worktree.mjs <create\|cleanup> <experiment.json> <repository-root>` | Create or dispose a revision-checked disposable prototype worktree. | `scripts/prototype-worktree.mjs` |
 | `npm run tasks:compile -- <contract.json> <task-drafts.json> <absolute-target-directory>` | Validate accepted intent, compile a dependency-aware task graph, and emit disposable minimal task capsules. | `scripts/compile-task-graph.mjs` |
 | `npm run authorization:check -- <contract.json> <graph.json> <capsule.json> <absolute-target-directory>` | Classify pre-execution risk and emit bounded controls; rejects stale or unresolved inputs. | `scripts/authorize-task-execution.mjs` |
+| `node scripts/benchmark-engineering.mjs <run.json> [candidate-run.json]` | Validate/collect a safe engineering benchmark run or compare aligned runs without authorizing work. | `docs/engineering-benchmark.md` |
 | `node scripts/validate-research-run.mjs artifacts/research-runs/example-run` | Validate an archived run without changing it. | `research/README.md` |
 | `node scripts/finalize-research-run.mjs artifacts/research-runs/example-run` | Finalize a supplied archive; only the persistence writer should invoke this in normal workflow operation. | `research/README.md` |
 
@@ -173,7 +174,7 @@ The forward-looking, outcome-led roadmap is [docs/ROADMAP.md](docs/ROADMAP.md). 
 
 ## Roadmap
 
-Current-runtime Light and Deep acceptance is complete. The next roadmap gate is pre-execution risk classification and bounded authorization; executor work remains conditional on later milestones.
+Current-runtime Light and Deep acceptance, risk authorization, and the plain-Claude engineering baseline harness are complete. A future executor remains conditional on Milestone 57 and must not claim value until Milestone 64 compares it against the recorded baseline.
 
 ## License
 
