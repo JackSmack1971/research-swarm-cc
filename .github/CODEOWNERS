@@ -1,0 +1,11 @@
+# CODEOWNERS
+# Generated from repository evidence. Edit ownership sources, then regenerate.
+# Rules are ordered broad to specific because the last matching rule wins.
+
+# Repository fallback
+# This small personal repository has one verified owner and no verified team with write access.
+* @JackSmack1971
+
+# Repository governance
+# Protect the ownership policy itself.
+.github/CODEOWNERS @JackSmack1971
