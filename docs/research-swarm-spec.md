@@ -123,6 +123,8 @@ This specification remains authoritative for the research workflow and archive c
 
 Milestone 48's project-profile contract is an engineering derived-state input, not a research archive contract or workflow input. Its Node/Ajv implementation may inspect an explicit target repository read-only, but it must not change research schemas, generate a permanent repository map, or elevate optional code-intelligence results into canonical evidence or authorization.
 
+Milestone 50's engineering evidence packet is a derived, scoped export of an already valid research archive, not a research workflow input or archive migration. It must preserve run/version/hash provenance and exclude raw webpages, agent transcripts, report prose, discarded claims, and unrelated context. It may inform an explicit engineering decision only; it must not create a decision, requirement, authorization, or task, and research is never a universal engineering prerequisite.
+
 ---
 
 # 4. Required directory structure

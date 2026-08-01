@@ -55,6 +55,8 @@ This boundary reflects Claude Code 2.1.220 local help and the current official [
 
 No delivery artifact promotes merely because a test passed. Promotion requires each accepted criterion to have proportional proof, including runtime or browser evidence where the criterion demands behavior. Record evidence source/revision, decision and authorization, contract/criterion/task identifiers, implementing revision, verifier identity/context, commands or runtime session, results, exceptions, and unresolved risks. Preserve historical evidence as historical; later decisions may supersede it but cannot rewrite it.
 
+When the Decision Router determines external factual research is relevant, a deterministic evidence-packet compiler may carry only a validated, semantically passed archive's explicitly scoped retained claims, source IDs and locators, verification references, relevant counter-evidence, conflicts, gaps, and archive hash identity into the Intent plane. It excludes report prose, webpages, agent transcripts, discarded claims, and unrelated archive context. The packet is informational evidence only: it cannot create a decision, requirement, criterion, authorization, or task, and research remains optional.
+
 When drift is detected, stop the affected work, re-read the changed canonical input, regenerate derived context, and re-authorize if scope, risk, or criteria changed. A human resolves value judgments, conflicting priorities, irreversible actions, exceptions, and merge/deploy; the system may surface the smallest decision needed but must not guess it.
 
 ## Non-goals and next boundary

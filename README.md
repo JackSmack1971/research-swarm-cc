@@ -101,6 +101,7 @@ Use `/research-swarm` for a public-web research question. Use `light` for narrow
 | `npm run contracts:check` | Check generated contract artifacts for drift. | `package.json` |
 | `npm test` | Run deterministic `node:test` coverage. | `package.json` |
 | `npm run profile -- <absolute-target-directory>` | Emit a deterministic, schema-validated profile of a target project. | `scripts/profile-project.mjs` |
+| `npm run evidence:packet -- <archive-directory> <packet-id> <engineering-question> <selection-rationale> <claim-id[,claim-id...]>` | Emit a scoped engineering evidence packet from a validated, confirmed research archive. | `scripts/compile-engineering-evidence-packet.mjs` |
 | `node scripts/validate-research-run.mjs artifacts/research-runs/example-run` | Validate an archived run without changing it. | `research/README.md` |
 | `node scripts/finalize-research-run.mjs artifacts/research-runs/example-run` | Finalize a supplied archive; only the persistence writer should invoke this in normal workflow operation. | `research/README.md` |
 
