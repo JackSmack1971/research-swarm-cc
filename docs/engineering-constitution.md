@@ -38,6 +38,8 @@ Autonomy progresses only from advice, to inspection/recommendation, to drafting,
 
 Classify blast radius before execution: affected users/data/systems, reversibility, privilege, external effects, and uncertainty. Prefer subtraction, existing capability, Node.js built-ins, native Claude Code features, and existing dependencies before new mechanism. If the smallest safe change is uncertain, route it before asking a person: leave resolved or reversible details alone; inspect repository facts; use Research Swarm/evidence packets only for material external facts; prototype experiential, UX, state, or architecture questions inspection cannot settle; ask a human only for normative, preference, policy, hard-to-reverse, or consequential product decisions; and let an agent choose only reversible low-risk implementation details. Never ask a person for a fact a trustworthy repository, evidence, or experiment source can answer, and never let an agent impersonate human judgment. Do not create a universal checklist, permanent memory, or generic builder swarm.
 
+Milestone 55 requires a separate deterministic authorization record before future execution. It classifies security/authentication/authorization, privacy, integrity, migrations, external APIs, high consequence, UI/accessibility, infrastructure, dependencies, blast radius, and reversibility; binds accepted current intent to a current capsule/profile; and records proportional verification, proof, isolation, tool posture, and human boundaries. Low-risk reversible work stays lightweight; high-risk work is plan-only pending explicit human approval. It never authorizes merge or deployment.
+
 Threats include untrusted instructions/evidence, stale or fabricated context, confused authority, hidden scope expansion, shared-write races, privilege/permission escalation, unreviewed destructive changes, and verification theater. Mitigate with provenance, typed boundaries, revision stamps, isolated worktrees where applicable, least privilege, deterministic validation, fresh-context verification, bounded repair, and explicit human approval at the boundaries above.
 
 ## Claude Code mechanism boundary
@@ -63,4 +65,4 @@ When drift is detected, stop the affected work, re-read the changed canonical in
 
 ## Non-goals and next boundary
 
-This milestone creates no schema, installer, executor, workflow, service, database, dependency, or autonomous merge/deploy path. Milestones 48–59 may add only the mechanisms their gates authorize; the existing Milestone 46 runtime-acceptance gate remains open.
+The completed Milestone 55 adds only schemas, deterministic validation, and a manual authorization check; it creates no executor, workflow, service, database, dependency, or autonomous merge/deploy path. Milestones 56–59 may add only the mechanisms their gates authorize.

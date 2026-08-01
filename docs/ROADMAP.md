@@ -38,7 +38,7 @@ The specification and progress record override this roadmap when they conflict. 
 
 ## Current state
 
-The research system is substantially complete offline: it has canonical provenance and claim contracts, adversarial verification, bounded repair, auditable archives, guarded learning, and deterministic Node.js validation. Milestones 36–45 and the architecture-only Milestone 47 are complete; Milestone 46 runtime acceptance remains incomplete.
+The research system has canonical provenance and claim contracts, adversarial verification, bounded repair, auditable archives, guarded learning, deterministic Node.js validation, and accepted current-runtime Light and Deep evidence. Milestones 36–47 and 50–54 are complete.
 
 The critical gap is live-runtime acceptance. No validated version-2 archive has yet been produced by a current Claude Code **Light** or **Deep** run. An initial bounded Light attempt stopped at the Dynamic Workflow review gate; later bounded Light runs reached worker and normalization stages but retained no eligible evidence when official sources were inaccessible or the worker returned no usable evidence. Deep has not been attempted. The current platform also does not prove hard per-role write isolation; that constraint remains behavioral and must be described honestly.
 
@@ -126,4 +126,4 @@ Review this roadmap after each completed milestone and after any material platfo
 
 ## Near-term decision
 
-Milestone 54 is complete. The next action is **Milestone 46**: obtain current-runtime Light and Deep acceptance evidence. Planning does not authorize executor work; do not begin it before Milestone 55 and the engineering benchmark harness (56) are proven.
+Milestone 46 and Milestone 54 are complete. The next action is **Milestone 55**: add pre-execution risk classification and bounded execution authorization. Planning and authorization do not implement an executor; do not begin it before Milestone 56 is proven.

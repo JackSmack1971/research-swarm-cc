@@ -54,6 +54,8 @@ The workflow must return only the final report and the path to its archived run 
 
 Follow these rules throughout the implementation.
 
+Milestone 55 adds separate canonical risk-classification and execution-authorization records. They bind an accepted current Change Contract, current task graph/capsule, and profiled base; classify security, privacy, integrity, migrations, external APIs, high consequence, UI/accessibility, infrastructure, dependencies, blast radius, and reversibility before implementation; and fail closed on relevant drift or unresolved uncertainty. They record proportional autonomy, human boundaries, proof, verification, isolation, and tool posture. Evidence, graph inferences, and prototype artifacts remain non-authoritative. Authorization never merges, deploys, or implements work; the executor remains a later milestone.
+
 ## 3.1 Runtime boundary
 
 The runtime target is Claude Code.

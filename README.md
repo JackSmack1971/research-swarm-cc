@@ -107,6 +107,7 @@ Use `/research-swarm` for a public-web research question. Use `light` for narrow
 | `node scripts/render-change-contract.mjs <contract.json> [--check-base <target-directory>]` | Validate and render a canonical Change Contract; optionally reject a drifted repository base. | `scripts/render-change-contract.mjs` |
 | `node scripts/prototype-worktree.mjs <create\|cleanup> <experiment.json> <repository-root>` | Create or dispose a revision-checked disposable prototype worktree. | `scripts/prototype-worktree.mjs` |
 | `npm run tasks:compile -- <contract.json> <task-drafts.json> <absolute-target-directory>` | Validate accepted intent, compile a dependency-aware task graph, and emit disposable minimal task capsules. | `scripts/compile-task-graph.mjs` |
+| `npm run authorization:check -- <contract.json> <graph.json> <capsule.json> <absolute-target-directory>` | Classify pre-execution risk and emit bounded controls; rejects stale or unresolved inputs. | `scripts/authorize-task-execution.mjs` |
 | `node scripts/validate-research-run.mjs artifacts/research-runs/example-run` | Validate an archived run without changing it. | `research/README.md` |
 | `node scripts/finalize-research-run.mjs artifacts/research-runs/example-run` | Finalize a supplied archive; only the persistence writer should invoke this in normal workflow operation. | `research/README.md` |
 
@@ -139,6 +140,8 @@ Prototype work uses an absolute, disposable Git worktree outside the production 
 
 Task graphs are derived from an accepted, current Change Contract plus explicit task drafts. Each task maps to observable criteria, names code anchors and verification, carries explicit dependencies, and rejects unordered anchor collisions. Broad migrations may use `expand`, `migrate`, and `contract` slices; reversed dependencies fail. Capsules include only the mapped criteria and decision evidence, non-goals, base revision, anchors, verification, risks, and stop conditions. They deliberately exclude the full contract, research archives, specifications, conversation history, and permanent repository maps; any revision, fingerprint, contract, or anchor drift fails closed and requires regeneration.
 
+Before future execution, `/build` records deterministic risk classification and bounded authorization for the accepted current contract, task graph, capsule, and profile. Low-risk reversible tasks retain task-local verification; high-risk work requires isolated posture, independent proof, and human approval. Authorization is not an executor and never authorizes merge or deployment.
+
 ## Troubleshooting
 
 | Symptom | Likely cause | Fix |
@@ -170,7 +173,7 @@ The forward-looking, outcome-led roadmap is [docs/ROADMAP.md](docs/ROADMAP.md). 
 
 ## Roadmap
 
-The immediate roadmap priority is bounded current-runtime Light and Deep acceptance. Future work is conditional on that evidence and is documented with explicit gates rather than delivery-date commitments.
+Current-runtime Light and Deep acceptance is complete. The next roadmap gate is pre-execution risk classification and bounded authorization; executor work remains conditional on later milestones.
 
 ## License
 

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "risk-classification.schema.json",
+  "title": "Pre-execution risk classification",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "contract", "task", "base_repository", "dimensions", "overall_level"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "contract": { "$ref": "task-graph.schema.json#/properties/contract" },
+    "task": { "type": "object", "additionalProperties": false, "required": ["task_id", "capsule_sha256"], "properties": { "task_id": { "type": "string", "pattern": "^tsk_[A-Za-z0-9][A-Za-z0-9_-]*$" }, "capsule_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" } } },
+    "base_repository": { "$ref": "project-profile.schema.json#/$defs/target" },
+    "dimensions": { "type": "object", "additionalProperties": false, "required": ["security_authentication_authorization", "privacy_sensitive_data", "data_integrity", "migrations", "external_apis", "financial_high_consequence", "ui_accessibility", "infrastructure_configuration", "dependency_introduction", "blast_radius", "reversibility"], "properties": {
+      "security_authentication_authorization": { "$ref": "#/$defs/dimension" }, "privacy_sensitive_data": { "$ref": "#/$defs/dimension" }, "data_integrity": { "$ref": "#/$defs/dimension" }, "migrations": { "$ref": "#/$defs/dimension" }, "external_apis": { "$ref": "#/$defs/dimension" }, "financial_high_consequence": { "$ref": "#/$defs/dimension" }, "ui_accessibility": { "$ref": "#/$defs/dimension" }, "infrastructure_configuration": { "$ref": "#/$defs/dimension" }, "dependency_introduction": { "$ref": "#/$defs/dimension" }, "blast_radius": { "$ref": "#/$defs/dimension" }, "reversibility": { "$ref": "#/$defs/dimension" }
+    } },
+    "overall_level": { "enum": ["low", "medium", "high"] }
+  },
+  "$defs": { "dimension": { "type": "object", "additionalProperties": false, "required": ["level", "rationale"], "properties": { "level": { "enum": ["none", "low", "medium", "high"] }, "rationale": { "type": "string", "minLength": 1 } } } }
+}
