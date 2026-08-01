@@ -78,6 +78,7 @@ test('every workflow agent call has an intentional stable-alias model route', as
   assert.equal(Object.values(routes).includes('haiku'), false);
   for (const label of ['select research policy', 'plan research', 'fill gap', 'repair ledger', 'normalize', 'verify', 'repair verification', 'adjudicate', 'synthesize', 'repair report', 'validate report semantics', 'evaluate run quality', 'evaluate run friction', 'persist research run', 'register research learning']) assert.match(workflow, new RegExp(label));
   assert.match(workflow, /const nativeAgent = agent;/);
+  assert.match(workflow, /const nativeAgent = agent;\s+\{\s+const agent = \(prompt, options\) => \{/);
   assert.match(workflow, /const agent = \(prompt, options\) => \{/);
   assert.match(workflow, /const stageName = modelStageFor\(options\?\.label \?\? ""\);/);
   assert.match(workflow, /nativeAgent\(scopedPrompt, \{ \.\.\.options, model \}\)/);

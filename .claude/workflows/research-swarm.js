@@ -3390,6 +3390,7 @@ const modelStageFor = (label) => {
   throw new Error(`Missing model routing for ${label}.`);
 };
 const nativeAgent = agent;
+{
 const agent = (prompt, options) => {
   const stageName = modelStageFor(options?.label ?? "");
   const model = WORKFLOW_MODEL_ROUTING[stageName];
@@ -3554,6 +3555,7 @@ return {
     : "# Research Swarm Validation Failure\n\nThe run was archived for audit but could not be reported as successful.\n",
   run_directory: persistence.run_directory
 };
+}
 } catch (cause) {
   return {
     report: "# Research Swarm Failure\n\nThe workflow stopped before it could produce a validated report.",

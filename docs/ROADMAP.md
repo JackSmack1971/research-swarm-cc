@@ -40,7 +40,7 @@ The specification and progress record override this roadmap when they conflict. 
 
 The research system is substantially complete offline: it has canonical provenance and claim contracts, adversarial verification, bounded repair, auditable archives, guarded learning, and deterministic Node.js validation. Milestones 36–44 are complete; Milestone 45's deterministic acceptance work is complete, but its runtime acceptance remains incomplete.
 
-The critical gap is live-runtime acceptance. No validated version-2 archive has yet been produced by a current Claude Code **Light** or **Deep** run. A bounded Light attempt stopped at the Dynamic Workflow review gate, and Deep has not been attempted. The current platform also does not prove hard per-role write isolation; that constraint remains behavioral and must be described honestly.
+The critical gap is live-runtime acceptance. No validated version-2 archive has yet been produced by a current Claude Code **Light** or **Deep** run. An initial bounded Light attempt stopped at the Dynamic Workflow review gate; later bounded Light runs reached worker and normalization stages but retained no eligible evidence when official sources were inaccessible or the worker returned no usable evidence. Deep has not been attempted. The current platform also does not prove hard per-role write isolation; that constraint remains behavioral and must be described honestly.
 
 ## Outcome map
 

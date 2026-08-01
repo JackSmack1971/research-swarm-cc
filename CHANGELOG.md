@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Fixed
 
 - Research workflow structured-output stages now use Sonnet at minimum after a Haiku-routed stage exhausted its retry budget during runtime acceptance.
+- Research workflow model routing no longer fails during initialization because of a JavaScript temporal-dead-zone collision.
 
 ### Added
 
