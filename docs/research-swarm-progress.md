@@ -315,3 +315,9 @@ Claude Code 2.1.220 and current Dynamic Workflow documentation were available. O
 Repository hygiene upgraded Ajv from 8.17.1 to 8.20.0 after `npm audit` reported its direct moderate `$data` ReDoS advisory. Current Ajv documentation confirms the later v8 path uses the configured regular-expression engine for `$data` patterns; `npm audit` is now clean. The project skill's stale test count was also corrected; its isolated driver passes all checks.
 
 | 2026-08-01 | `npm ci`; `npm run contracts:check`; `npm test`; valid v1/v2 and invalid fixture validation; benchmark test/collector; wrapped workflow serialization + LF checks; Node/Bash syntax; hook doctor; `git diff --check`; one bounded Claude Code Light attempt | Passed offline: all listed deterministic gates. Runtime: blocked before execution by the explicit Dynamic Workflow review gate; no retry and no Deep run. |
+
+## README update
+
+Added the root operating README. It documents the Claude Code workflow surface, grounded setup and offline verification commands, architecture, configuration and safety boundaries, troubleshooting, and the incomplete current-runtime acceptance status without changing repository behavior.
+
+| 2026-08-01 | README evidence inventory; README quality check; `git diff --check` | Passed: the root README scores 29/30 in the repository README quality check. No install, test, workflow, network, or runtime command was executed for this documentation-only update. |
