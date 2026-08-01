@@ -23,6 +23,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+- The roadmap now allows architecture-only planning before workflow approval while requiring prototype evidence, risk authorization, and an engineering benchmark before executor work.
 - The project now has an outcome-led, gate-driven roadmap at `docs/ROADMAP.md` that prioritizes live Claude Code runtime acceptance before conditional engineering expansion.
 - Deep ledger repairs now adversarially reverify changed or newly admitted canonical claims, and every workflow role is explicitly prohibited from nested delegation.
 - Research archive finalization now deterministically serializes records, refreshes structural metadata and report hashes, and captures validation without changing research decisions.

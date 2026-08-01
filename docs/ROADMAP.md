@@ -12,7 +12,7 @@ Evolve the existing Claude Code Deep Research Swarm into an evidence-grounded en
 validated evidence -> explicit decision -> change contract -> isolated delivery -> independent proof
 ```
 
-The immediate priority is to prove the current research workflow in a live Claude Code session. Engineering capabilities begin only after that proof and retain the repository's Claude Code-only, schema-first, deterministic-validation architecture.
+The immediate priority is to prove the current research workflow in a live Claude Code session. That runtime gate blocks execution authorization, not architecture-only engineering design. Engineering capabilities retain the repository's Claude Code-only, schema-first, deterministic-validation architecture.
 
 ## Roadmap principles
 
@@ -38,7 +38,7 @@ The specification and progress record override this roadmap when they conflict. 
 
 ## Current state
 
-The research system is substantially complete offline: it has canonical provenance and claim contracts, adversarial verification, bounded repair, auditable archives, guarded learning, and deterministic Node.js validation. Milestones 36–45 completed optimization and final deterministic acceptance work.
+The research system is substantially complete offline: it has canonical provenance and claim contracts, adversarial verification, bounded repair, auditable archives, guarded learning, and deterministic Node.js validation. Milestones 36–44 are complete; Milestone 45's deterministic acceptance work is complete, but its runtime acceptance remains incomplete.
 
 The critical gap is live-runtime acceptance. No validated version-2 archive has yet been produced by a current Claude Code **Light** or **Deep** run. A bounded Light attempt stopped at the Dynamic Workflow review gate, and Deep has not been attempted. The current platform also does not prove hard per-role write isolation; that constraint remains behavioral and must be described honestly.
 
@@ -47,7 +47,7 @@ The critical gap is live-runtime acceptance. No validated version-2 archive has 
 | Horizon | Desired outcome | Entry condition | Exit condition |
 | --- | --- | --- | --- |
 | **Now** | The research swarm is proven in its intended runtime. | Existing offline suite remains green. | Validated current-runtime Light and Deep v2 archives; limitations recorded truthfully. |
-| **Next** | Engineering decisions become explicit, traceable, and safe to hand off. | Runtime acceptance is evidenced. | A change can trace evidence/decision to acceptance criteria and a drift-aware task context. |
+| **Next** | Engineering decisions become explicit, traceable, and safe to hand off. | Architecture work may begin now; execution authorization requires runtime acceptance. | A change can trace evidence/decision to acceptance criteria and a drift-aware task context. |
 | **Later** | The system delivers bounded changes in isolation and independently proves them. | Change-contract and context pipeline is reliable. | A representative change passes independent verification with an auditable handoff. |
 | **Conditional** | The system generalizes to new projects and learns cautiously. | Delivery evidence shows stable value. | Benchmarks demonstrate improved first-pass criteria success without weaker safety or excessive cost. |
 
@@ -63,34 +63,36 @@ The critical gap is live-runtime acceptance. No validated version-2 archive has 
 
 | ID | Outcome | Completion gate | Dependencies / non-goals |
 | --- | --- | --- | --- |
-| **47 — Engineering constitution** | Define the Evidence, Intent, and Delivery truth planes; artifact ownership; autonomy levels; rigor levels; and threat/failure model. | Architecture-only document and canonical boundary decisions are reviewed against the existing spec. | Follows 46. No executor, workflow, or new runtime surface. |
+| **47 — Engineering constitution** | Define the Evidence, Intent, and Delivery truth planes; artifact ownership; autonomy and rigor levels; threat/failure model; and the boundary between Dynamic Workflows (orchestration), skills (reusable guidance), subagents (bounded judgment), and deterministic scripts (enforcement). | Architecture-only document and canonical boundary decisions are reviewed against the existing spec. | Can proceed independently of 46. No executor, workflow, or new runtime surface. |
 | **48 — Project profiler and code-intelligence abstraction** | Reliably identify a target repository's stack, commands, CI, project instructions, LSP, and optional intelligence capabilities. | A deterministic profile, source-revision stamp, and drift detection work on representative fixtures. | Follows 47. Prefer existing project metadata; no permanent repository map. |
 | **49 — Structural repository graph adapter** | Evaluate optional read-only graph intelligence for architecture, cross-artifact, and impact questions. | A representative benchmark beats LSP/search baselines for retrieval quality or downstream task success. | Follows 48. Graph data is derived and revision-stamped, never canonical; no mandatory Graphify dependency or always-on hook. |
-| **50 — Evidence bridge** | Convert validated research archives into scoped engineering evidence packets. | Invalid, unverified, or out-of-scope research cannot enter an engineering decision; provenance remains traceable. | Follows 47; may use 48/49 only as optional context. Research conclusions never become requirements automatically. |
-| **51 — Decision router** | Route uncertainty to research, codebase inspection, a prototype, a human, or an agent choice. | Fixtures show that only normative or irreversible questions interrupt the human. | Follows 50. Ask one high-value question at a time. |
-| **52 — Change contract** | Make requirements, acceptance criteria, constraints, risks, and base revision machine-validatable and renderable for people. | Stable IDs link every requirement and criterion; delta changes and repository drift are represented. | Follows 51. The contract is durable; a prose plan is not the source of truth. |
-| **53 — Prototype lane** | Resolve UX, state, or architecture uncertainty through disposable isolated experiments. | Prototype output is explicitly classified as evidence, accepted or rejected, and cannot silently become production code. | Follows 52. Only for uncertainty that inspection cannot settle. |
-| **54 — Task graph and context compiler** | Produce vertical slices and minimal task capsules from a contract and current repository state. | Every task maps to acceptance criteria; capsules invalidate and regenerate on source drift. | Follows 48 and 52; uses 49 only when its benchmark earns it. |
+| **50 — Evidence bridge** | Convert validated research archives into scoped engineering evidence packets when research is warranted. | Invalid, unverified, or out-of-scope research cannot enter an engineering decision; provenance remains traceable. | Follows 47; may use 48/49 only as optional context. Research is one input path, never a universal prerequisite or an automatic requirement source. |
+| **51 — Decision router** | Route uncertainty to no further inquiry, codebase inspection, research, a prototype, a human, or an agent choice. | Fixtures show that only normative or irreversible questions interrupt the human. | Follows 50. Ask one high-value question at a time. |
+| **52 — Change contract** | Make draft requirements, acceptance criteria, constraints, risks, and base revision machine-validatable and renderable for people. | Stable IDs link every requirement and criterion; delta changes and repository drift are represented. | Follows 51. The contract is durable; a prose plan is not the source of truth. |
+| **53 — Prototype lane** | Resolve draft-contract UX, state, or architecture uncertainty through disposable isolated experiments. | Prototype output is explicitly classified as evidence, accepted or rejected, and cannot silently become production code. | Follows 52. Required whenever inspection leaves execution-relevant uncertainty. |
+| **54 — Task graph and context compiler** | Produce vertical slices and minimal task capsules from an accepted contract and current repository state. | Every task maps to acceptance criteria; capsules invalidate and regenerate on source drift. | Follows 48, 52, and any required 53 prototype; uses 49 only when its benchmark earns it. |
 
 ### Later — deliver with independent proof
 
 | ID | Outcome | Completion gate | Dependencies / non-goals |
 | --- | --- | --- | --- |
-| **55 — Production executor** | Implement bounded task slices in isolated worktrees using risk-appropriate tools and effort. | An executor produces scoped changes plus immutable execution events without modifying canonical planning state. | Follows 54. No autonomous merge or deployment. |
-| **56 — Independent verification plane** | Validate a change against its contract from fresh context, with bounded targeted repair. | The implementer cannot approve its own work; every criterion has concrete proof or a recorded failure. | Follows 55. “Tests passed” alone is insufficient where runtime proof is required. |
-| **57 — Delivery and handoff** | Preserve a concise delivery manifest and resume path. | A fresh Claude session can understand the decision, contract, changes, proofs, and unresolved risks without replaying the prior conversation. | Follows 56. PR preparation may be optional; merging remains human-controlled. |
-| **58 — Production risk profiles** | Apply conditional gates for security, data, API, UI, migration, infrastructure, and dependency changes. | Low-risk work stays inexpensive; high-risk work cannot bypass its required evidence or checks. | Follows 56. No universal heavyweight checklist. |
+| **55 — Basic risk classification and execution authorization** | Classify a proposed change before implementation and authorize only the required evidence, isolation, and human controls. | Each task has a recorded risk class and authorization decision; unresolved draft-contract uncertainty blocks execution. | Follows 54 and requires 46 runtime acceptance. Low-risk work stays lightweight. |
+| **56 — Engineering benchmark harness** | Establish representative, reproducible pre-executor tasks and a plain-Claude baseline. | The harness measures criteria success, rework, human attention, cost, and safety gates before executor claims are evaluated. | Follows 54; benchmark fixtures do not authorize production changes. |
+| **57 — Production executor** | Implement authorized bounded task slices in isolated worktrees using risk-appropriate tools and effort. | An executor produces scoped changes plus immutable execution events without modifying canonical planning state. | Follows 55 and 56. No autonomous merge or deployment. |
+| **58 — Independent verification plane** | Validate a change against its contract from fresh context, with bounded targeted repair. | The implementer cannot approve its own work; every criterion has concrete proof or a recorded failure. | Follows 57. “Tests passed” alone is insufficient where runtime proof is required. |
+| **59 — Delivery and handoff** | Preserve a concise delivery manifest and resume path. | A fresh Claude session can understand the decision, contract, changes, proofs, and unresolved risks without replaying the prior conversation. | Follows 58. PR preparation may be optional; merging remains human-controlled. |
+| **60 — Production risk profiles** | Apply conditional gates for security, data, API, UI, migration, infrastructure, and dependency changes. | High-risk work cannot bypass its required evidence or checks. | Follows 58. It refines, rather than replaces, the basic pre-execution risk classification. |
 
-Do not start 58 or the conditional horizon until milestones 50–57 demonstrate a reliable end-to-end change on representative work.
+Do not start 60 or the conditional horizon until milestones 50–59 demonstrate a reliable end-to-end change on representative work.
 
 ### Conditional — scale only after the delivery loop works
 
 | ID | Outcome | Completion gate | Dependencies / non-goals |
 | --- | --- | --- | --- |
-| **59 — Greenfield builder** | Bootstrap a new project from research-backed charter, stack decisions, and a vertical first slice. | Chosen stack decisions retain evidence/constraint links and the generated project passes baseline production gates. | Requires proven 50–58 flow. |
-| **60 — Engineering learning** | Learn from attributable review, rework, runtime, and user outcomes without contaminating research learning. | Lessons are scoped, reviewable, reversible, and cannot weaken the engineering constitution. | Requires 57 and sufficient independent delivery evidence. |
-| **61 — Distribution architecture** | Safely install, update, and remove the system across target repositories. | Project data and security-sensitive agent semantics survive lifecycle operations. | Requires a stable project-local product first. |
-| **62 — Engineering benchmark** | Demonstrate real value on brownfield and greenfield tasks. | It improves first-pass criteria success and rework against a plain-Claude baseline while preserving safety and economic viability. | Requires representative, reproducible task suites. |
+| **61 — Greenfield builder** | Bootstrap a new project from an evidence-informed charter, stack decisions, and a vertical first slice. | Chosen stack decisions retain evidence/constraint links and the generated project passes baseline production gates. | Requires proven 50–60 flow; research is used only when the decision router requires it. |
+| **62 — Engineering learning** | Learn from attributable review, rework, runtime, and user outcomes without contaminating research learning. | Lessons are scoped, reviewable, reversible, and cannot weaken the engineering constitution. | Requires 59 and sufficient independent delivery evidence. |
+| **63 — Distribution architecture** | Safely install, update, and remove the system across target repositories. | Project data and security-sensitive agent semantics survive lifecycle operations. | Requires a stable project-local product first. |
+| **64 — Engineering value benchmark** | Demonstrate real value on brownfield and greenfield tasks using the established harness. | It improves first-pass criteria success and rework against a plain-Claude baseline while preserving safety and economic viability. | Requires representative delivery evidence. |
 
 ## Decision gates and measures
 
@@ -110,10 +112,10 @@ The north-star measure is **verified acceptance criteria satisfied per unit of h
 
 ## Guardrails and explicit exclusions
 
-- No external agent runtime, web server, database, or GitHub Issues blackboard.
+- The orchestration product adds no external agent runtime, web server, database, or GitHub Issues blackboard. A user application's accepted contract may require those components.
 - No generic builder swarm or permanent narrative memory as canonical state.
 - No automatic conversion of evidence into a product decision or requirement.
-- No unvalidated research input, prototype, inferred graph edge, or stale repository profile authorizes a production change.
+- No unvalidated research input, prototype, inferred graph edge, or stale repository profile authorizes a production change; required prototype evidence resolves draft-contract uncertainty before execution authorization.
 - No new dependency before the repository capability, standard library, native platform, and installed-dependency options are assessed.
 - No implementation agent self-approval, autonomous merge, or autonomous deployment in the initial product.
 - No mandatory graph tool, strict source-read hook, or universal production checklist.
@@ -124,4 +126,4 @@ Review this roadmap after each completed milestone and after any material platfo
 
 ## Near-term decision
 
-The next action is **Milestone 46**: obtain current-runtime Light and Deep acceptance evidence. If it passes, begin **Milestone 47** as an architecture-only effort. Do not begin an executor or distribution work before the contract-to-context path (milestones 50–54) is proven.
+The next action is **Milestone 46**: obtain current-runtime Light and Deep acceptance evidence. **Milestone 47** may proceed in parallel because it is architecture-only. Do not begin executor work before the contract-to-context path (milestones 50–54), basic risk authorization (55), and the engineering benchmark harness (56) are proven.
