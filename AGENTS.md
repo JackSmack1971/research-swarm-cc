@@ -10,7 +10,7 @@ Use only the approved Claude Code surfaces (`.claude/workflows/`, agents, skills
 
 The current goal defines the active milestone and overrides stale historical planning. Before editing, read the current goal, the active/current progress section, relevant specification sections and canonical contracts, and the files being changed. Read the full specification when changing architecture, resolving an ambiguous contract, or when the milestone requires it.
 
-`docs/research-swarm-spec.md` defines architecture and contracts. `docs/research-swarm-progress.md` records state, decisions, and validation. Do not silently deviate from architecture: record the original requirement, reason, alternative, affected files, and evidence in progress.
+`docs/research-swarm-spec.md` defines research architecture and contracts; `docs/engineering-constitution.md` defines engineering-system boundaries. `docs/research-swarm-progress.md` records state, decisions, and validation. Do not silently deviate from architecture: record the original requirement, reason, alternative, affected files, and evidence in progress.
 
 Detailed research evidence rules live in `.claude/rules/deep-research.md`, `.claude/skills/research-standards/SKILL.md`, and `research/schemas/`; do not duplicate or weaken them here.
 

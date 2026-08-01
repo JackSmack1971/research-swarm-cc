@@ -75,7 +75,7 @@ flowchart LR
   P --> A[Archived run + deterministic validation]
 ```
 
-The workflow owns fan-out, selection, bounded repairs, aggregation, and return values. Role documents provide behavioral instructions; canonical JSON Schemas and Node.js validation enforce archive contracts. See [the full workflow guide](research/README.md) for evidence standards, depth policy, archive layout, learning controls, and current runtime limitations.
+The workflow owns fan-out, selection, bounded repairs, aggregation, and return values. Role documents provide behavioral instructions; canonical JSON Schemas and Node.js validation enforce archive contracts. See [the full workflow guide](research/README.md) for evidence standards, depth policy, archive layout, learning controls, and current runtime limitations. Future engineering work follows the separate [Engineering Constitution](docs/engineering-constitution.md); it adds no executor or runtime surface.
 
 ## Directory structure
 
@@ -148,7 +148,7 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) before proposing changes, [CODE_OF_CONDU
 
 No license file was found. Add a license before publishing or accepting contributions.
 
-The forward-looking, outcome-led roadmap is [docs/ROADMAP.md](docs/ROADMAP.md). Implemented work and open runtime-acceptance limitations are recorded in [docs/research-swarm-progress.md](docs/research-swarm-progress.md). The architecture and canonical contracts are defined in [docs/research-swarm-spec.md](docs/research-swarm-spec.md).
+The forward-looking, outcome-led roadmap is [docs/ROADMAP.md](docs/ROADMAP.md). Implemented work and open runtime-acceptance limitations are recorded in [docs/research-swarm-progress.md](docs/research-swarm-progress.md). Research architecture and canonical contracts are defined in [docs/research-swarm-spec.md](docs/research-swarm-spec.md); engineering-system boundaries are defined in [docs/engineering-constitution.md](docs/engineering-constitution.md).
 
 ## Roadmap
 

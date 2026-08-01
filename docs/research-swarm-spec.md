@@ -117,6 +117,10 @@ Do not add any other npm dependency unless the repository already has an approve
 
 Use the built-in `node:test` test runner.
 
+## 3.6 Engineering-system boundary
+
+This specification remains authoritative for the research workflow and archive contracts. The engineering system's truth planes, typed evidence-to-delivery boundaries, ownership, rigor/autonomy, drift, and Claude Code mechanism decisions are authoritative in [the Engineering Constitution](engineering-constitution.md). The existing Dynamic Workflow remains a bounded non-interactive research DAG; it is not an engineering executor or a general engineering Dynamic Workflow.
+
 ---
 
 # 4. Required directory structure
@@ -1015,6 +1019,8 @@ Use this implementation rule:
 4. still create `.claude/agents/*.md` so the roles are reusable outside the workflow.
 
 The generated workflow must work without relying on an unverified option name.
+
+For the broader mechanism boundary, including the distinction between this workflow's behavioral isolation and ordinary custom-subagent worktree isolation, see [the Engineering Constitution](engineering-constitution.md). This workflow does not gain those controls by that cross-reference.
 
 ---
 

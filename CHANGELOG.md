@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- Added an engineering constitution that separates evidence, intent, and delivery without adding an executor or runtime surface.
 - Added repository-specific contribution, conduct, and security reporting policies.
 - Research optimization benchmarks can now collect validated archive metrics and deterministic agent-path estimates without fabricating workflow token telemetry.
 - Research learning can now be paused, resumed, inspected, rebuilt, and restored from an auditable snapshot without exposing research content.

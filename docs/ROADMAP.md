@@ -38,7 +38,7 @@ The specification and progress record override this roadmap when they conflict. 
 
 ## Current state
 
-The research system is substantially complete offline: it has canonical provenance and claim contracts, adversarial verification, bounded repair, auditable archives, guarded learning, and deterministic Node.js validation. Milestones 36–44 are complete; Milestone 45's deterministic acceptance work is complete, but its runtime acceptance remains incomplete.
+The research system is substantially complete offline: it has canonical provenance and claim contracts, adversarial verification, bounded repair, auditable archives, guarded learning, and deterministic Node.js validation. Milestones 36–45 and the architecture-only Milestone 47 are complete; Milestone 46 runtime acceptance remains incomplete.
 
 The critical gap is live-runtime acceptance. No validated version-2 archive has yet been produced by a current Claude Code **Light** or **Deep** run. An initial bounded Light attempt stopped at the Dynamic Workflow review gate; later bounded Light runs reached worker and normalization stages but retained no eligible evidence when official sources were inaccessible or the worker returned no usable evidence. Deep has not been attempted. The current platform also does not prove hard per-role write isolation; that constraint remains behavioral and must be described honestly.
 
@@ -63,7 +63,7 @@ The critical gap is live-runtime acceptance. No validated version-2 archive has 
 
 | ID | Outcome | Completion gate | Dependencies / non-goals |
 | --- | --- | --- | --- |
-| **47 — Engineering constitution** | Define the Evidence, Intent, and Delivery truth planes; artifact ownership; autonomy and rigor levels; threat/failure model; and the boundary between Dynamic Workflows (orchestration), skills (reusable guidance), subagents (bounded judgment), and deterministic scripts (enforcement). | Architecture-only document and canonical boundary decisions are reviewed against the existing spec. | Can proceed independently of 46. No executor, workflow, or new runtime surface. |
+| **47 — Engineering constitution** | **Complete:** [Engineering Constitution](engineering-constitution.md) defines the Evidence, Intent, and Delivery truth planes; ownership; autonomy/rigor; risk; and Claude Code mechanism boundary. | Architecture-only document and canonical boundary decisions reviewed against the existing spec. | Completed independently of 46. No executor, workflow, or new runtime surface. |
 | **48 — Project profiler and code-intelligence abstraction** | Reliably identify a target repository's stack, commands, CI, project instructions, LSP, and optional intelligence capabilities. | A deterministic profile, source-revision stamp, and drift detection work on representative fixtures. | Follows 47. Prefer existing project metadata; no permanent repository map. |
 | **49 — Structural repository graph adapter** | Evaluate optional read-only graph intelligence for architecture, cross-artifact, and impact questions. | A representative benchmark beats LSP/search baselines for retrieval quality or downstream task success. | Follows 48. Graph data is derived and revision-stamped, never canonical; no mandatory Graphify dependency or always-on hook. |
 | **50 — Evidence bridge** | Convert validated research archives into scoped engineering evidence packets when research is warranted. | Invalid, unverified, or out-of-scope research cannot enter an engineering decision; provenance remains traceable. | Follows 47; may use 48/49 only as optional context. Research is one input path, never a universal prerequisite or an automatic requirement source. |
@@ -126,4 +126,4 @@ Review this roadmap after each completed milestone and after any material platfo
 
 ## Near-term decision
 
-The next action is **Milestone 46**: obtain current-runtime Light and Deep acceptance evidence. **Milestone 47** may proceed in parallel because it is architecture-only. Do not begin executor work before the contract-to-context path (milestones 50–54), basic risk authorization (55), and the engineering benchmark harness (56) are proven.
+The next action is **Milestone 46**: obtain current-runtime Light and Deep acceptance evidence. Milestone 47 is complete; its constitution does not authorize executor work. Do not begin executor work before the contract-to-context path (milestones 50–54), basic risk authorization (55), and the engineering benchmark harness (56) are proven.
