@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "prototype-experiment.schema.json",
+  "title": "Disposable prototype experiment",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "experiment_id", "question_id", "linked_uncertainty_id", "hypothesis", "variants", "base_revision", "isolation", "run", "observations", "verdict", "decision_references", "prototype_artifacts", "cleanup"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "experiment_id": { "type": "string", "pattern": "^exp_[A-Za-z0-9][A-Za-z0-9_-]*$" },
+    "question_id": { "type": "string", "minLength": 1 },
+    "linked_uncertainty_id": { "type": "string", "pattern": "^unc_[A-Za-z0-9][A-Za-z0-9_-]*$" },
+    "hypothesis": { "type": "string", "minLength": 1 },
+    "variants": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/variant" } },
+    "base_revision": { "$ref": "#/$defs/baseRevision" },
+    "isolation": { "$ref": "#/$defs/isolation" },
+    "run": { "$ref": "#/$defs/run" },
+    "observations": { "type": "array", "items": { "$ref": "#/$defs/observation" } },
+    "verdict": { "enum": ["accepted", "rejected", "inconclusive"] },
+    "decision_references": { "type": "array", "items": { "type": "string", "pattern": "^dec_[A-Za-z0-9][A-Za-z0-9_-]*$" }, "uniqueItems": true },
+    "prototype_artifacts": { "type": "array", "items": { "$ref": "#/$defs/artifact" }, "uniqueItems": true },
+    "cleanup": { "$ref": "#/$defs/cleanup" }
+  },
+  "$defs": {
+    "variant": { "type": "object", "additionalProperties": false, "required": ["variant_id", "description"], "properties": { "variant_id": { "type": "string", "pattern": "^var_[A-Za-z0-9][A-Za-z0-9_-]*$" }, "description": { "type": "string", "minLength": 1 } } },
+    "baseRevision": { "type": "object", "additionalProperties": false, "required": ["repository_identity", "git_revision", "source_fingerprint"], "properties": { "repository_identity": { "type": "string", "minLength": 1 }, "git_revision": { "type": "string", "pattern": "^[a-f0-9]{40,64}$" }, "source_fingerprint": { "type": "string", "pattern": "^[a-f0-9]{64}$" } } },
+    "isolation": { "type": "object", "additionalProperties": false, "required": ["mechanism", "location"], "properties": { "mechanism": { "const": "git_worktree" }, "location": { "type": "string", "minLength": 1 } } },
+    "run": { "type": "object", "additionalProperties": false, "required": ["instructions", "max_runs"], "properties": { "instructions": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } }, "max_runs": { "type": "integer", "minimum": 1, "maximum": 20 } } },
+    "observation": { "type": "object", "additionalProperties": false, "required": ["observation_id", "statement"], "properties": { "observation_id": { "type": "string", "pattern": "^obs_[A-Za-z0-9][A-Za-z0-9_-]*$" }, "statement": { "type": "string", "minLength": 1 } } },
+    "artifact": { "type": "object", "additionalProperties": false, "required": ["path", "sha256"], "properties": { "path": { "type": "string", "minLength": 1 }, "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" } } },
+    "cleanup": { "type": "object", "additionalProperties": false, "required": ["state", "disposed_at"], "properties": { "state": { "enum": ["planned", "disposed"] }, "disposed_at": { "type": ["string", "null"], "format": "date-time" } }, "allOf": [{ "if": { "properties": { "state": { "const": "planned" } }, "required": ["state"] }, "then": { "properties": { "disposed_at": { "const": null } } } }, { "if": { "properties": { "state": { "const": "disposed" } }, "required": ["state"] }, "then": { "properties": { "disposed_at": { "type": "string" } } } }] }
+  }
+}

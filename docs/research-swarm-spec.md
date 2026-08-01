@@ -129,6 +129,8 @@ Milestone 51's engineering uncertainty and decision records are separate canonic
 
 Milestone 52's change contract is separate canonical Intent-plane state outside research archives. It preserves decisions, authorized requirements, observable acceptance criteria, constraints, non-goals, risks, unresolved uncertainty, base repository identity/revision/fingerprint, and any traceable delta from a prior contract. Markdown is a deterministic view only. An accepted contract cannot retain execution-relevant unresolved uncertainty, and acceptance is not execution authorization; task planning and execution remain later milestones.
 
+Milestone 53's prototype lane is separate canonical experiment evidence outside research archives. A record links one draft-contract uncertainty to a hypothesis/variants, exact base revision, disposable isolated worktree, bounded local instructions, observations, accepted/rejected/inconclusive verdict, resulting decision references, artifact identities, and disposal state. Required experiential prototype uncertainty keeps a contract draft. The record never authorizes execution or direct promotion of prototype code; a separate explicit decision may use its finding, after which the existing validated contract path applies. It adds no production executor, workflow, service, or generic prototype swarm.
+
 ---
 
 # 4. Required directory structure

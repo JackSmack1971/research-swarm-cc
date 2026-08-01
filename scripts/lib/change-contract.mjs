@@ -2,11 +2,13 @@ import Ajv2020 from 'ajv/dist/2020.js';
 import changeContractSchema from '../../engineering/schemas/change-contract.schema.json' with { type: 'json' };
 import decisionSchema from '../../engineering/schemas/decision.schema.json' with { type: 'json' };
 import uncertaintySchema from '../../engineering/schemas/uncertainty.schema.json' with { type: 'json' };
+import prototypeExperimentSchema from '../../engineering/schemas/prototype-experiment.schema.json' with { type: 'json' };
+import { validatePrototypeExperiment } from './prototype-lane.mjs';
 import { profileProject } from './project-profiler.mjs';
 
 const ajv = new Ajv2020({ allErrors: true, strict: true, strictRequired: false });
 ajv.addFormat('date-time', { type: 'string', validate: (value) => !Number.isNaN(Date.parse(value)) });
-ajv.addSchema(decisionSchema); ajv.addSchema(uncertaintySchema);
+ajv.addSchema(decisionSchema); ajv.addSchema(uncertaintySchema); ajv.addSchema(prototypeExperimentSchema);
 const validate = ajv.compile(changeContractSchema);
 const unique = (items, key, label, errors) => {
   const ids = items.map((item) => item[key] ?? item.id);
@@ -28,7 +30,14 @@ export function validateChangeContract(contract) {
   for (const decision of contract.decisions) for (const evidence of decision.evidence_references) if (!evidenceIds.has(evidence)) errors.push(`Decision ${decision.decision_id} references evidence outside the contract.`);
   for (const requirement of contract.requirements) for (const decision of requirement.decision_ids) if (!decisionIds.has(decision)) errors.push(`Requirement ${requirement.requirement_id} is not authorized by a contract decision.`);
   for (const criterion of contract.acceptance_criteria) for (const requirement of criterion.requirement_ids) if (!requirementIds.has(requirement)) errors.push(`Criterion ${criterion.criterion_id} references an unknown requirement.`);
+  const requiredPrototype = contract.uncertainties.filter(({ kind, status, downstream_dependency }) => kind === 'experiential' && status === 'unresolved' && downstream_dependency);
+  if (contract.lifecycle_state !== 'draft' && requiredPrototype.length) errors.push('A contract with unresolved required prototype questions must remain draft.');
   if (contract.lifecycle_state === 'accepted' && contract.uncertainties.some(({ status, downstream_dependency }) => status === 'unresolved' && downstream_dependency)) errors.push('An accepted contract cannot contain unresolved execution-relevant uncertainty.');
+  for (const experiment of contract.prototype_experiments ?? []) {
+    const result = validatePrototypeExperiment(experiment); if (!result.valid) errors.push(`Prototype experiment ${experiment?.experiment_id ?? 'unknown'} is invalid.`);
+    if (!contract.uncertainties.some(({ uncertainty_id }) => uncertainty_id === experiment.linked_uncertainty_id)) errors.push(`Prototype experiment ${experiment.experiment_id} links an uncertainty outside the contract.`);
+    for (const decision of experiment.decision_references) if (!decisionIds.has(decision)) errors.push(`Prototype experiment ${experiment.experiment_id} references a decision outside the contract.`);
+  }
   if (contract.change_relationship) {
     unique(contract.change_relationship.deltas, 'operation_id', 'delta operation', errors);
     for (const delta of contract.change_relationship.deltas) {

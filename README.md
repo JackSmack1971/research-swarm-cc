@@ -6,7 +6,7 @@ Research Swarm is a Claude Code dynamic workflow for people who need public-web 
 - Preserves sources, claims, conflicts, coverage gaps, verification events, repairs, and report-to-claim anchors in each archived run.
 - Uses deterministic Node.js validation so archive structure can be checked offline.
 - Includes a read-only project profiler for target repositories; it records metadata-backed commands, capability evidence, and a drift fingerprint without creating a repository map.
-- Includes a manual `/build` controller that routes engineering uncertainty to the smallest trustworthy source without implementing production changes, plus a canonical change contract that records accepted intent without authorizing execution.
+- Includes a manual `/build` controller and disposable prototype lane for resolving draft-contract uncertainty without implementing production changes, plus a canonical change contract that records accepted intent without authorizing execution.
 
 ## Contents
 
@@ -105,10 +105,11 @@ Use `/research-swarm` for a public-web research question. Use `light` for narrow
 | `npm run evidence:packet -- <archive-directory> <packet-id> <engineering-question> <selection-rationale> <claim-id[,claim-id...]>` | Emit a scoped engineering evidence packet from a validated, confirmed research archive. | `scripts/compile-engineering-evidence-packet.mjs` |
 | `node scripts/route-engineering-uncertainty.mjs <uncertainty.json>` | Validate and deterministically route one engineering uncertainty. | `scripts/route-engineering-uncertainty.mjs` |
 | `node scripts/render-change-contract.mjs <contract.json> [--check-base <target-directory>]` | Validate and render a canonical Change Contract; optionally reject a drifted repository base. | `scripts/render-change-contract.mjs` |
+| `node scripts/prototype-worktree.mjs <create\|cleanup> <experiment.json> <repository-root>` | Create or dispose a revision-checked disposable prototype worktree. | `scripts/prototype-worktree.mjs` |
 | `node scripts/validate-research-run.mjs artifacts/research-runs/example-run` | Validate an archived run without changing it. | `research/README.md` |
 | `node scripts/finalize-research-run.mjs artifacts/research-runs/example-run` | Finalize a supplied archive; only the persistence writer should invoke this in normal workflow operation. | `research/README.md` |
 
-Claude Code commands for feedback, learning lifecycle operations, and review-only improvement proposals live in [`.claude/commands/`](.claude/commands/). The manual [`.claude/skills/build/SKILL.md`](.claude/skills/build/SKILL.md) provides `/build` decision routing only; the workflow entry point is [`.claude/workflows/research-swarm.js`](.claude/workflows/research-swarm.js).
+Claude Code commands for feedback, learning lifecycle operations, and review-only improvement proposals live in [`.claude/commands/`](.claude/commands/). The manual [`.claude/skills/build/SKILL.md`](.claude/skills/build/SKILL.md) provides `/build` decision routing, while [`.claude/skills/prototype-lane/SKILL.md`](.claude/skills/prototype-lane/SKILL.md) runs one bounded disposable experiment; neither implements production work.
 
 ## Configuration and safety
 
@@ -131,7 +132,9 @@ Run `npm run contracts:check` before `npm test`; both are deterministic and offl
 
 `/build` is manually invoked and does not implement code. It records material uncertainties and routes repository facts to inspection, material external facts to Research Swarm/evidence packets, experiential or architecture uncertainty to a disposable prototype, and only normative, preference, policy, hard-to-reverse, or consequential decisions to one human question. Evidence never becomes a decision automatically.
 
-A Change Contract is the durable Intent-plane JSON record after decisions exist: requirements link to their authorizing decisions, criteria describe observable proof, and the contract captures constraints, non-goals, risks, unresolved uncertainty, and a profiled base revision/fingerprint. Its Markdown rendering is a view, not authority. `draft`, `resolved`, and `accepted` states do not authorize task execution; accepted contracts reject execution-relevant unresolved uncertainty, and a changed profile invalidates the base context.
+A Change Contract is the durable Intent-plane JSON record after decisions exist: requirements link to their authorizing decisions, criteria describe observable proof, and the contract captures constraints, non-goals, risks, unresolved uncertainty, optional prototype evidence, and a profiled base revision/fingerprint. Its Markdown rendering is a view, not authority. A required experiential prototype question keeps the contract `draft`; its accepted, rejected, or inconclusive record is evidence only, and a separate explicit decision is still required. No lifecycle state authorizes task execution, accepted contracts reject execution-relevant unresolved uncertainty, and a changed profile invalidates the base context.
+
+Prototype work uses an absolute, disposable Git worktree outside the production repository and records the exact base revision, bounded local instructions, observations, verdict, decision references, artifacts, and cleanup state. The helper refuses source drift and direct prototype-artifact promotion. Dispose it after recording the result; dirty worktrees are preserved for manual inspection rather than force-deleted.
 
 ## Troubleshooting
 
