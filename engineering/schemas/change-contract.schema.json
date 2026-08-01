@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "change-contract.schema.json",
+  "title": "Engineering change contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "contract_id", "lifecycle_state", "owner", "goal", "outcome", "base_repository", "evidence_references", "decisions", "requirements", "acceptance_criteria", "constraints", "non_goals", "risks", "uncertainties"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "contract_id": { "type": "string", "pattern": "^chg_[A-Za-z0-9][A-Za-z0-9_-]*$" },
+    "lifecycle_state": { "enum": ["draft", "resolved", "accepted"] },
+    "owner": { "$ref": "#/$defs/owner" },
+    "goal": { "type": "string", "minLength": 1 },
+    "outcome": { "type": "string", "minLength": 1 },
+    "base_repository": { "$ref": "#/$defs/baseRepository" },
+    "evidence_references": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+    "decisions": { "type": "array", "items": { "$ref": "decision.schema.json" } },
+    "requirements": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/requirement" } },
+    "acceptance_criteria": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/criterion" } },
+    "constraints": { "type": "array", "items": { "$ref": "#/$defs/namedStatement" } },
+    "non_goals": { "type": "array", "items": { "$ref": "#/$defs/namedStatement" } },
+    "risks": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/risk" } },
+    "uncertainties": { "type": "array", "items": { "$ref": "uncertainty.schema.json" } },
+    "change_relationship": { "$ref": "#/$defs/changeRelationship" }
+  },
+  "$defs": {
+    "owner": { "type": "object", "additionalProperties": false, "required": ["kind", "identifier"], "properties": { "kind": { "enum": ["human", "agent", "system"] }, "identifier": { "type": "string", "minLength": 1 } } },
+    "baseRepository": { "type": "object", "additionalProperties": false, "required": ["identity", "root", "git_revision", "git_dirty", "source_fingerprint"], "properties": { "identity": { "type": "string", "minLength": 1 }, "root": { "type": "string", "minLength": 1 }, "git_revision": { "type": ["string", "null"] }, "git_dirty": { "type": ["boolean", "null"] }, "source_fingerprint": { "type": "string", "pattern": "^[a-f0-9]{64}$" } } },
+    "requirement": { "type": "object", "additionalProperties": false, "required": ["requirement_id", "statement", "decision_ids"], "properties": { "requirement_id": { "type": "string", "pattern": "^req_[A-Za-z0-9][A-Za-z0-9_-]*$" }, "statement": { "type": "string", "minLength": 1 }, "decision_ids": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "pattern": "^dec_[A-Za-z0-9][A-Za-z0-9_-]*$" } } } },
+    "criterion": { "type": "object", "additionalProperties": false, "required": ["criterion_id", "requirement_ids", "observable_proof"], "properties": { "criterion_id": { "type": "string", "pattern": "^ac_[A-Za-z0-9][A-Za-z0-9_-]*$" }, "requirement_ids": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "pattern": "^req_[A-Za-z0-9][A-Za-z0-9_-]*$" } }, "observable_proof": { "type": "string", "minLength": 1 } } },
+    "namedStatement": { "type": "object", "additionalProperties": false, "required": ["id", "statement"], "properties": { "id": { "type": "string", "pattern": "^(con|ng)_[A-Za-z0-9][A-Za-z0-9_-]*$" }, "statement": { "type": "string", "minLength": 1 } } },
+    "risk": { "type": "object", "additionalProperties": false, "required": ["risk_id", "dimension", "level", "rationale"], "properties": { "risk_id": { "type": "string", "pattern": "^rsk_[A-Za-z0-9][A-Za-z0-9_-]*$" }, "dimension": { "enum": ["scope", "reversibility", "security", "data", "external_effect", "uncertainty"] }, "level": { "enum": ["low", "medium", "high", "critical"] }, "rationale": { "type": "string", "minLength": 1 } } },
+    "entitySnapshot": { "type": "object", "additionalProperties": false, "required": ["id", "sha256"], "properties": { "id": { "type": "string", "minLength": 1 }, "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" } } },
+    "delta": { "type": "object", "additionalProperties": false, "required": ["operation_id", "operation", "entity_type", "rationale"], "properties": { "operation_id": { "type": "string", "pattern": "^dop_[A-Za-z0-9][A-Za-z0-9_-]*$" }, "operation": { "enum": ["add", "modify", "remove"] }, "entity_type": { "enum": ["requirement", "criterion", "constraint", "non_goal", "risk"] }, "rationale": { "type": "string", "minLength": 1 }, "previous": { "$ref": "#/$defs/entitySnapshot" }, "next": { "$ref": "#/$defs/entitySnapshot" } }, "allOf": [ { "if": { "properties": { "operation": { "const": "add" } }, "required": ["operation"] }, "then": { "required": ["next"], "not": { "required": ["previous"] } } }, { "if": { "properties": { "operation": { "const": "modify" } }, "required": ["operation"] }, "then": { "required": ["previous", "next"] } }, { "if": { "properties": { "operation": { "const": "remove" } }, "required": ["operation"] }, "then": { "required": ["previous"], "not": { "required": ["next"] } } } ] },
+    "changeRelationship": { "type": "object", "additionalProperties": false, "required": ["parent_contract_id", "parent_contract_sha256", "deltas"], "properties": { "parent_contract_id": { "type": "string", "pattern": "^chg_[A-Za-z0-9][A-Za-z0-9_-]*$" }, "parent_contract_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }, "deltas": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/delta" } } } }
+  }
+}

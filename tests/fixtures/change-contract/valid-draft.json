@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0.0",
+  "contract_id": "chg_fixture_draft",
+  "lifecycle_state": "draft",
+  "owner": { "kind": "human", "identifier": "product-owner" },
+  "goal": "Make the fixture behavior observable.",
+  "outcome": "A deterministic fixture contract can be rendered.",
+  "base_repository": { "identity": "fixture-repository", "root": "C:/fixture", "git_revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "git_dirty": false, "source_fingerprint": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" },
+  "evidence_references": ["epk_fixture"],
+  "decisions": [{ "schema_version": "1.0.0", "decision_id": "dec_fixture", "scope": "Fixture behavior", "outcome": "Use deterministic output.", "rationale": "It is observable without implementation detail.", "alternatives": ["Use an unstable output."], "evidence_references": ["epk_fixture"], "decided_by": { "kind": "human", "identifier": "product-owner" }, "decided_at": "2026-08-01T00:00:00.000Z", "reversibility": "easy" }],
+  "requirements": [{ "requirement_id": "req_fixture", "statement": "The fixture produces deterministic output.", "decision_ids": ["dec_fixture"] }],
+  "acceptance_criteria": [{ "criterion_id": "ac_fixture", "requirement_ids": ["req_fixture"], "observable_proof": "Rendering the same canonical JSON twice produces byte-identical Markdown." }],
+  "constraints": [{ "id": "con_fixture", "statement": "Use only deterministic local data." }],
+  "non_goals": [{ "id": "ng_fixture", "statement": "Do not execute a fixture." }],
+  "risks": [{ "risk_id": "rsk_fixture", "dimension": "uncertainty", "level": "low", "rationale": "The fixture has no external dependencies." }],
+  "uncertainties": [{ "schema_version": "1.0.0", "uncertainty_id": "unc_fixture", "question": "Does the user prefer a heading?", "kind": "preference", "status": "unresolved", "materiality": "low", "reversibility": "easy", "consequential": false, "downstream_dependency": false, "rationale": "It does not block execution.", "evidence_references": [] }]
+}

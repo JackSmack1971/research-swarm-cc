@@ -127,6 +127,8 @@ Milestone 50's engineering evidence packet is a derived, scoped export of an alr
 
 Milestone 51's engineering uncertainty and decision records are separate canonical contracts outside research archives. The Decision Router sends resolved/reversible details to no further inquiry, repository facts to inspection, material external facts to Research Swarm/evidence packets, experiential/UX/state/architecture questions to a prototype, normative/preference/policy/high-irreversibility/consequential decisions to a human, and reversible low-risk implementation choices to an agent. It never executes production work.
 
+Milestone 52's change contract is separate canonical Intent-plane state outside research archives. It preserves decisions, authorized requirements, observable acceptance criteria, constraints, non-goals, risks, unresolved uncertainty, base repository identity/revision/fingerprint, and any traceable delta from a prior contract. Markdown is a deterministic view only. An accepted contract cannot retain execution-relevant unresolved uncertainty, and acceptance is not execution authorization; task planning and execution remain later milestones.
+
 ---
 
 # 4. Required directory structure

@@ -6,7 +6,7 @@ Research Swarm is a Claude Code dynamic workflow for people who need public-web 
 - Preserves sources, claims, conflicts, coverage gaps, verification events, repairs, and report-to-claim anchors in each archived run.
 - Uses deterministic Node.js validation so archive structure can be checked offline.
 - Includes a read-only project profiler for target repositories; it records metadata-backed commands, capability evidence, and a drift fingerprint without creating a repository map.
-- Includes a manual `/build` controller that routes engineering uncertainty to the smallest trustworthy source without implementing production changes.
+- Includes a manual `/build` controller that routes engineering uncertainty to the smallest trustworthy source without implementing production changes, plus a canonical change contract that records accepted intent without authorizing execution.
 
 ## Contents
 
@@ -40,7 +40,7 @@ npm test
 node scripts/validate-research-run.mjs tests/fixtures/valid-run-v2
 ```
 
-The last command validates the included version-2 fixture. The repository records its most recent offline acceptance as 88 passing tests; run the commands yourself for your checkout.
+The last command validates the included version-2 fixture. The repository records its most recent offline acceptance as 103 passing tests; run the commands yourself for your checkout.
 
 ### Run research
 
@@ -104,6 +104,7 @@ Use `/research-swarm` for a public-web research question. Use `light` for narrow
 | `npm run profile -- <absolute-target-directory>` | Emit a deterministic, schema-validated profile of a target project. | `scripts/profile-project.mjs` |
 | `npm run evidence:packet -- <archive-directory> <packet-id> <engineering-question> <selection-rationale> <claim-id[,claim-id...]>` | Emit a scoped engineering evidence packet from a validated, confirmed research archive. | `scripts/compile-engineering-evidence-packet.mjs` |
 | `node scripts/route-engineering-uncertainty.mjs <uncertainty.json>` | Validate and deterministically route one engineering uncertainty. | `scripts/route-engineering-uncertainty.mjs` |
+| `node scripts/render-change-contract.mjs <contract.json> [--check-base <target-directory>]` | Validate and render a canonical Change Contract; optionally reject a drifted repository base. | `scripts/render-change-contract.mjs` |
 | `node scripts/validate-research-run.mjs artifacts/research-runs/example-run` | Validate an archived run without changing it. | `research/README.md` |
 | `node scripts/finalize-research-run.mjs artifacts/research-runs/example-run` | Finalize a supplied archive; only the persistence writer should invoke this in normal workflow operation. | `research/README.md` |
 
@@ -129,6 +130,8 @@ Run `npm run contracts:check` before `npm test`; both are deterministic and offl
 `npm run profile -- <absolute-target-directory>` reads project metadata and source files without installing dependencies or modifying the target. It reports only declared build/test/lint/typecheck/run commands, revision/dirty state when the target itself is a Git root, Claude Code configuration evidence, and explicit unknowns. Its fingerprint changes when profiled project content changes; regenerate a drifted profile before using it as engineering context. LSP and code-intelligence entries are optional configuration evidence, never a claim that a provider is runnable.
 
 `/build` is manually invoked and does not implement code. It records material uncertainties and routes repository facts to inspection, material external facts to Research Swarm/evidence packets, experiential or architecture uncertainty to a disposable prototype, and only normative, preference, policy, hard-to-reverse, or consequential decisions to one human question. Evidence never becomes a decision automatically.
+
+A Change Contract is the durable Intent-plane JSON record after decisions exist: requirements link to their authorizing decisions, criteria describe observable proof, and the contract captures constraints, non-goals, risks, unresolved uncertainty, and a profiled base revision/fingerprint. Its Markdown rendering is a view, not authority. `draft`, `resolved`, and `accepted` states do not authorize task execution; accepted contracts reject execution-relevant unresolved uncertainty, and a changed profile invalidates the base context.
 
 ## Troubleshooting
 
