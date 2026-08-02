@@ -65,4 +65,4 @@ When drift is detected, stop the affected work, re-read the changed canonical in
 
 ## Non-goals and next boundary
 
-Milestone 57 adds only a bounded controller and project-local executor for authorized isolated worktrees. It emits immutable execution events and always returns an unverified implementation; it creates no engineering workflow, service, database, dependency, self-approval, autonomous merge, or deployment path. Milestones 58–59 may add only the mechanisms their gates authorize.
+Milestone 57 adds only a bounded controller and project-local executor for authorized isolated worktrees. It emits immutable execution events and always returns an unverified implementation; it creates no engineering workflow, service, database, dependency, self-approval, autonomous merge, or deployment path. Milestone 58 adds only a separate fresh-context verifier, append-only criterion proof records, and at most two identified-defect repair rounds. The executor event remains unverified regardless of verifier outcome; merge and deployment remain human boundaries. Milestone 59 may add only the mechanisms its gate authorizes.

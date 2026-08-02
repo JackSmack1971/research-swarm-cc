@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "verification-event.schema.json",
+  "title": "Append-only independent verification event",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "verification_event_id", "task_id", "execution", "verifier", "status", "rationale", "evidence"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "verification_event_id": { "type": "string", "pattern": "^ver_[A-Za-z0-9][A-Za-z0-9_-]*$" },
+    "task_id": { "type": "string", "pattern": "^tsk_[A-Za-z0-9][A-Za-z0-9_-]*$" },
+    "execution": { "$ref": "#/$defs/execution" },
+    "verifier": { "$ref": "#/$defs/verifier" },
+    "status": { "$ref": "#/$defs/status" },
+    "rationale": { "type": "string", "minLength": 1 },
+    "evidence": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/evidence" } }
+  },
+  "$defs": {
+    "execution": { "type": "object", "additionalProperties": false, "required": ["event_id", "change_identity"], "properties": { "event_id": { "type": "string", "pattern": "^exe_[A-Za-z0-9][A-Za-z0-9_-]*$" }, "change_identity": { "type": "string", "minLength": 1 } } },
+    "verifier": { "type": "object", "additionalProperties": false, "required": ["verifier_id", "fresh_context_id", "separate_from_executor", "executor_reasoning_available"], "properties": { "verifier_id": { "type": "string", "minLength": 1 }, "fresh_context_id": { "type": "string", "minLength": 1 }, "separate_from_executor": { "const": true }, "executor_reasoning_available": { "const": false } } },
+    "status": { "enum": ["proven", "failed", "blocked", "unverifiable"] },
+    "evidence": { "type": "object", "additionalProperties": false, "required": ["category", "summary"], "properties": { "category": { "enum": ["command", "runtime", "browser", "api", "lsp", "security"] }, "summary": { "type": "string", "minLength": 1 }, "locator": { "type": "string", "minLength": 1 } } }
+  }
+}
