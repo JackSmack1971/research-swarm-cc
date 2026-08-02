@@ -13,6 +13,7 @@
     "authorization:check": "node scripts/authorize-task-execution.mjs",
     "execute": "node scripts/execute-authorized-task.mjs",
     "delivery:handoff": "node scripts/render-delivery-handoff.mjs",
+    "benchmark:engineering-knowledge": "node scripts/audit-engineering-knowledge.mjs",
     "distribution": "node scripts/distribute.mjs"
   },
   "dependencies": {
