@@ -18,6 +18,9 @@ function factors(need, signals) {
     time_sensitive: need.freshness.requirement !== 'none',
     security_or_high_consequence: signals.security_or_high_consequence ?? (need.security === 'high' || need.consequence === 'high' || need.consequence === 'critical' || need.materiality === 'critical'),
     evidence_conflict: signals.evidence_conflict ?? false,
+    unresolved_material_conflict: signals.unresolved_material_conflict ?? false,
+    source_group_insufficient: signals.source_group_insufficient ?? false,
+    substantial_source_diversity: signals.substantial_source_diversity ?? false,
     independence_required: signals.independence_required ?? (need.authority.level === 'independent' || need.authority.proof === 'independent_corroboration'),
     breadth: need.scope.breadth,
     external_lookup: external,
@@ -32,9 +35,11 @@ export function routeKnowledgeNeed(need, signals = {}) {
   const f = factors(need, signals);
   let tier = 'T0';
   if (!f.repository_answerable) {
-    if (f.security_or_high_consequence || f.evidence_conflict || f.breadth === 'broad') tier = 'T4';
+    const fullSwarm = f.breadth === 'broad' || f.unresolved_material_conflict || f.substantial_source_diversity || f.evidence_conflict && signals.conflict_severity !== 'moderate' || f.security_or_high_consequence || need.consequence === 'high' || need.consequence === 'critical' || need.security === 'high';
+    const focusedVerification = signals.focused_verification === true || f.independence_required || (f.time_sensitive && ['high', 'critical'].includes(need.materiality)) || need.security === 'relevant' || f.source_group_insufficient || (f.evidence_conflict && signals.conflict_severity === 'moderate');
+    if (fullSwarm) tier = 'T4';
+    else if (focusedVerification) tier = 'T3';
     else if (signals.focused_research === true) tier = 'T2';
-    else if (f.independence_required) tier = 'T3';
     else if (f.external_lookup && (need.authority.level === 'official' || need.authority.level === 'primary' || f.time_sensitive)) tier = 'T1';
     else tier = 'T2';
   }

@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
+import test from 'node:test';
+import { projectFocusedResearchInput } from '../scripts/lib/focused-engineering-research.mjs';
+import { acceptFocusedVerificationEvidence, projectFocusedVerificationInput, validateFocusedVerificationEvidence } from '../scripts/lib/focused-engineering-verification.mjs';
+
+const need = JSON.parse(await readFile(path.join('tests', 'fixtures', 'evidence-router', 'simple-external.json')));
+const source = (source_id, independence_group) => ({ source_id, title: source_id, publisher: 'Vendor', publication_date: '2026-01-01T00:00:00.000Z', publication_unavailable_reason: null, locator: `https://vendor.test/${source_id}`, source_type: 'official_release', accessed_at: '2026-08-02T00:00:00.000Z', independence_group, version_applicability: 'current' });
+const focused = { schema_version: '1.0.0', evidence_id: 'fre_external', knowledge_need_id: need.knowledge_need_id, scope: { question: need.question, repository: need.scope.repository, dependencies: need.scope.dependencies, versions: need.scope.versions, usage: need.scope.usage }, sources: [source('frs_docs', 'vendor'), source('frs_registry', 'registry')], claims: [{ claim_id: 'frc_release', statement: 'The requested release occurred on the stated date.', scope: 'The requested dependency release.', claim_type: 'source_assertion', confidence: 'medium', confidence_rationale: 'Focused evidence.', supporting_evidence: [{ source_id: 'frs_docs', locator: 'Release table' }], counter_evidence: [] }], unresolved_gaps: [], escalation: { required: false, tier: 'none', reasons: [] }, budget: { max_sources: 5, max_claims: 5, max_web_fetches: 10, used_sources: 2, used_claims: 1, used_web_fetches: 2 }, non_authorizing: true };
+const input = projectFocusedVerificationInput(need, focused, { repositoryFacts: ['dependency is declared'] });
+const fixtures = JSON.parse(await readFile(path.join('tests', 'fixtures', 'focused-verification', 'dispositions.json'), 'utf8'));
+
+test('T3 projection is minimal and excludes researcher rationale', () => { assert.equal(input.admitted_claims[0].confidence_rationale, undefined); assert.deepEqual(input.source_ids, ['frs_docs', 'frs_registry']); assert.equal(input.verification_posture.seek_disconfirming_first, true); });
+test('fixtures cover all terminal dispositions and validate', () => { assert.deepEqual(fixtures.map(({ claims: [{ disposition }] }) => disposition), ['confirmed', 'confirmed_with_qualification', 'contradicted', 'unverifiable']); for (const fixture of fixtures) assert.equal(validateFocusedVerificationEvidence(fixture).valid, true); });
+test('T3 acceptance requires every claim and rejects researcher self-approval', () => { assert.equal(acceptFocusedVerificationEvidence(input, fixtures[0]).valid, true); const self = structuredClone(fixtures[0]); self.verifier.verifier_id = 'engineering-focused-researcher'; assert.equal(acceptFocusedVerificationEvidence(input, self).valid, false); const missing = structuredClone(fixtures[0]); missing.claims = []; assert.equal(acceptFocusedVerificationEvidence(input, missing).valid, false); });
+test('T3 keeps bounded conflict and unverifiable paths available for T4', () => { assert.equal(fixtures[2].escalation.tier, 'T4'); assert.equal(fixtures[3].claims[0].disposition, 'unverifiable'); assert.equal(fixtures[3].escalation.tier, 'T4'); });

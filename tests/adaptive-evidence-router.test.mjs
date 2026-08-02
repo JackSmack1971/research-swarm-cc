@@ -20,6 +20,13 @@ test('escalates risky, conflicting, and broad needs to the full swarm', async ()
   assert.equal(routeKnowledgeNeed(await fixture('broad')).tier, 'T4');
 });
 
+test('routes bounded material verification triggers to T3', async () => {
+  const need = await fixture('simple-external');
+  assert.equal(routeKnowledgeNeed({ ...need, materiality: 'high' }).tier, 'T3');
+  assert.equal(routeKnowledgeNeed(need, { security_or_high_consequence: false, conflict_severity: 'moderate', evidence_conflict: true }).tier, 'T3');
+  assert.equal(routeKnowledgeNeed({ ...need, security: 'relevant' }).tier, 'T3');
+});
+
 test('validates canonical records and fails closed when underspecified', async () => {
   const need = await fixture('simple-external');
   const underspecified = await fixture('underspecified');
