@@ -1,0 +1,11 @@
+{
+  "status": "found",
+  "source": {
+    "authority": "official",
+    "source_kind": "official-advisory",
+    "locator": "https://osv.dev/vulnerability/CVE-2026-0001",
+    "retrieved_at": "2026-08-02T00:00:00.000Z",
+    "freshness": "recent"
+  },
+  "records": [{ "id": "CVE-2026-0001", "affected_versions": ["<8.21.0"] }]
+}

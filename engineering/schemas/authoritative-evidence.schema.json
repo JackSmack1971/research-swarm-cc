@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "authoritative-evidence.schema.json",
+  "title": "Tier 1 authoritative engineering evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "evidence_id", "knowledge_need_id", "lookup_kind", "scope", "provenance", "result", "conflicts", "unresolved_gaps", "escalation", "non_authorizing"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "evidence_id": { "type": "string", "pattern": "^aev_[A-Za-z0-9][A-Za-z0-9_-]*$" },
+    "knowledge_need_id": { "type": "string", "pattern": "^kn_[A-Za-z0-9][A-Za-z0-9_-]*$" },
+    "lookup_kind": { "enum": ["version", "release", "compatibility", "advisory"] },
+    "scope": { "type": "object", "additionalProperties": false, "required": ["ecosystem", "package", "repository_version", "requested_version"], "properties": { "ecosystem": { "type": "string", "minLength": 1 }, "package": { "type": "string", "minLength": 1 }, "repository_version": { "type": ["string", "null"] }, "requested_version": { "type": ["string", "null"] } } },
+    "provenance": { "type": "object", "additionalProperties": false, "required": ["authority", "source_kind", "locator", "retrieved_at", "freshness"], "properties": { "authority": { "enum": ["official", "primary"] }, "source_kind": { "type": "string", "minLength": 1 }, "locator": { "type": "string", "minLength": 1 }, "retrieved_at": { "type": "string", "format": "date-time" }, "freshness": { "enum": ["current", "recent", "as_of", "unknown"] } } },
+    "result": { "type": "object", "additionalProperties": false, "required": ["status", "records"], "properties": { "status": { "enum": ["found", "not_found", "unavailable", "ambiguous"] }, "records": { "type": "array", "items": { "type": "object", "additionalProperties": true } } } },
+    "security": { "type": "object", "additionalProperties": false, "required": ["affected_version_evidence", "exploitability"], "properties": { "affected_version_evidence": { "type": "array", "items": { "type": "object", "additionalProperties": false, "required": ["id", "affected_versions", "matches_repository_version"], "properties": { "id": { "type": ["string", "null"] }, "affected_versions": { "type": "array", "items": { "type": "string" } }, "matches_repository_version": { "type": ["boolean", "null"] } } } }, "exploitability": { "const": "not_assessed" } } },
+    "conflicts": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "unresolved_gaps": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "escalation": { "type": "object", "additionalProperties": false, "required": ["required", "tier", "reasons"], "properties": { "required": { "type": "boolean" }, "tier": { "enum": ["none", "T2", "T3", "T4"] }, "reasons": { "type": "array", "items": { "type": "string", "minLength": 1 } } } },
+    "non_authorizing": { "const": true }
+  }
+}

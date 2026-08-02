@@ -153,6 +153,8 @@ Milestone 54's task graph and context capsules are derived Delivery-plane planni
 
 Milestone 63 uses a hybrid distribution. The versioned Claude Code plugin under `distribution/plugin/` contains only generic guidance. The lifecycle installer bootstraps project-local `.claude/workflows/`, research-role agents, rules, skills, and deterministic `research/`, `engineering/`, and `scripts/` assets because current plugin documentation lists skills, agents, hooks, commands, MCP/LSP, monitors, executables, and settings, but not Dynamic Workflows. Security-sensitive research agents therefore retain project-local semantics. `.claude/settings.json`, local settings, generated archives, learning state, and existing target files are not owned.
 
+Milestone 64 adds a bounded Tier 1 authoritative lookup adapter for narrow repository-scoped npm facts. Claude Code supplies one approved retrieval result; deterministic Node.js code validates the T0 dependency/version scope, normalizes version/release/compatibility/advisory records, and emits interim evidence with authority, locator, retrieval time, freshness, conflicts, and gaps. Advisory matches preserve affected-version evidence separately from exploitability, and unavailable, conflicting, or consequential ambiguity escalates to a later tier. The adapter performs no broad network retrieval and creates no research archive.
+
 `node scripts/distribute.mjs` supports `install`, `update`, `uninstall`, `rollback`, `status`, and `--dry-run`. It writes an explicit versioned ownership manifest, refuses conflicts, symlinks, path escape, and changed owned files, uses atomic writes and update backups, and never deletes target project data.
 
 ---

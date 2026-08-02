@@ -61,7 +61,11 @@ export async function inspectRepositoryKnowledge(need, targetPath, { file, text,
     const packagePath = validPath(root, 'package.json');
     const pkg = JSON.parse(await readFile(packagePath, 'utf8').catch(() => '{}'));
     const version = pkg.dependencies?.[dependency] ?? pkg.devDependencies?.[dependency] ?? null;
-    return result(need, profile, { anchors: version ? [{ path: 'package.json', kind: 'metadata', excerpt: `${dependency}: ${version}` }] : [], observed_facts: version ? [`package.json declares ${dependency} at ${version}.`] : [], unresolved_subquestions: version ? [] : [`No package.json dependency declaration found for ${dependency}.`], confidence: version ? 'high' : 'low', provenance_type: 'deterministic_metadata', mechanism: 'metadata', external_evidence_necessary: false });
+    const lockfile = validPath(root, 'package-lock.json');
+    const lock = JSON.parse(await readFile(lockfile, 'utf8').catch(() => '{}'));
+    const resolved = lock.packages?.[`node_modules/${dependency}`]?.version ?? null;
+    const metadata = version ? { name: dependency, declared_version: version, resolved_version: resolved, manifest_path: 'package.json', lockfile_path: resolved ? 'package-lock.json' : null } : null;
+    return result(need, profile, { ...(metadata ? { dependency: metadata } : {}), anchors: version ? [{ path: 'package.json', kind: 'metadata', excerpt: `${dependency}: ${version}${resolved ? ` (resolved ${resolved})` : ''}` }] : [], observed_facts: version ? [`package.json declares ${dependency} at ${version}.${resolved ? ` package-lock.json resolves it to ${resolved}.` : ''}`] : [], unresolved_subquestions: version ? [] : [`No package.json dependency declaration found for ${dependency}.`], confidence: version ? 'high' : 'low', provenance_type: 'deterministic_metadata', mechanism: 'metadata', external_evidence_necessary: false });
   }
   return result(need, profile, { anchors: [{ path: '.', kind: 'graph-candidate', excerpt: 'Structural repository relationship requires graph intelligence.' }], observed_facts: [], unresolved_subquestions: ['Cross-file, cross-artifact, or impact relationships need a future Graphify candidate evaluation.'], confidence: 'low', provenance_type: 'graphify_candidate', mechanism: 'graphify-candidate', external_evidence_necessary: false });
 }
