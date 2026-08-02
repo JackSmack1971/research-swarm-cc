@@ -19,11 +19,11 @@ test('T0 searches exact text before graph intelligence', async () => {
   assert.equal(evidence.mechanism, 'search'); assert.ok(evidence.anchors.some(({ path: name }) => name === 'package.json')); assert.equal(evidence.external_evidence_necessary, false);
 });
 
-test('T0 parses dependency metadata and marks structural work as a non-authorizing candidate', async () => {
+test('T0 parses dependency metadata and keeps unsupported structural inference non-authorizing', async () => {
   const metadata = await inspectRepositoryKnowledge(need, process.cwd(), { dependency: 'ajv', now: () => '2026-08-02T00:00:00.000Z' });
   assert.equal(metadata.mechanism, 'metadata'); assert.match(metadata.observed_facts[0], /ajv/);
   const structural = await inspectRepositoryKnowledge(need, process.cwd(), { now: () => '2026-08-02T00:00:00.000Z' });
-  assert.equal(structural.mechanism, 'graphify-candidate'); assert.equal(structural.non_authorizing, true); assert.equal(structural.external_evidence_necessary, false);
+  assert.equal(structural.mechanism, 'read'); assert.equal(structural.provenance_type, 'direct_observation'); assert.equal(structural.non_authorizing, true); assert.equal(structural.external_evidence_necessary, false);
 });
 
 test('the integrated router consumes T0 before selecting escalation', async () => {

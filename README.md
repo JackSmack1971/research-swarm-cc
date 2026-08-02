@@ -96,12 +96,12 @@ flowchart LR
   H -. attributable signals .-> L[Dormant engineering learning]
 ```
 
-The Dynamic Workflow owns research fan-out, selection, bounded repairs, aggregation, and return values; it is not the engineering executor. The engineering path keeps Evidence, Intent, and Delivery separate: evidence can inform an explicit decision, but cannot become a requirement or authorization by itself. The executor returns an unverified implementation, the verifier independently proves criteria, and the handoff is a drift-checked derived view. Engineering learning consumes only eligible delivery signals and cannot influence policy while its final-acceptance gate is pending. Role write isolation in Dynamic Workflows remains behavioral where the documented interface does not provide named-agent or per-call restrictions. See [the research workflow guide](research/README.md) and [the engineering constitution](docs/engineering-constitution.md).
+The Dynamic Workflow owns research fan-out, selection, bounded repairs, aggregation, and return values; it is not the engineering executor. `/build` is the engineering controller and Knowledge Need/Evidence Router: it loads T0 repository intelligence, T2 focused research, or T3 adversarial verification only when that route is needed, and escalates broad or high-consequence needs to `/research-swarm` as T4. `/research-swarm` also remains the standalone deep-research path. The engineering path keeps Evidence, Intent, and Delivery separate: evidence can inform an explicit decision, but cannot become a requirement or authorization by itself. The executor returns an unverified implementation, the verifier independently proves criteria, and `/delivery-handoff` is the fresh-session Delivery boundary. Engineering learning consumes only eligible delivery signals and cannot influence policy while its final-acceptance gate is pending. Role write isolation in Dynamic Workflows remains behavioral where the documented interface does not provide named-agent or per-call restrictions. See [the research workflow guide](research/README.md) and [the engineering constitution](docs/engineering-constitution.md).
 
 ## Directory structure
 
 ```text
-.claude/       Claude Code workflow, role definitions, rules, commands, hooks, and skills
+.claude/       Claude Code workflow, lazy role definitions, minimal rules, commands, hooks, and skills
 research/      Archive schemas and the detailed workflow operating guide
 engineering/   Engineering schemas, benchmark evidence, and the learning constitution
 scripts/       Contract generation, archive validation/finalization, and learning utilities

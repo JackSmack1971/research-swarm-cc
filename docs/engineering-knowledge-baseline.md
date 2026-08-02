@@ -40,7 +40,7 @@ The current context-efficiency work narrows executor, verifier, and repair proje
 
 ## Graphify and M49 evidence
 
-Graphify is not an available current retrieval path. The progress record reports that M49's full extraction stopped because no approved semantic-extraction backend/credential was available; a code-only graph was partial, and its `affected` and `benchmark` operations failed on the generated graph. The roadmap therefore keeps Graphify blocked and optional. The code↔docs/config case is consequently recorded as a repository-inspection class with unavailable Graphify cost/evidence, not as a successful graph result (`docs/research-swarm-progress.md`, `docs/ROADMAP.md`).
+The current installed Graphify is 0.8.38. A revision-stamped disposable code-only extraction was reproducible, but it did not beat direct inspection: exact-symbol, cross-file-impact, and architecture queries returned anchored nodes with 25–88% irrelevant node context and roughly 0.6–0.7 seconds query latency, while direct search returned only matching anchors. The installed `affected` and `benchmark` commands failed because the extractor emitted `edges` while those commands require `links`; the code↔config/docs case was not run because no approved semantic backend is available. Graphify is therefore rejected for all four benchmark classes and remains optional, read-only, and non-canonical. T0 routes exact symbols and impact to search/LSP, architecture to the profiler plus targeted search, and code↔config/docs to direct search (`scripts/benchmark-repository-intelligence.mjs`, `docs/research-swarm-progress.md`).
 
 ## Ranked opportunities (audit only)
 
@@ -50,7 +50,6 @@ Graphify is not an available current retrieval path. The progress record reports
 | 2 | Reuse a scoped evidence projection for engineering-facing prompts | high: keeps claims, locators, verification, conflicts and gaps | medium reduction; current packet is already scoped | medium: omission could hide counter-evidence | first measure payloads and prove packet completeness |
 | 3 | Separate engineering evidence validation from report-only semantic review where safe | medium/high: reduces report-specific work | medium reduction; no live measurement | high: semantic support must not be silently dropped | archive validity and evidence guarantees must remain intact |
 | 4 | Add question-class telemetry at the router/workflow boundary | medium: makes cost and quality decisions observable | low implementation cost | low | current `/workflows` telemetry is manual/unavailable in this repository |
-| 5 | Revisit repository cross-artifact intelligence after a functioning M49 benchmark | medium: improves code↔docs/config and impact questions | unknown | medium: graph edges are derived and must not authorize work | blocked by backend and Graphify benchmark failures |
+| 5 | Keep Graphify dormant unless a future version proves class-specific value | low currently: direct inspection wins the measured classes | no measured reduction | medium: graph edges are derived and must not authorize work | revisit only with a compatible interface or approved semantic backend |
 
-No router, runtime, service, dependency, database, generic memory, Graphify integration, or new research path was implemented. Provenance, verification, archive validity, and the evidence/decision boundary remain unchanged.
-
+No runtime, service, dependency, database, generic memory, Graphify integration, or new research path was implemented. The T0 fallback was narrowed to direct observation; provenance, verification, archive validity, and the evidence/decision boundary remain unchanged.

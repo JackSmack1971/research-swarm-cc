@@ -157,6 +157,8 @@ Milestone 64 adds a bounded Tier 1 authoritative lookup adapter for narrow repos
 
 Milestone 66 adds a bounded Tier 3 focused cross-check for material engineering knowledge needs. It projects only the scoped need, admitted T2 claims, source metadata/locators, relevant repository facts, and a disconfirming-first posture into a distinct fresh-context verifier; researcher rationale is unavailable. Each admitted claim receives one terminal disposition (`confirmed`, `confirmed_with_qualification`, `contradicted`, `demoted`, or `unverifiable`) with checked source IDs and rationale, while conflicts and uncertainty remain explicit. Deterministic routing uses T3 for bounded material, time-sensitive, security-relevant, independence, or moderate-conflict cases and preserves T4 for broad scope, unresolved material conflict, substantial source diversity, or high-consequence questions. T3 emits no report, archive, decision, authorization, or learning artifact.
 
+Milestone 68 consolidates Claude Code surfaces around progressive disclosure. `/build` is the engineering controller and Knowledge Need/Evidence Router; T0 repository intelligence, T2 focused research, and T3 adversarial verification load through focused non-user-facing skills and narrowly tooled custom agents. `/research-swarm` remains the T4 escalation and standalone deep-research workflow; `/delivery-handoff` remains the fresh-session Delivery boundary. The universal research rule contains only the untrusted-content/security boundary and canonical ownership reminder; detailed research standards remain in the lazy research skill. Hooks stay cheap and deterministic, and distribution lifecycle tests cover the added skills without owning target settings, hooks, archives, or learning state.
+
 `node scripts/distribute.mjs` supports `install`, `update`, `uninstall`, `rollback`, `status`, and `--dry-run`. It writes an explicit versioned ownership manifest, refuses conflicts, symlinks, path escape, and changed owned files, uses atomic writes and update backups, and never deletes target project data.
 
 ---
@@ -231,59 +233,15 @@ Do not duplicate the full research rules in `CLAUDE.md`.
 
 # 5. Project rule
 
-Create `.claude/rules/deep-research.md`.
+Create `.claude/rules/deep-research.md` as a small universal safety boundary.
+It must contain only the untrusted-content/security rule and a pointer to the
+lazy standards skill; evidence, source, conflict, role, synthesis, and repair
+procedures belong in `.claude/skills/research-standards/SKILL.md`.
 
 It must establish these invariants:
 
-## Evidence
-
-* Every externally verifiable material claim must reference at least one source ID.
-* Every source must include title, publisher or responsible organization, publication date when available, URL or DOI, source type, and access date.
-* Evidence must include a locator such as a section, heading, page, table, paragraph description, timestamp, or repository path.
-* Missing provenance makes a claim ineligible for the final report.
-* A URL alone is not evidence.
-* Workers must distinguish facts, source assertions, estimates, opinions, and inferences.
-
-## Source hierarchy
-
-Prefer, in order:
-
-1. primary data and original research;
-2. official documentation, laws, standards, filings, and public records;
-3. high-quality independent secondary analysis;
-4. expert commentary;
-5. general commentary or opinion.
-
-Do not treat multiple articles derived from the same press release or dataset as independent confirmation.
-
-## Conflicts
-
-* Conflicting credible evidence must remain visible.
-* A conflict must identify the competing claims, supporting source IDs, likely reason for disagreement, and practical implication.
-* Lack of agreement must not be converted into false certainty.
-
-## Roles
-
-* Planners do not research claims.
-* Workers extract evidence but do not write narrative reports.
-* Normalizers deduplicate and structure claims but do not silently resolve conflicts.
-* Verifiers actively attempt refutation.
-* Synthesizers may not introduce unsupported externally verifiable propositions.
-* Persistence writers may write files but may not alter research conclusions.
-
-## Synthesis
-
-* Every key report finding must map to retained claim IDs.
-* Derived conclusions must be labeled as inferences and identify their supporting claim IDs.
-* The final report must distinguish established findings, qualified findings, unresolved conflicts, gaps, and recommendations.
-* Unsupported claims must be removed rather than rewritten to sound plausible.
-
-## Repair limits
-
-* Validation failure may trigger no more than two targeted repair rounds.
-* A repair round may correct, demote, remove, or re-research a claim.
-* It must not invent evidence.
-* If validation still fails, return a transparent failure report and preserve the incomplete run for inspection.
+Detailed evidence, source hierarchy, conflict, role, synthesis, and repair
+requirements are loaded from the `research-standards` skill by research roles.
 
 ---
 

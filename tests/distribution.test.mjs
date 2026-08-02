@@ -23,6 +23,9 @@ test("install, dry-run, update, rollback, status, and uninstall preserve target 
     assert.match(dry.stdout, /\"action\": \"install\"/);
     await command(["install", "--target", dir]);
     const before = await readFile(path.join(dir, ".claude", "agents", "research-planner.md"), "utf8");
+    await readFile(path.join(dir, ".claude", "skills", "repository-intelligence", "SKILL.md"), "utf8");
+    await readFile(path.join(dir, ".claude", "skills", "focused-engineering-research", "SKILL.md"), "utf8");
+    await readFile(path.join(dir, ".claude", "skills", "focused-engineering-verification", "SKILL.md"), "utf8");
     await command(["update", "--target", dir]);
     const status = await command(["status", "--target", dir]);
     assert.match(status.stdout, /\"state\": \"installed\"/);
@@ -31,6 +34,7 @@ test("install, dry-run, update, rollback, status, and uninstall preserve target 
     await command(["uninstall", "--target", dir]);
     assert.equal(await readFile(path.join(dir, "artifacts", "research-runs", "keep.txt"), "utf8"), "canonical\n");
     assert.equal(await readFile(path.join(dir, ".claude", "settings.json"), "utf8"), "{\"user\":true}\n");
+    await assert.rejects(readFile(path.join(dir, ".claude", "skills", "repository-intelligence", "SKILL.md"), "utf8"), /ENOENT/);
     assert.equal((await command(["status", "--target", dir])).stdout.includes('"state": "uninstalled"'), true);
   } finally { await rm(dir, { recursive: true, force: true }); }
 });

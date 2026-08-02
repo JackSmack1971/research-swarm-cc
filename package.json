@@ -10,11 +10,13 @@
     "greenfield": "node scripts/build-greenfield.mjs",
     "evidence:packet": "node scripts/compile-engineering-evidence-packet.mjs",
     "evidence:capsule": "node scripts/compile-engineering-evidence-capsule.mjs",
+    "evidence:t4": "node scripts/invoke-engineering-t4.mjs",
     "tasks:compile": "node scripts/compile-task-graph.mjs",
     "authorization:check": "node scripts/authorize-task-execution.mjs",
     "execute": "node scripts/execute-authorized-task.mjs",
     "delivery:handoff": "node scripts/render-delivery-handoff.mjs",
     "benchmark:engineering-knowledge": "node scripts/audit-engineering-knowledge.mjs",
+    "benchmark:repository-intelligence": "node scripts/benchmark-repository-intelligence.mjs",
     "distribution": "node scripts/distribute.mjs"
   },
   "dependencies": {

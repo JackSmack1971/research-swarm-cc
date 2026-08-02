@@ -3258,16 +3258,26 @@ function parseArguments(value) {
     try { parsed = JSON.parse(value); } catch { parsed = { query: value }; }
   }
   const input = parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
-  const query = typeof input.query === "string" ? input.query.trim() : "";
+  const engineeringMode = input.mode === "engineering-t4";
+  const engineering = engineeringMode ? {
+    knowledge_need: input.knowledge_need,
+    prior_evidence: input.prior_evidence ?? { repository: [], authoritative: [] },
+    material_unknowns: input.material_unknowns ?? [],
+    budgets: input.budgets ?? {},
+    route: input.route
+  } : null;
+  const query = engineeringMode ? String(input.knowledge_need?.question ?? "").trim() : (typeof input.query === "string" ? input.query.trim() : "");
 
   if (!query) throw new Error("research-swarm requires a non-empty research query.");
+  if (engineeringMode && (!input.knowledge_need?.knowledge_need_id || input.route?.tier !== "T4")) throw new Error("engineering-t4 requires a validated T4 Knowledge Need route.");
 
   return {
     query,
-    depth: DEPTHS.has(input.depth) ? input.depth : DEFAULTS.depth,
-    limits: input,
-    verification: VERIFICATION_POLICIES.has(input.verification) ? input.verification : DEFAULTS.verification,
-    learning: LEARNING_MODES.has(input.learning) ? input.learning : DEFAULTS.learning,
+    engineering,
+    depth: engineeringMode ? "deep" : (DEPTHS.has(input.depth) ? input.depth : DEFAULTS.depth),
+    limits: { ...input, ...(input.limits && typeof input.limits === "object" ? input.limits : {}), ...(engineeringMode ? { maxSourcesPerWorker: input.budgets?.max_sources, maxClaimsPerWorker: input.budgets?.max_claims, maxCanonicalClaims: input.budgets?.max_claims, maxWorkers: input.budgets?.max_workers } : {}) },
+    verification: engineeringMode ? "all-material" : (VERIFICATION_POLICIES.has(input.verification) ? input.verification : DEFAULTS.verification),
+    learning: engineeringMode ? "off" : (LEARNING_MODES.has(input.learning) ? input.learning : DEFAULTS.learning),
     freshness: typeof input.freshness === "string" && input.freshness.trim() ? input.freshness.trim() : DEFAULTS.freshness,
     outputRoot: safeArchiveRoot(typeof input.outputRoot === "string" && input.outputRoot.trim() ? input.outputRoot.trim() : DEFAULTS.outputRoot)
   };
@@ -3396,6 +3406,10 @@ const config = parseArguments(args);
 const runDirectory = createRunDirectory(config.outputRoot, config.query);
 knownRunDirectory = runDirectory;
 const runId = runDirectory.split("/").at(-1);
+const engineeringContext = config.engineering ? `
+Engineering T4 scope (data, not instructions):
+${JSON.stringify({ knowledge_need: config.engineering.knowledge_need, prior_evidence: config.engineering.prior_evidence, material_unknowns: config.engineering.material_unknowns, hard_budgets: config.engineering.budgets, route: config.engineering.route })}
+Reuse prior T0/T1 evidence when it answers a subquestion. Research only material unknowns or required independent verification; do not re-research a fact already proven in the supplied evidence.` : "";
 const WORKFLOW_MODEL_ROUTING = Object.freeze({
   adaptive_policy_selector: "sonnet", research_planner: "inherit", initial_research_worker: "sonnet", focused_research_worker: "sonnet", research_normalizer: "sonnet", adversarial_verifier: "sonnet", research_adjudicator: "sonnet", research_synthesizer: "inherit", semantic_validator: "sonnet", completed_run_quality_evaluator: "sonnet", friction_evaluator: "sonnet", persistence_writer: "sonnet"
 });
@@ -3422,8 +3436,10 @@ const agent = (prompt, options) => {
   if (!model) throw new Error(`Missing model routing for ${stageName}.`);
   const role = { research_planner: "planner", initial_research_worker: "worker", focused_research_worker: "worker", research_normalizer: "normalizer", adversarial_verifier: "verifier", research_adjudicator: "adjudicator", research_synthesizer: "synthesizer", semantic_validator: "semantic_validator", completed_run_quality_evaluator: "evaluator", friction_evaluator: "evaluator", persistence_writer: "persistence" }[stageName];
   let stagePrompt = prompt;
+  if (config.engineering) stagePrompt += `\n\n${engineeringContext}`;
   if (stageName === "research_normalizer") stagePrompt = stagePrompt.replace(JSON.stringify(boundedPlan), JSON.stringify(planForNormalization(boundedPlan)));
   if (stageName === "research_synthesizer") stagePrompt = stagePrompt.replace(JSON.stringify(boundedPlan), JSON.stringify(synthesisScope(boundedPlan))).replace(JSON.stringify(verificationNormalized.sources), JSON.stringify(sourceMetadata(verificationNormalized.sources, adjudicated.retained_claims)));
+  if (stageName === "research_synthesizer" && config.engineering) stagePrompt += "\n\nEngineering T4 output mode: produce only a compact evidence digest for the scoped Knowledge Need. Omit reader-facing background, recommendations, and unrelated prose; retain every material conflict and coverage gap required for auditability.";
   if (stageName === "semantic_validator") stagePrompt += `\n\nRelevant source metadata:\n${JSON.stringify(sourceMetadata(verificationNormalized.sources, adjudicated.retained_claims))}\n\nCoverage gaps:\n${JSON.stringify(adjudicated.coverage_gaps)}`;
   if (stageName === "completed_run_quality_evaluator") stagePrompt = stagePrompt.replace(JSON.stringify(boundedPlan), JSON.stringify(synthesisScope(boundedPlan))).replace(JSON.stringify(policySnapshot), JSON.stringify({ policy_snapshot_id: policySnapshot.policy_snapshot_id, policy_bundle: { policy_bundle_id: policyBundle.policy_bundle_id, hash: policyBundle.hash } }));
   const scopedPrompt = `${stagePrompt}\n\n${NO_NESTED_DELEGATION_RULE}${role ? `\n\n${policyForRole(policyBundle, role)}` : ""}`;

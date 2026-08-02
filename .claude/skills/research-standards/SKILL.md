@@ -52,6 +52,21 @@ Write reports in this order:
 
 Map each key report unit to retained claim IDs. Keep uncertainty and unresolved material conflicts visible.
 
+## Role and lifecycle boundaries
+
+Planners do not research claims. Workers extract evidence and do not write
+narrative reports. Normalizers structure claims without silently resolving
+conflicts. Verifiers seek disconfirming evidence. Synthesizers use only the
+adjudicated ledger. Only the persistence writer creates the final archive and
+it may repair serialization or formatting, never evidence, claims, confidence,
+verification outcomes, conflicts, conclusions, or recommendations.
+
+Map every key report finding to retained claim IDs and keep established,
+qualified, unresolved, gap, and recommendation sections distinct. Permit no
+more than two targeted repair rounds after validation failure; repair may
+correct, demote, remove, or re-research, but never invent evidence. Preserve
+an incomplete run for inspection when validation still fails.
+
 ## Prohibited behavior
 
 Do not invent sources, dates, locators, claims, evidence, verification results, or conclusions. Do not treat derivative coverage as independent corroboration, search snippets as evidence, unavailable evidence as contradiction, or a polished narrative as proof. Do not silently drop credible counter-evidence or conflicts. Do not promote confidence without the required evidence and recorded rationale. Do not add unsupported externally verifiable claims to a report.

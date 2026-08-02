@@ -13,11 +13,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- Added progressive-disclosure Claude Code surfaces: `/build` routes T0–T4 engineering evidence, focused T0/T2/T3 skills load only when needed, and `/research-swarm` remains the T4/standalone research path.
+- Added an explicit engineering-scoped T4 Research Swarm invocation with bounded prior-evidence reuse, hard source/claim budgets, and compact Evidence Capsule handoff.
 - Added one non-authorizing Engineering Evidence Capsule contract for T1–T4 evidence, with native tier adapters, fail-closed validation, deterministic identity, and preserved T4 archive lineage.
 - Added a bounded Tier 3 focused adversarial cross-check with a fresh verifier, terminal claim dispositions, preserved uncertainty, and deterministic T4 escalation.
 - Added a bounded Tier 2 fresh-context engineering researcher with scoped T0/T1 input projection, authoritative evidence contracts, hard source/claim/web budgets, and T3/T4 escalation.
 - Added a bounded Tier 1 authoritative lookup adapter for repository-scoped npm version, release, compatibility, and advisory facts with explicit provenance, freshness, escalation, and non-exploitability claims.
-- Added revision-stamped, non-authorizing Tier 0 repository intelligence for exact reads/searches, configured LSP lookup, dependency metadata, and explicit Graphify candidates before external evidence routing.
+- Added revision-stamped, non-authorizing Tier 0 repository intelligence for exact reads/searches, configured LSP lookup, dependency metadata, and optional structural inspection before external evidence routing.
 - Added canonical Engineering Knowledge Need and adaptive Evidence Route contracts with deterministic T0–T4 routing, fail-closed underspecification, and offline escalation fixtures.
 - Added a deterministic engineering-knowledge path baseline benchmark covering ten question classes, current routing, unavailable telemetry, evidence consumption, and ranked pre-redesign opportunities.
 - Added versioned hybrid distribution lifecycle commands with conflict-safe install/update/rollback/uninstall, ownership manifests, path protections, and disposable-target tests.
@@ -51,6 +53,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+- Tier 0 structural repository evidence now routes away from Graphify after the current per-question-class benchmark found direct inspection cheaper and more precise.
 - Engineering evidence now has a capsule migration path across all tiers; the legacy evidence-packet shape and research archives remain read-only-compatible.
 - Updated the root README to describe the current Claude Code engineering-control flow, optional research evidence route, and dormant Milestone 62 engineering-learning boundary.
 

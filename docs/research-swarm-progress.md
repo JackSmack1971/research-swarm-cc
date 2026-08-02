@@ -533,9 +533,9 @@ The architectural decision is to keep this router in the Evidence plane: it emit
 
 ## Tier 0 repository intelligence
 
-Implemented the default first repository-evidence source for engineering knowledge needs. `scripts/lib/repository-intelligence.mjs` reuses the project profiler for a Git revision/content fingerprint, then selects the cheapest requested mechanism: exact file read, exact text search, injected project-LSP lookup when configured, or deterministic `package.json` dependency metadata. Structural, cross-file, code↔docs/config, and impact-shaped needs return a compact revision-stamped Graphify candidate only after those simpler mechanisms are unavailable; no Graphify dependency, graph, or external lookup is invoked.
+Implemented the default first repository-evidence source for engineering knowledge needs. `scripts/lib/repository-intelligence.mjs` reuses the project profiler for a Git revision/content fingerprint, then selects the cheapest requested mechanism: exact file read, exact text search, injected project-LSP lookup when configured, or deterministic `package.json` dependency metadata. Structural, cross-file, code↔docs/config, and impact-shaped needs now remain compact, revision-stamped, and explicitly unresolved when direct mechanisms are insufficient; Graphify is not invoked.
 
-The canonical repository-evidence record preserves exact anchors, observed facts, unresolved subquestions, confidence, provenance/mechanism, and external-evidence status. Every result is explicitly non-authorizing. The existing route CLI accepts an optional absolute repository path and the router consumes T0 evidence before choosing an external tier; the legacy route-only invocation remains unchanged. Tests cover file, search, metadata, structural-candidate, schema, fingerprint, and integrated-routing behavior. Model-facing output contains no repository-wide content or history beyond the compact evidence record.
+The canonical repository-evidence record preserves exact anchors, observed facts, unresolved subquestions, confidence, provenance/mechanism, and external-evidence status. Every result is explicitly non-authorizing. The existing route CLI accepts an optional absolute repository path and the router consumes T0 evidence before choosing an external tier; the legacy route-only invocation remains unchanged. Tests cover file, search, metadata, structural fallback, schema, fingerprint, and integrated-routing behavior. Model-facing output contains no repository-wide content or history beyond the compact evidence record.
 
 | 2026-08-02 | `node --test tests/repository-intelligence.test.mjs tests/adaptive-evidence-router.test.mjs`; `node --test tests/*.test.mjs` (152 tests: 151 passed, 1 environment skip); `npm run contracts:check`; T0 CLI invocation against the repository fixture; `node --check scripts/lib/repository-intelligence.mjs`; `node --check scripts/lib/adaptive-evidence-router.mjs`; `node --check scripts/route-engineering-evidence.mjs`; `git diff --check` | Passed: representative repository needs terminate at T0; exact reads/search, metadata, and configured LSP selection are deterministic/read-only; structural work is explicitly Graphify-candidate and non-authorizing; source revision/fingerprint and anchors are emitted; output remains compact; no external research or Graphify adoption was performed. |
 
@@ -565,4 +565,45 @@ Added `engineering/schemas/engineering-evidence-capsule.schema.json` and `script
 
 T4 uses the existing validated archive bridge and projects only selected retained claims, while preserving run, plan, archive-version, and archive-hash lineage. The old evidence-packet compiler and packet schema remain read-only-compatible; no archive migration or Decision Router/Change Contract lineage change is required because their evidence references are opaque IDs. `evidence:capsule` is the new T4 CLI surface. Scope stops at evidence unification; T4 internals are unchanged.
 
+## Graphify re-evaluation and T0 routing decision
+
+Re-ran the representative four-class benchmark requested by M49 using the installed Graphify 0.8.38 interface. The benchmark creates a disposable revision-stamped code-only corpus, never writes `graphify-out/` into the repository, records direct Read/search and Graphify retrieval quality, source anchors, irrelevant context, model-facing characters, setup/query timing, graph size, and observable interface failures, and records the absence of a project-local LSP. Code-only extraction is the approved first lane; no semantic backend, watcher, hook, MCP, persistent memory, or automatic indexing was used.
+
+Graphify completed extraction and returned source-anchored results, but direct search produced smaller, exact result sets: Graphify's irrelevant node-context ratios were 0.875 for exact symbol, 0.500 for cross-file impact, and 0.250 for architecture, with roughly 0.6–0.7 second query latency. Its `affected` and `benchmark` commands failed on the generated `edges`/expected `links` mismatch. The code↔config/docs case was correctly not run in code-only mode because no approved semantic backend was available. The per-class decision is direct search or LSP for exact symbols and cross-file impact, profiler plus targeted search for architecture/module relationships, and direct search for code↔config/docs. Graphify remains a non-authorizing future candidate only; no adapter is adopted.
+
+The T0 structural fallback now reports a revision-stamped, low-confidence direct observation with an explicit unresolved relationship instead of emitting a Graphify candidate. This keeps inferred or ambiguous edges out of authorization and supersedes the stale M49 “blocked benchmark” conclusion without changing the Evidence/Intent/Delivery boundaries.
+
+| 2026-08-02 | Current `graphify --help`/`--version`; official Graphify CLI documentation; `npm run benchmark:repository-intelligence`; `node --test tests/repository-intelligence.test.mjs`; `node --check scripts/benchmark-repository-intelligence.mjs`; `node --check scripts/lib/repository-intelligence.mjs`; `npm test`; `npm run contracts:check`; `node scripts/validate-research-run.mjs tests/fixtures/valid-run-v2`; `git diff --check` | Passed: reproducible disposable four-class benchmark; code-only extraction; direct-vs-Graphify measurements; per-class routing decision; structural fallback contract/test; full offline suite; generated-contract check; valid archive; syntax; and whitespace. No semantic extraction, live research, Claude Code runtime, persistent graph artifact, or Graphify dependency was used. |
+
 | 2026-08-02 | `node --test tests/engineering-evidence-capsule.test.mjs tests/evidence-bridge.test.mjs`; `npm test`; `npm run contracts:check`; `node scripts/validate-research-run.mjs tests/fixtures/valid-run-v2`; `node --check scripts/lib/engineering-evidence-capsule.mjs`; `node --check scripts/compile-engineering-evidence-capsule.mjs`; JSON parse; `git diff --check` | Passed: all four tier paths, common-contract validation, digest and source-reference rejection, T4 archive lineage projection, legacy packet compatibility, 169 tests with 168 passed and 1 environment-only symlink skip, generated contract check, valid v2 archive, syntax, JSON parsing, and whitespace. No live retrieval, Claude Code runtime, archive rewrite, or T4 optimization was performed. |
+
+## Milestone 67 — Engineering-scoped T4 invocation
+
+Added `scripts/lib/engineering-t4-invocation.mjs` and `scripts/invoke-engineering-t4.mjs` as the explicit Evidence Router T4 handoff. The invocation is driven by a validated Knowledge Need, requires a T4 route, forces Deep/all-material verification, carries repository-conditioned scope, freshness and authority requirements, known T0/T1 evidence, material unknowns, and hard source/claim/worker budgets, and emits projection telemetry showing the known evidence excluded from redundant research. The workflow accepts the `engineering-t4` mode, reuses the supplied scoped evidence in every role, and narrows only engineering synthesis to a compact evidence digest; standalone `/research-swarm` defaults and full reader-facing guarantees are unchanged. The existing validated archive bridge remains the only capsule compiler, so engineering receives the common Evidence Capsule while the complete archive stays auditable.
+
+The offline fixture proves two known evidence items are carried into the T4 projection and counted as avoided redundant work; `live_runtime: false` is explicit because no Claude Code workflow execution or `/workflows` telemetry was available. No archive schema migration, new runtime, external dependency, or surface cleanup was added. Scope stops after T4 integration.
+
+| 2026-08-02 | `node --test tests/engineering-t4-invocation.test.mjs tests/adaptive-evidence-router.test.mjs`; `npm test`; `npm run contracts:check`; `node --check scripts/lib/engineering-t4-invocation.mjs`; `node --check scripts/invoke-engineering-t4.mjs`; `node scripts/validate-research-run.mjs tests/fixtures/valid-run-v2`; `git diff --check` | Passed: T4-only invocation, prior-evidence projection, hard budgets, Deep/all-material mode, non-T4 rejection, 171 tests with 170 passed and 1 environment-only symlink skip, generated contracts, valid v2 archive, syntax, and whitespace. No live Claude Code run, archive, or runtime savings claim was made. |
+
+## Milestone 68 — Claude Code surface consolidation
+
+Consolidated the Claude Code entrypoints around progressive disclosure. `/build`
+now names the Knowledge Need/Evidence Router and points to lazy T0 repository
+intelligence, T2 focused research, and T3 focused verification skills;
+`/research-swarm` remains the T4 escalation and standalone deep-research path;
+`/delivery-handoff` remains the fresh-session Delivery boundary. The universal
+research rule was reduced to untrusted-content/security and canonical ownership
+reminders; detailed evidence, role, synthesis, and repair guidance remains in
+the lazy `research-standards` skill. T2/T3 agents now preload their focused
+skills instead of duplicating those procedures.
+
+The project-local skills remain owned by the existing hybrid bootstrap because
+Dynamic Workflows and security-sensitive role semantics are still not plugin
+assets. The installer therefore needs no ownership-model change: its existing
+`.claude/skills` root picks up the new skills, while settings, hooks, archives,
+learning state, and target data remain unowned. No obsolete command or asset
+was removed; names and compatibility paths remain intact. The SessionStart and
+Stop hooks remain offline, bounded, and deterministic, with no web, Graphify,
+archive hydration, or background intelligence.
+
+| 2026-08-02 | `node --test tests/surface-consolidation.test.mjs tests/distribution.test.mjs`; `npm test`; `npm run contracts:check`; `node scripts/validate-research-run.mjs tests/fixtures/valid-run-v2`; `node --check scripts/distribute.mjs`; `git diff --check` | Passed: progressive-disclosure/static boundary checks, focused-agent tool and skill checks, lightweight-hook checks, distribution lifecycle coverage including new skills, full deterministic suite, generated contracts, valid v2 archive, syntax, and whitespace. No Claude Code runtime, live web research, Graphify extraction, archive hydration, or background hook intelligence was run. |
