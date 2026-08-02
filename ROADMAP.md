@@ -83,7 +83,7 @@ Current-runtime Light and Deep version-2 archive acceptance is complete by maint
 | **59 — Delivery and handoff** | **Complete:** Preserve a concise delivery manifest and resume path. | A fresh Claude session can validate canonical references and understand the decision, contract, change identity, proofs, and unresolved risks without replaying the prior conversation. | Follows 58. It cannot execute, approve, push, merge, or deploy. |
 | **60 — Production risk profiles** | Apply conditional gates for security, data, API, UI, migration, infrastructure, and dependency changes. | High-risk work cannot bypass its required evidence or checks. | Follows 58. It refines, rather than replaces, the basic pre-execution risk classification. |
 
-Do not start 60 or the conditional horizon until milestones 50–59 demonstrate a reliable end-to-end change on representative work.
+The maintainer will manually test a representative chain from an evidence packet through independent proof and delivery handoff at final project acceptance. That test does not block Milestone 60 or later development; it is required before declaring the project complete.
 
 ### Conditional — scale only after the delivery loop works
 

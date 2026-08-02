@@ -377,6 +377,8 @@ The manual `/delivery-handoff` skill is the fresh-session entry point. Missing r
 
 | 2026-08-02 | installed Claude Code 2.1.220 `--help`; `node --test tests/delivery-handoff.test.mjs`; `npm run contracts:check`; `npm test`; `node scripts/validate-research-run.mjs tests/fixtures/valid-run-v2`; `node scripts/benchmark-engineering.mjs engineering/benchmarks/plain-claude-2026-08-01.json`; `git diff --check` | Passed: deterministic fresh-process regeneration; verified, partial, blocked, stopped, drifted, and missing-reference handoffs; full offline contract/test/archive/benchmark gates and whitespace check. No live executor/verifier, PR preparation, commit, push, merge, deployment, or user-application change was performed. |
 
+The maintainer will manually test the representative chain from an evidence packet through independent proof and delivery handoff at final project acceptance. This remains pending manual evidence and does not block Milestone 60 or later development; it is required before declaring the project complete.
+
 ## Milestone 47
 
 Created `docs/engineering-constitution.md` as the authoritative engineering-system boundary without creating an executor, workflow, schema, installer, service, dependency, or runtime surface. It separates Evidence, Intent, and Delivery; requires typed lineage from evidence through independently verified acceptance criteria; defines canonical versus derived state, ownership, revision-stamped drift handling, quick/standard/program rigor, advice-to-isolated-implementation autonomy, blast radius/reversibility, threats, minimum-mechanism selection, and human decision/merge/deploy boundaries.

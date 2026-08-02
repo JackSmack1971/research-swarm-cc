@@ -40,6 +40,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+- Clarified that the maintainer's pending manual representative delivery-chain test does not block further development and is required only for final project acceptance.
 - The roadmap now allows architecture-only planning before workflow approval while requiring prototype evidence, risk authorization, and an engineering benchmark before executor work.
 - The project now has an outcome-led, gate-driven roadmap at `docs/ROADMAP.md` that prioritizes live Claude Code runtime acceptance before conditional engineering expansion.
 - Deep ledger repairs now adversarially reverify changed or newly admitted canonical claims, and every workflow role is explicitly prohibited from nested delegation.
