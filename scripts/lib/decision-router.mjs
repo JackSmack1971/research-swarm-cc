@@ -22,7 +22,7 @@ const ROUTES = {
 function rationale(uncertainty, route) {
   if (route === 'no_inquiry') return 'The detail is already resolved or reversible enough to proceed without more inquiry.';
   if (route === 'repository_inspection') return 'A trustworthy repository inspection can answer this codebase fact.';
-  if (route === 'research_evidence') return 'Material external factual uncertainty requires the Research Swarm and, when relevant, a scoped evidence packet.';
+  if (route === 'research_evidence') return 'Material external factual uncertainty requires the Research Swarm and, when relevant, one scoped Engineering Evidence Capsule.';
   if (route === 'prototype') return 'Inspection cannot settle this experiential, UX, state, or architecture question; use a disposable prototype.';
   if (route === 'human') return 'This is a normative, preference, policy, high-irreversibility, or consequential decision that requires human judgment.';
   return 'This is a reversible, low-risk implementation choice the agent may make and record.';

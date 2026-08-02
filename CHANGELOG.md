@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- Added one non-authorizing Engineering Evidence Capsule contract for T1–T4 evidence, with native tier adapters, fail-closed validation, deterministic identity, and preserved T4 archive lineage.
 - Added a bounded Tier 3 focused adversarial cross-check with a fresh verifier, terminal claim dispositions, preserved uncertainty, and deterministic T4 escalation.
 - Added a bounded Tier 2 fresh-context engineering researcher with scoped T0/T1 input projection, authoritative evidence contracts, hard source/claim/web budgets, and T3/T4 escalation.
 - Added a bounded Tier 1 authoritative lookup adapter for repository-scoped npm version, release, compatibility, and advisory facts with explicit provenance, freshness, escalation, and non-exploitability claims.
@@ -50,6 +51,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+- Engineering evidence now has a capsule migration path across all tiers; the legacy evidence-packet shape and research archives remain read-only-compatible.
 - Updated the root README to describe the current Claude Code engineering-control flow, optional research evidence route, and dormant Milestone 62 engineering-learning boundary.
 
 - Clarified that the maintainer's pending manual representative delivery-chain test does not block further development and is required only for final project acceptance.
