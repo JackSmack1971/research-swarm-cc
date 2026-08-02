@@ -12,7 +12,8 @@
     "tasks:compile": "node scripts/compile-task-graph.mjs",
     "authorization:check": "node scripts/authorize-task-execution.mjs",
     "execute": "node scripts/execute-authorized-task.mjs",
-    "delivery:handoff": "node scripts/render-delivery-handoff.mjs"
+    "delivery:handoff": "node scripts/render-delivery-handoff.mjs",
+    "distribution": "node scripts/distribute.mjs"
   },
   "dependencies": {
     "ajv": "8.20.0"

@@ -58,6 +58,20 @@ For bounded structured input:
 
 New archives are written below `artifacts/research-runs/`.
 
+### Distribute to another repository
+
+Distribution is hybrid: the Claude Code plugin carries generic guidance, while the installer bootstraps project-local workflow, schemas, scripts, and research roles because current plugin documentation does not include Dynamic Workflows.
+
+```sh
+node scripts/distribute.mjs install --target <absolute-target-directory>
+node scripts/distribute.mjs status --target <absolute-target-directory>
+node scripts/distribute.mjs update --target <absolute-target-directory>
+node scripts/distribute.mjs rollback --target <absolute-target-directory>
+node scripts/distribute.mjs uninstall --target <absolute-target-directory>
+```
+
+Add `--dry-run` to inspect a plan. Ownership and SHA-256 hashes live in `.research-swarm/distribution-manifest.json`; conflicts, symlinks, path escape, and user-modified owned files fail closed. Settings, hooks, archives, learning state, and other target data are never owned or removed.
+
 ## Features
 
 - Depth-aware parallel research with hard resource limits and bounded focused gap filling.

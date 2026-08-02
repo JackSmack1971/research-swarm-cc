@@ -1,0 +1,6 @@
+{
+  "name": "research-swarm-cc",
+  "version": "1.0.0",
+  "description": "Generic guidance for the Research Swarm Claude Code project bootstrap",
+  "skills": "./skills/"
+}

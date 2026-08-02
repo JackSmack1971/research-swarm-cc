@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- Added versioned hybrid distribution lifecycle commands with conflict-safe install/update/rollback/uninstall, ownership manifests, path protections, and disposable-target tests.
 - Added a separate dormant engineering-learning registry with delivery-bound provenance, bounded lesson lifecycle, deterministic safety controls, and deferred live activation pending final Claude Code project acceptance.
 - Added a deterministic greenfield builder that validates a charter, routed uncertainties, stack decisions, subtraction ladder, accepted contract, and safe file set before native first-slice scaffolding, then reuses the existing isolated execution and independent verification path.
 - Added deterministic conditional production risk-profile gates with required proof evidence for security, data, migration, API, UI, infrastructure, and dependency changes.

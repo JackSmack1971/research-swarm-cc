@@ -1,0 +1,22 @@
+{
+  "name": "research-swarm-cc",
+  "version": "1.0.0",
+  "plugin": "distribution/plugin",
+  "bootstrap": {
+    "roots": [
+      ".claude/agents/research-",
+      ".claude/commands/research-",
+      ".claude/hooks/session-start.sh",
+      ".claude/rules/deep-research.md",
+      ".claude/skills",
+      ".claude/workflows/research-swarm.js",
+      "engineering",
+      "research",
+      "scripts"
+    ],
+    "exclude": [
+      ".claude/settings.json",
+      ".claude/settings.local.json"
+    ]
+  }
+}

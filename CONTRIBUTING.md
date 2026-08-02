@@ -23,6 +23,8 @@ node scripts/validate-research-run.mjs tests/fixtures/valid-run-v2
 
 The checks are deterministic and offline. They do not establish that a change ran in Claude Code. Only claim runtime validation when you actually ran it and record the bounded result.
 
+Distribution changes must test disposable targets with existing Claude configuration, conflicts, rollback, uninstall, symlink/path protections, and preserved project data. Never overwrite settings, hooks, archives, learning state, or user-modified owned files.
+
 ## Making a change
 
 1. Read [AGENTS.md](AGENTS.md), the active section of [the progress record](docs/research-swarm-progress.md), the applicable specification, and the files you will change.

@@ -149,6 +149,12 @@ Milestone 62 adds a separate deterministic engineering-learning registry. It acc
 
 Milestone 54's task graph and context capsules are derived Delivery-plane planning records outside research archives. A deterministic compiler accepts only a valid accepted Change Contract at its exact profiled base, validates criterion lineage, dependencies, collision and migration ordering, and emits disposable task-local capsules. It does not infer decisions, authorize execution, execute work, or make optional Graphify data mandatory.
 
+### 3.7 Distribution boundary
+
+Milestone 63 uses a hybrid distribution. The versioned Claude Code plugin under `distribution/plugin/` contains only generic guidance. The lifecycle installer bootstraps project-local `.claude/workflows/`, research-role agents, rules, skills, and deterministic `research/`, `engineering/`, and `scripts/` assets because current plugin documentation lists skills, agents, hooks, commands, MCP/LSP, monitors, executables, and settings, but not Dynamic Workflows. Security-sensitive research agents therefore retain project-local semantics. `.claude/settings.json`, local settings, generated archives, learning state, and existing target files are not owned.
+
+`node scripts/distribute.mjs` supports `install`, `update`, `uninstall`, `rollback`, `status`, and `--dry-run`. It writes an explicit versioned ownership manifest, refuses conflicts, symlinks, path escape, and changed owned files, uses atomic writes and update backups, and never deletes target project data.
+
 ---
 
 # 4. Required directory structure
