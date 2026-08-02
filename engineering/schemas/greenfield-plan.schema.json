@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "greenfield-plan.schema.json",
+  "title": "Greenfield project plan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "plan_id", "charter", "stack_decisions", "uncertainties", "subtraction_ladder", "contract", "files", "baseline"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "plan_id": { "type": "string", "pattern": "^gfp_[A-Za-z0-9][A-Za-z0-9_-]*$" },
+    "charter": { "type": "object", "additionalProperties": false, "required": ["product", "users", "constraints"], "properties": { "product": { "type": "string", "minLength": 1 }, "users": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 }, "uniqueItems": true }, "constraints": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true } } },
+    "stack_decisions": { "type": "array", "minItems": 1, "items": { "$ref": "decision.schema.json" } },
+    "uncertainties": { "type": "array", "items": { "$ref": "uncertainty.schema.json" }, "uniqueItems": true },
+    "subtraction_ladder": { "type": "object", "additionalProperties": false, "required": ["considered", "retained"], "properties": { "considered": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 }, "uniqueItems": true }, "retained": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true } } },
+    "contract": { "$ref": "change-contract.schema.json" },
+    "files": { "type": "object", "minProperties": 1, "additionalProperties": { "type": "string" } },
+    "baseline": { "type": "object", "additionalProperties": false, "required": ["commands", "runtime_command", "expected_output"], "properties": { "commands": { "type": "array", "minItems": 1, "items": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } }, "uniqueItems": true }, "runtime_command": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } }, "expected_output": { "type": "string", "minLength": 1 } } }
+  }
+}

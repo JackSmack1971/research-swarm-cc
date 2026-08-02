@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0.0",
+  "plan_id": "gfp_counter",
+  "charter": { "product": "A tiny local counter CLI.", "users": ["a developer validating the delivery loop"], "constraints": ["offline", "no runtime dependency", "one vertical slice first"] },
+  "stack_decisions": [{ "schema_version": "1.0.0", "decision_id": "dec_node", "scope": "Greenfield stack", "outcome": "Use Node.js ESM and the built-in test runner.", "rationale": "The product is a local CLI and the control repo already runs Node.js.", "alternatives": ["Add a web framework", "Add a database"], "evidence_references": ["constraint_local"], "decided_by": { "kind": "human", "identifier": "product-owner" }, "decided_at": "2026-08-02T00:00:00.000Z", "reversibility": "easy" }],
+  "uncertainties": [],
+  "subtraction_ladder": { "considered": ["Node.js built-ins", "web framework", "database", "queue"], "retained": ["Node.js built-ins"] },
+  "contract": {
+    "schema_version": "1.0.0", "contract_id": "chg_greenfield_counter", "lifecycle_state": "accepted", "owner": { "kind": "human", "identifier": "product-owner" }, "goal": "Deliver a usable local counter CLI as the first greenfield slice.", "outcome": "A generated project prints the requested counter value and passes baseline gates.",
+    "base_repository": { "identity": "pending", "root": "pending", "git_revision": null, "git_dirty": false, "source_fingerprint": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" }, "evidence_references": ["constraint_local"],
+    "decisions": [{ "schema_version": "1.0.0", "decision_id": "dec_node", "scope": "Greenfield stack", "outcome": "Use Node.js ESM and the built-in test runner.", "rationale": "The product is a local CLI and the control repo already runs Node.js.", "alternatives": ["Add a web framework", "Add a database"], "evidence_references": ["constraint_local"], "decided_by": { "kind": "human", "identifier": "product-owner" }, "decided_at": "2026-08-02T00:00:00.000Z", "reversibility": "easy" }],
+    "requirements": [{ "requirement_id": "req_counter", "statement": "The CLI returns a deterministic count.", "decision_ids": ["dec_node"] }], "acceptance_criteria": [{ "criterion_id": "ac_counter", "requirement_ids": ["req_counter"], "observable_proof": "npm test, npm run build, npm run typecheck, and the runtime command pass.", "required_proof_kinds": ["command", "runtime"] }], "constraints": [{ "id": "con_local", "statement": "Use offline native tooling." }], "non_goals": [{ "id": "ng_server", "statement": "Do not add a server, database, queue, or deployment." }], "risks": [{ "risk_id": "rsk_counter", "dimension": "scope", "level": "medium", "rationale": "This is a new repository and must remain isolated until verified." }], "uncertainties": []
+  },
+  "files": {
+    "package.json": "{\n  \"name\": \"generated-counter\",\n  \"private\": true,\n  \"type\": \"module\",\n  \"scripts\": {\"build\": \"node --check src/index.mjs\", \"test\": \"node --test\", \"typecheck\": \"node --check src/index.mjs\", \"start\": \"node src/index.mjs\"}\n}\n",
+    "src/index.mjs": "export function count(value) { return Number(value ?? 0); }\nif (process.argv[1]?.endsWith('/src/index.mjs') || process.argv[1]?.endsWith('\\\\src\\\\index.mjs')) console.log(count(process.argv[2]));\n",
+    "test/index.test.mjs": "import test from 'node:test';\nimport assert from 'node:assert/strict';\nimport { count } from '../src/index.mjs';\ntest('counts the supplied value', () => assert.equal(count('7'), 7));\n"
+  },
+  "baseline": { "commands": [["npm", "test"], ["npm", "run", "build"], ["npm", "run", "typecheck"]], "runtime_command": ["npm", "start", "7"], "expected_output": "7" }
+}

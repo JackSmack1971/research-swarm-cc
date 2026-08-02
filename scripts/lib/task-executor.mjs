@@ -21,7 +21,7 @@ export async function changeIdentity(root) {
 const stable = (value) => Array.isArray(value) ? `[${value.map(stable).join(',')}]` : value && typeof value === 'object' ? `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${stable(value[key])}`).join(',')}}` : JSON.stringify(value);
 const freeze = (value) => { if (value && typeof value === 'object') { for (const item of Object.values(value)) freeze(item); Object.freeze(value); } return value; };
 const event = (kind, base_revision, task_id, worktree, commands, file_changes, status, change_identity = null) => freeze({ schema_version: '1.0.0', event_id: `exe_${task_id}_${kind}`, kind, base_revision, task_id, worktree: { ...worktree }, commands: commands.map((item) => ({ ...item, argv: [...item.argv] })), file_changes: [...file_changes], result: { status, change_identity } });
-const scope = (files, anchors, protectedPaths) => files.every((file) => !protectedPaths.some((item) => file === item || file.startsWith(`${item}/`)) && anchors.some((anchor) => file === anchor.path || file.startsWith(`${anchor.path}/`) || anchor.path.startsWith(`${file}/`)));
+const scope = (files, anchors, protectedPaths) => files.every((file) => !protectedPaths.some((item) => file === item || file.startsWith(`${item}/`)) && anchors.some((anchor) => anchor.path === '.' || file === anchor.path || file.startsWith(`${anchor.path}/`) || anchor.path.startsWith(`${file}/`)));
 
 export function validateExecutionEvent(record) { return validate(record) ? { valid: true, errors: [] } : { valid: false, errors: validate.errors }; }
 
