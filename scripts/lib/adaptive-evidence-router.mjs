@@ -46,3 +46,9 @@ export function routeKnowledgeNeed(need, signals = {}) {
 }
 
 export const routeEvidence = routeKnowledgeNeed;
+
+export async function routeKnowledgeNeedWithRepositoryEvidence(need, targetPath, options = {}) {
+  const { inspectRepositoryKnowledge } = await import('./repository-intelligence.mjs');
+  const evidence = await inspectRepositoryKnowledge(need, targetPath, options);
+  return { evidence, route: routeKnowledgeNeed(need, { repository_answerable: !evidence.external_evidence_necessary }) };
+}

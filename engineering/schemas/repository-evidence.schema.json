@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "repository-evidence.schema.json",
+  "title": "Tier 0 repository evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "repository_evidence_id", "knowledge_need_id", "source", "anchors", "observed_facts", "unresolved_subquestions", "confidence", "provenance_type", "mechanism", "external_evidence_necessary", "non_authorizing"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "repository_evidence_id": { "type": "string", "pattern": "^ree_[A-Za-z0-9][A-Za-z0-9_-]*$" },
+    "knowledge_need_id": { "type": "string", "pattern": "^kn_[A-Za-z0-9][A-Za-z0-9_-]*$" },
+    "source": { "type": "object", "additionalProperties": false, "required": ["root", "git_revision", "git_dirty", "source_fingerprint"], "properties": { "root": { "type": "string", "minLength": 1 }, "git_revision": { "type": ["string", "null"] }, "git_dirty": { "type": ["boolean", "null"] }, "source_fingerprint": { "type": "string", "pattern": "^[a-f0-9]{64}$" } } },
+    "anchors": { "type": "array", "items": { "type": "object", "additionalProperties": false, "required": ["path", "kind"], "properties": { "path": { "type": "string", "minLength": 1 }, "line": { "type": "integer", "minimum": 1 }, "column": { "type": "integer", "minimum": 1 }, "kind": { "enum": ["file", "text", "symbol", "metadata", "graph-candidate"] }, "excerpt": { "type": "string", "minLength": 1 } } } },
+    "observed_facts": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+    "unresolved_subquestions": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+    "confidence": { "enum": ["high", "medium", "low"] },
+    "provenance_type": { "enum": ["direct_observation", "lsp_observation", "deterministic_metadata", "graphify_candidate"] },
+    "mechanism": { "enum": ["read", "search", "lsp", "metadata", "graphify-candidate"] },
+    "external_evidence_necessary": { "type": "boolean" },
+    "non_authorizing": { "const": true }
+  }
+}

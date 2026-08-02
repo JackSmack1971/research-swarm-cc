@@ -1,7 +1,10 @@
 import { readFile } from 'node:fs/promises';
-import { routeKnowledgeNeed } from './lib/adaptive-evidence-router.mjs';
+import { routeKnowledgeNeed, routeKnowledgeNeedWithRepositoryEvidence } from './lib/adaptive-evidence-router.mjs';
 
 try {
-  if (process.argv.length !== 3) throw new Error('Usage: node scripts/route-engineering-evidence.mjs <knowledge-need.json>');
-  process.stdout.write(`${JSON.stringify(routeKnowledgeNeed(JSON.parse(await readFile(process.argv[2], 'utf8'))), null, 2)}\n`);
+  const [needFile, targetPath] = process.argv.slice(2);
+  if (!needFile || process.argv.length > 4) throw new Error('Usage: node scripts/route-engineering-evidence.mjs <knowledge-need.json> [absolute-repository-path]');
+  const need = JSON.parse(await readFile(needFile, 'utf8'));
+  const output = targetPath ? await routeKnowledgeNeedWithRepositoryEvidence(need, targetPath) : routeKnowledgeNeed(need);
+  process.stdout.write(`${JSON.stringify(output, null, 2)}\n`);
 } catch (error) { process.stderr.write(`${error.message}\n`); process.exitCode = 1; }
