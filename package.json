@@ -9,7 +9,8 @@
     "profile": "node scripts/profile-project.mjs",
     "evidence:packet": "node scripts/compile-engineering-evidence-packet.mjs",
     "tasks:compile": "node scripts/compile-task-graph.mjs",
-    "authorization:check": "node scripts/authorize-task-execution.mjs"
+    "authorization:check": "node scripts/authorize-task-execution.mjs",
+    "execute": "node scripts/execute-authorized-task.mjs"
   },
   "dependencies": {
     "ajv": "8.20.0"

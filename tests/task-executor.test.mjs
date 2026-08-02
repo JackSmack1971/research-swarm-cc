@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';
+import { cp, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
+import { execFile as execute } from 'node:child_process';
+import { promisify } from 'node:util';
+import test from 'node:test';
+import { authorizeTaskExecution } from '../scripts/lib/execution-authorization.mjs';
+import { compileContextCapsules, compileTaskGraph } from '../scripts/lib/task-graph.mjs';
+import { profileProject } from '../scripts/lib/project-profiler.mjs';
+import { executeAuthorizedTask, validateExecutionEvent } from '../scripts/lib/task-executor.mjs';
+const execFile = promisify(execute);
+const task = () => [{ task_id: 'tsk_executor', title: 'Fix total', objective: 'Correct the representative local bug.', slice: 'vertical', criterion_ids: ['ac_fixture'], depends_on: [], code_anchors: [{ path: 'src/app.tsx', reason: 'Representative fixture source.' }], verification: { commands: ['npm test'], proofs: ['Total test passes.'] } }];
+async function setup(t) { const root = await mkdtemp(path.join(os.tmpdir(), 'executor-')); t.after(() => rm(root, { recursive: true, force: true })); await cp('tests/fixtures/project-profiler/node-web', root, { recursive: true }); await execFile('git', ['init', '-q'], { cwd: root }); await execFile('git', ['add', '.'], { cwd: root }); await execFile('git', ['-c', 'user.name=test', '-c', 'user.email=test@example.test', 'commit', '-qm', 'fixture'], { cwd: root }); const contract = JSON.parse(await readFile('tests/fixtures/change-contract/valid-accepted.json', 'utf8')); contract.base_repository = { identity: 'fixture', ...(await profileProject(root)).target }; const graph = await compileTaskGraph({ graph_id: 'tgr_executor', contract, targetPath: root, tasks: task() }); const [capsule] = await compileContextCapsules(graph, contract, root); const signals = { external_apis: { level: 'medium', rationale: 'Require isolated execution for the representative task.' } }; const authorization = await authorizeTaskExecution({ contract, graph, capsule, targetPath: root, signals }); return { root, targetPath: root, contract, graph, capsule, signals, authorization }; }
+
+test('runs a representative authorized task in a disposable worktree and returns only unverified implementation evidence', async (t) => { const input = await setup(t); const output = await executeAuthorizedTask({ ...input, runExecutor: async ({ worktreePath }) => { await writeFile(path.join(worktreePath, 'src', 'app.tsx'), 'export const repaired = true;\n'); return { argv: ['fixture-executor'], exit_code: 0 }; } }); assert.equal(output.events.at(-1).result.status, 'unverified_implementation'); assert.deepEqual(output.events.at(-1).file_changes, ['src/app.tsx']); assert.ok(Object.isFrozen(output.events.at(-1))); assert.ok(output.events.every((item) => validateExecutionEvent(item).valid)); assert.match(await readFile(path.join(input.root, 'src', 'app.tsx'), 'utf8'), /App = \(\) => null/); });
+
+test('rejects planning-state mutation and authorization drift before the executor can promote a change', async (t) => { const input = await setup(t); const rejected = await executeAuthorizedTask({ ...input, protectedPaths: ['src/planning.json'], runExecutor: async ({ worktreePath }) => { await writeFile(path.join(worktreePath, 'src', 'planning.json'), '{}'); return { argv: ['fixture-executor'], exit_code: 0 }; } }); assert.equal(rejected.events.at(-1).result.status, 'rejected'); const stale = structuredClone(input.authorization); stale.tool_posture = 'plan_only'; await assert.rejects(() => executeAuthorizedTask({ ...input, authorization: stale, runExecutor: async () => ({ argv: ['never'], exit_code: 0 }) }), /drift|permit/); });

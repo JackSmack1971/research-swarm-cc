@@ -141,7 +141,7 @@ Prototype work uses an absolute, disposable Git worktree outside the production 
 
 Task graphs are derived from an accepted, current Change Contract plus explicit task drafts. Each task maps to observable criteria, names code anchors and verification, carries explicit dependencies, and rejects unordered anchor collisions. Broad migrations may use `expand`, `migrate`, and `contract` slices; reversed dependencies fail. Capsules include only the mapped criteria and decision evidence, non-goals, base revision, anchors, verification, risks, and stop conditions. They deliberately exclude the full contract, research archives, specifications, conversation history, and permanent repository maps; any revision, fingerprint, contract, or anchor drift fails closed and requires regeneration.
 
-Before future execution, `/build` records deterministic risk classification and bounded authorization for the accepted current contract, task graph, capsule, and profile. Low-risk reversible tasks retain task-local verification; high-risk work requires isolated posture, independent proof, and human approval. Authorization is not an executor and never authorizes merge or deployment.
+`/build` records deterministic risk classification and bounded authorization for the accepted current contract, task graph, capsule, and profile. The executor then rechecks that authorization immediately before creating an isolated worktree, sends only the capsule to the project-local executor, and returns immutable command/change events as **unverified implementation**. It rejects planning-state changes and anchor escape; it never commits, merges, pushes, deploys, or self-verifies.
 
 ## Troubleshooting
 
@@ -174,7 +174,7 @@ The forward-looking, outcome-led roadmap is [docs/ROADMAP.md](docs/ROADMAP.md). 
 
 ## Roadmap
 
-Current-runtime Light and Deep acceptance, risk authorization, and the plain-Claude engineering baseline harness are complete. A future executor remains conditional on Milestone 57 and must not claim value until Milestone 64 compares it against the recorded baseline.
+Current-runtime Light and Deep acceptance, risk authorization, the plain-Claude engineering baseline harness, and the bounded executor are complete. Independent verification remains Milestone 58; no executor value claim is allowed until Milestone 64 compares it against the recorded baseline.
 
 ## License
 

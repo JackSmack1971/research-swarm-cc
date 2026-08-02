@@ -135,6 +135,8 @@ Milestone 53's prototype lane is separate canonical experiment evidence outside 
 
 Milestone 56's engineering benchmark is a separate, deterministic delivery-evidence harness. It defines safe disposable brownfield task fixtures and records only observed task outcomes, raw runtime evidence, nullable exposed telemetry, human attention, regressions, complexity, and risk-gate results. A comparator may report aligned-suite deltas and new safety regressions but cannot choose a winner, authorize a task, or establish executor value. Plain-Claude baseline sessions disable repository customizations and run only in disposable fixtures; missing telemetry remains missing.
 
+Milestone 57's executor accepts only a current deterministic authorization and its task capsule, rechecks drift immediately before creating an isolated Git worktree, and returns immutable execution events. Events record the base revision, task, worktree, invoked commands, changed files, stop/scope outcomes, and resulting diff identity without storing hidden reasoning. It rejects planning-state paths and anchor escape, prohibits nested delegation, force operations, merge, push, deployment, and production side effects, and labels every successful result `unverified_implementation` until Milestone 58 independently verifies it.
+
 Milestone 54's task graph and context capsules are derived Delivery-plane planning records outside research archives. A deterministic compiler accepts only a valid accepted Change Contract at its exact profiled base, validates criterion lineage, dependencies, collision and migration ordering, and emits disposable task-local capsules. It does not infer decisions, authorize execution, execute work, or make optional Graphify data mandatory.
 
 ---

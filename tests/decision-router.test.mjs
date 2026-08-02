@@ -31,8 +31,8 @@ test('keeps evidence distinct from decisions and rejects malformed records', asy
   assert.equal(validateUncertainty({ ...(await fixture('repository-fact')), kind: 'invented' }).valid, false);
 });
 
-test('statically validates the manually invoked non-executing build skill', async () => {
+test('statically validates the manually invoked bounded build controller', async () => {
   const skill = await readFile('.claude/skills/build/SKILL.md', 'utf8');
   assert.match(skill, /^---\nname: build\ndescription: .+\ndisable-model-invocation: true\n---/);
-  assert.doesNotMatch(skill, /user-invocable: false/); assert.match(skill, /must not implement production code/i); assert.match(skill, /must not commit or push/i);
+  assert.doesNotMatch(skill, /user-invocable: false/); assert.match(skill, /npm run execute/); assert.match(skill, /unverified implementation/i); assert.match(skill, /must not approve its own work/i); assert.match(skill, /commit or push/i);
 });

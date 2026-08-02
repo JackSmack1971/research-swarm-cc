@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- Added a bounded isolated-worktree executor that rechecks authorization, records immutable unverified implementation events, and cannot merge or deploy.
 - Added a deterministic, safe engineering benchmark harness with a representative brownfield suite, raw plain-Claude baseline evidence, reproducible fixture resets, and non-authorizing comparison metrics.
 - Added deterministic pre-execution risk classification and bounded task authorization with drift, uncertainty, proof, and human-control safeguards; it never merges, deploys, or executes production work.
 - Added deterministic task-graph and minimal context-capsule compilation for accepted, current Change Contracts, with dependency, collision, and drift safeguards.

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "execution-event.schema.json",
+  "title": "Immutable isolated execution event",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "event_id", "kind", "base_revision", "task_id", "worktree", "commands", "file_changes", "result"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "event_id": { "type": "string", "pattern": "^exe_[A-Za-z0-9][A-Za-z0-9_-]*$" },
+    "kind": { "enum": ["preflight", "command", "scope_rejected", "stop", "complete"] },
+    "base_revision": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+    "task_id": { "type": "string", "pattern": "^tsk_[A-Za-z0-9][A-Za-z0-9_-]*$" },
+    "worktree": { "type": "object", "additionalProperties": false, "required": ["path", "branch"], "properties": { "path": { "type": "string", "minLength": 1 }, "branch": { "type": ["string", "null"] } } },
+    "commands": { "type": "array", "items": { "type": "object", "additionalProperties": false, "required": ["argv", "exit_code"], "properties": { "argv": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } }, "exit_code": { "type": ["integer", "null"] } } } },
+    "file_changes": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+    "result": { "type": "object", "additionalProperties": false, "required": ["status", "change_identity"], "properties": { "status": { "enum": ["unverified_implementation", "stopped", "rejected"] }, "change_identity": { "type": ["string", "null"] } } }
+  }
+}
