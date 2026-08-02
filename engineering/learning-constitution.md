@@ -1,0 +1,11 @@
+# Engineering-learning constitution
+
+Version `1.0.0` governs the separate engineering-learning plane. Its canonical hash is emitted by `scripts/lib/engineering-learning.mjs` and is stored with every state and lesson record.
+
+Engineering learning is policy adaptation, not model training. It may observe only an explicitly attributed signal bound to a digest-validated delivery handoff. A delivery handoff is eligible only when its execution event is complete, every criterion proof is independently proven, and its manifest is explicitly marked `live_delivery` with a matching Claude Code session attestation. Synthetic fixtures and the plain-Claude benchmark remain test/comparison evidence and can never promote or activate a lesson.
+
+The plane is dormant until final Claude Code project acceptance supplies a separate acceptance attestation. Before that gate, registration, schema validation, review, rejection, deduplication, conflict handling, rollback, pause, and bounded empty-policy compilation are allowed for deterministic testing; no lesson may influence requirements, authorization, risk controls, constitutional controls, research learning, merge, or deployment.
+
+Lessons move through `provisional` → `review` → `active`, or to `rejected`/`rolled_back`. Applicability is explicit and bounded; exclusions, constitution compatibility, independent review, immutable evidence IDs, and protected-surface filtering are mandatory. Active directives are selected deterministically, capped, and reversible. Missing, synthetic, baseline, stale, conflicting, malicious, or insufficient evidence fails closed.
+
+The state root is `artifacts/engineering-learning/`, separate from `artifacts/research-learning/`. No research archive, query, report, source, or research lesson is accepted as engineering policy evidence.

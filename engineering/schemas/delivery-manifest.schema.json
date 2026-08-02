@@ -19,6 +19,7 @@
     "unresolved": { "type": "array", "items": { "type": "object", "additionalProperties": false, "required": ["kind", "statement"], "properties": { "kind": { "enum": ["risk", "blocker"] }, "statement": { "type": "string", "minLength": 1 } } } },
     "repair_history": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
     "integration": { "type": "object", "additionalProperties": false, "required": ["status", "statement"], "properties": { "status": { "enum": ["not_applied", "applied", "blocked"] }, "statement": { "type": "string", "minLength": 1 } } },
-    "next_action": { "type": "string", "minLength": 1 }
+    "next_action": { "type": "string", "minLength": 1 },
+    "evidence_provenance": { "type": "object", "additionalProperties": false, "required": ["kind", "recorded_by"], "properties": { "kind": { "enum": ["synthetic_fixture", "plain_claude_baseline", "live_delivery"] }, "recorded_by": { "type": "string", "minLength": 1 }, "session_id": { "type": "string", "minLength": 1 } } }
   }
 }

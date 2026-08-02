@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "engineering-learning-state.schema.json",
+  "title": "Engineering-learning authoritative state",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "registry_id", "constitution_version", "constitution_hash", "activation", "activation_gate", "evidence", "provisional", "review", "active", "rejected", "rolled_back", "events"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "registry_id": { "const": "elreg_engineering_learning" },
+    "constitution_version": { "const": "1.0.0" },
+    "constitution_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "activation": { "enum": ["dormant", "enabled", "paused"] },
+    "activation_gate": { "enum": ["pending_final_claude_code_acceptance", "satisfied"] },
+    "evidence": { "type": "array", "items": { "$ref": "engineering-learning-evidence.schema.json" } },
+    "provisional": { "type": "array", "items": { "$ref": "engineering-lesson.schema.json" } },
+    "review": { "type": "array", "items": { "$ref": "engineering-lesson.schema.json" } },
+    "active": { "type": "array", "items": { "$ref": "engineering-lesson.schema.json" } },
+    "rejected": { "type": "array", "items": { "$ref": "engineering-lesson.schema.json" } },
+    "rolled_back": { "type": "array", "items": { "$ref": "engineering-lesson.schema.json" } },
+    "events": { "type": "array", "items": { "type": "object", "additionalProperties": false, "required": ["event_id", "lesson_id", "from", "to", "reason"], "properties": { "event_id": { "type": "string", "pattern": "^ele_[A-Za-z0-9][A-Za-z0-9_-]*$" }, "lesson_id": { "type": "string", "pattern": "^eln_[A-Za-z0-9][A-Za-z0-9_-]*$" }, "from": { "type": "string", "minLength": 1 }, "to": { "type": "string", "minLength": 1 }, "reason": { "type": "string", "minLength": 1 } } } }
+  }
+}

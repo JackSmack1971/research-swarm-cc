@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "engineering-lesson.schema.json",
+  "title": "Engineering-learning lesson",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "lesson_id", "status", "signal_type", "supporting_evidence_ids", "observed_problem", "root_cause", "recommended_behavior", "applicability", "exclusions", "risk", "constitution_version", "constitution_hash"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "lesson_id": { "type": "string", "pattern": "^eln_[A-Za-z0-9][A-Za-z0-9_-]*$" },
+    "status": { "enum": ["provisional", "review", "active", "rejected", "rolled_back"] },
+    "signal_type": { "enum": ["review_finding", "repair_rework", "failed_acceptance", "runtime_regression", "user_correction", "human_friction", "complexity_problem", "post_delivery_outcome"] },
+    "supporting_evidence_ids": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "pattern": "^elv_[A-Za-z0-9][A-Za-z0-9_-]*$" } },
+    "observed_problem": { "type": "string", "minLength": 1, "maxLength": 2000 },
+    "root_cause": { "type": "string", "minLength": 1, "maxLength": 2000 },
+    "recommended_behavior": { "type": "string", "minLength": 1, "maxLength": 1000 },
+    "applicability": { "type": "array", "minItems": 1, "maxItems": 8, "uniqueItems": true, "items": { "type": "string", "minLength": 2, "maxLength": 160 } },
+    "exclusions": { "type": "array", "maxItems": 8, "uniqueItems": true, "items": { "type": "string", "minLength": 2, "maxLength": 160 } },
+    "risk": { "enum": ["low", "medium", "high"] },
+    "conflict_set_id": { "type": "string", "pattern": "^elc_[A-Za-z0-9][A-Za-z0-9_-]*$" },
+    "constitution_version": { "const": "1.0.0" },
+    "constitution_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "review": { "$ref": "#/$defs/review" },
+    "counterexample_evidence_ids": { "type": "array", "uniqueItems": true, "items": { "type": "string", "pattern": "^elv_[A-Za-z0-9][A-Za-z0-9_-]*$" } }
+  },
+  "$defs": {
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["review_id", "reviewer_id", "outcome", "rationale"],
+      "properties": {
+        "review_id": { "type": "string", "pattern": "^elr_[A-Za-z0-9][A-Za-z0-9_-]*$" },
+        "reviewer_id": { "type": "string", "minLength": 1 },
+        "outcome": { "enum": ["approve", "reject"] },
+        "rationale": { "type": "string", "minLength": 1, "maxLength": 2000 }
+      }
+    }
+  }
+}

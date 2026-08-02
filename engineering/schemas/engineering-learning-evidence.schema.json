@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "engineering-learning-evidence.schema.json",
+  "title": "Engineering-learning evidence envelope",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "evidence_id", "provenance_kind", "manifest_path", "target_path", "signal_type", "signal_summary", "signal_source"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "evidence_id": { "type": "string", "pattern": "^elv_[A-Za-z0-9][A-Za-z0-9_-]*$" },
+    "provenance_kind": { "enum": ["synthetic_fixture", "plain_claude_baseline", "live_delivery"] },
+    "manifest_path": { "type": "string", "minLength": 1 },
+    "target_path": { "type": "string", "minLength": 1 },
+    "signal_type": { "enum": ["review_finding", "repair_rework", "failed_acceptance", "runtime_regression", "user_correction", "human_friction", "complexity_problem", "post_delivery_outcome"] },
+    "signal_summary": { "type": "string", "minLength": 1, "maxLength": 2000 },
+    "signal_source": { "$ref": "#/$defs/signalSource" },
+    "runtime_attestation": { "$ref": "#/$defs/runtimeAttestation" },
+    "manifest_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "delivery_id": { "type": "string", "pattern": "^dlv_[A-Za-z0-9][A-Za-z0-9_-]*$" },
+    "execution_event_id": { "type": "string", "pattern": "^exe_[A-Za-z0-9][A-Za-z0-9_-]*$" },
+    "verification_event_ids": { "type": "array", "uniqueItems": true, "items": { "type": "string", "pattern": "^ver_[A-Za-z0-9][A-Za-z0-9_-]*$" } },
+    "criterion_proof_ids": { "type": "array", "uniqueItems": true, "items": { "type": "string", "pattern": "^prf_[A-Za-z0-9][A-Za-z0-9_-]*$" } },
+    "live_eligible": { "type": "boolean" },
+    "accepted_for_learning": { "type": "boolean" }
+  },
+  "$defs": {
+    "signalSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "record_id"],
+      "properties": {
+        "kind": { "enum": ["delivery_manifest", "independent_review", "runtime_record", "user_feedback", "outcome_record"] },
+        "record_id": { "type": "string", "minLength": 1 },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    },
+    "runtimeAttestation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "session_id", "recorded_by"],
+      "properties": {
+        "kind": { "const": "claude_code_live_session" },
+        "session_id": { "type": "string", "minLength": 1 },
+        "recorded_by": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}
