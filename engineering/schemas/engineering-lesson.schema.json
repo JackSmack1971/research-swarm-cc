@@ -9,7 +9,7 @@
     "schema_version": { "const": "1.0.0" },
     "lesson_id": { "type": "string", "pattern": "^eln_[A-Za-z0-9][A-Za-z0-9_-]*$" },
     "status": { "enum": ["provisional", "review", "active", "rejected", "rolled_back"] },
-    "signal_type": { "enum": ["review_finding", "repair_rework", "failed_acceptance", "runtime_regression", "user_correction", "human_friction", "complexity_problem", "post_delivery_outcome"] },
+    "signal_type": { "enum": ["review_finding", "repair_rework", "failed_acceptance", "runtime_regression", "user_correction", "human_friction", "complexity_problem", "post_delivery_outcome", "retrieval_outcome"] },
     "supporting_evidence_ids": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "pattern": "^elv_[A-Za-z0-9][A-Za-z0-9_-]*$" } },
     "observed_problem": { "type": "string", "minLength": 1, "maxLength": 2000 },
     "root_cause": { "type": "string", "minLength": 1, "maxLength": 2000 },

@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Added bounded, provenance-backed retrieval-outcome signals to engineering learning without admitting research claims or enabling pre-acceptance policy promotion.
+
 ### Fixed
 
 - Generated research contracts now preserve canonical fields named `title` and `description`, so required structured-output fields remain satisfiable; Sonnet routing stays temporary pending valid-contract runtime evidence.

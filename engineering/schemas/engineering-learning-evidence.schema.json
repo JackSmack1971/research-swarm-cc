@@ -4,14 +4,14 @@
   "title": "Engineering-learning evidence envelope",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "evidence_id", "provenance_kind", "manifest_path", "target_path", "signal_type", "signal_summary", "signal_source"],
+  "required": ["schema_version", "evidence_id", "provenance_kind", "signal_type", "signal_summary", "signal_source"],
   "properties": {
     "schema_version": { "const": "1.0.0" },
     "evidence_id": { "type": "string", "pattern": "^elv_[A-Za-z0-9][A-Za-z0-9_-]*$" },
     "provenance_kind": { "enum": ["synthetic_fixture", "plain_claude_baseline", "live_delivery"] },
     "manifest_path": { "type": "string", "minLength": 1 },
     "target_path": { "type": "string", "minLength": 1 },
-    "signal_type": { "enum": ["review_finding", "repair_rework", "failed_acceptance", "runtime_regression", "user_correction", "human_friction", "complexity_problem", "post_delivery_outcome"] },
+    "signal_type": { "enum": ["review_finding", "repair_rework", "failed_acceptance", "runtime_regression", "user_correction", "human_friction", "complexity_problem", "post_delivery_outcome", "retrieval_outcome"] },
     "signal_summary": { "type": "string", "minLength": 1, "maxLength": 2000 },
     "signal_source": { "$ref": "#/$defs/signalSource" },
     "runtime_attestation": { "$ref": "#/$defs/runtimeAttestation" },
@@ -21,7 +21,8 @@
     "verification_event_ids": { "type": "array", "uniqueItems": true, "items": { "type": "string", "pattern": "^ver_[A-Za-z0-9][A-Za-z0-9_-]*$" } },
     "criterion_proof_ids": { "type": "array", "uniqueItems": true, "items": { "type": "string", "pattern": "^prf_[A-Za-z0-9][A-Za-z0-9_-]*$" } },
     "live_eligible": { "type": "boolean" },
-    "accepted_for_learning": { "type": "boolean" }
+    "accepted_for_learning": { "type": "boolean" },
+    "retrieval_outcome": { "$ref": "#/$defs/retrievalOutcome" }
   },
   "$defs": {
     "signalSource": {
@@ -43,6 +44,32 @@
         "session_id": { "type": "string", "minLength": 1 },
         "recorded_by": { "type": "string", "minLength": 1 }
       }
+    },
+    "retrievalOutcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["knowledge_need_id", "knowledge_need_sha256", "completed", "need_class", "risk", "freshness", "route", "repository_mechanism", "graphify", "counts", "telemetry", "decision", "criteria", "rework", "feedback", "evidence_quality", "provenance"],
+      "properties": {
+        "knowledge_need_id": { "type": "string", "pattern": "^kn_[A-Za-z0-9][A-Za-z0-9_-]*$" },
+        "knowledge_need_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "completed": { "const": true },
+        "need_class": { "enum": ["repository", "dependency", "external_fact", "security", "compatibility", "architecture", "other"] },
+        "risk": { "enum": ["low", "medium", "high", "critical"] },
+        "freshness": { "enum": ["none", "current", "recent", "as_of"] },
+        "route": { "type": "object", "additionalProperties": false, "required": ["route_id", "tier"], "properties": { "route_id": { "type": "string", "pattern": "^ert_[A-Za-z0-9][A-Za-z0-9_-]*$" }, "tier": { "enum": ["T0", "T1", "T2", "T3", "T4"] } } },
+        "repository_mechanism": { "enum": ["read", "search", "lsp", "metadata", "authoritative_lookup", "focused_research", "independent_verification", "validated_archive_bridge"] },
+        "graphify": { "type": "object", "additionalProperties": false, "required": ["used", "why"], "properties": { "used": { "type": "boolean" }, "why": { "type": "string", "minLength": 1, "maxLength": 240 } } },
+        "counts": { "type": "object", "additionalProperties": false, "required": ["agents", "sources"], "properties": { "agents": { "type": "integer", "minimum": 0, "maximum": 32 }, "sources": { "type": "integer", "minimum": 0, "maximum": 256 } } },
+        "telemetry": { "type": "object", "additionalProperties": false, "required": ["context_tokens", "total_tokens", "latency_ms"], "properties": { "context_tokens": { "type": ["integer", "null"], "minimum": 0 }, "total_tokens": { "type": ["integer", "null"], "minimum": 0 }, "latency_ms": { "type": ["integer", "null"], "minimum": 0 } } },
+        "decision": { "type": "object", "additionalProperties": false, "required": ["entered_accepted_decision"], "properties": { "entered_accepted_decision": { "type": "boolean" }, "decision_id": { "type": "string", "pattern": "^dec_[A-Za-z0-9][A-Za-z0-9_-]*$" } } },
+        "criteria": { "type": "object", "additionalProperties": false, "required": ["linked", "independently_proven"], "properties": { "linked": { "type": "integer", "minimum": 0, "maximum": 128 }, "independently_proven": { "type": "integer", "minimum": 0, "maximum": 128 } } },
+        "rework": { "type": "object", "additionalProperties": false, "required": ["required", "rounds"], "properties": { "required": { "type": "boolean" }, "rounds": { "type": "integer", "minimum": 0, "maximum": 2 } } },
+        "feedback": { "type": "object", "additionalProperties": false, "required": ["usefulness", "dead_end"], "properties": { "usefulness": { "enum": ["unknown", "low", "medium", "high"] }, "dead_end": { "type": "boolean" }, "note": { "type": "string", "maxLength": 500 } } },
+        "evidence_quality": { "enum": ["sufficient", "insufficient", "conflicting"] },
+        "provenance": { "type": "object", "additionalProperties": false, "required": ["record_kind", "record_id", "sha256"], "properties": { "record_kind": { "enum": ["knowledge_need", "route", "outcome_record"] }, "record_id": { "type": "string", "minLength": 1 }, "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" } } },
+        "delivery": { "type": "object", "additionalProperties": false, "required": ["delivery_id", "manifest_sha256"], "properties": { "delivery_id": { "type": "string", "pattern": "^dlv_[A-Za-z0-9][A-Za-z0-9_-]*$" }, "manifest_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" } } }
+      }
     }
-  }
+  },
+  "allOf": [{ "if": { "properties": { "signal_type": { "const": "retrieval_outcome" } }, "required": ["signal_type"] }, "then": { "required": ["retrieval_outcome"], "properties": { "retrieval_outcome": {} } } }, { "if": { "properties": { "signal_type": { "const": "retrieval_outcome" } }, "required": ["signal_type"] }, "then": {}, "else": { "required": ["manifest_path", "target_path"], "properties": { "manifest_path": {}, "target_path": {} } } }]
 }
