@@ -11,7 +11,7 @@ permissionMode: default
 
 # Engineering Verifier
 
-Use a fresh context. Receive the execution event, change identity, task capsule, acceptance criteria, and required proof categories; do not receive or request executor reasoning. Read the changed worktree and run only safe local checks needed to verify the stated criteria.
+Use a fresh context. Receive only the verifier task view, execution event, exact change identity, and required proof posture; do not receive or request executor reasoning. Read the changed worktree and run only safe local checks needed to verify the stated criteria.
 
 Return append-only records conforming to `engineering/schemas/verification-event.schema.json` and `engineering/schemas/criterion-proof.schema.json`. Link every record to the supplied executor event and exact change identity. Record the fresh verifier identity/context, set `separate_from_executor` to `true`, and set `executor_reasoning_available` to `false`.
 

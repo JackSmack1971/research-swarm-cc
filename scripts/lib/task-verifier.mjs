@@ -5,6 +5,7 @@ import proofSchema from '../../engineering/schemas/criterion-proof.schema.json' 
 import { validateChangeContract } from './change-contract.mjs';
 import { sha256, validateContextCapsule, validateTaskGraph } from './task-graph.mjs';
 import { validateExecutionAuthorization } from './execution-authorization.mjs';
+import { verifierContext } from './context-projections.mjs';
 
 const ajv = new Ajv2020({ allErrors: true, strict: true });
 const validateExecution = ajv.compile(executionSchema); const validateEvent = ajv.compile(eventSchema); const validateProof = ajv.compile(proofSchema);
@@ -51,7 +52,7 @@ export async function verifyAuthorizedTask({ contract, graph, capsule, authoriza
   if (typeof runVerifier !== 'function' || !Number.isInteger(maxRepairs) || maxRepairs < 0 || maxRepairs > 2) throw new Error('Verification requires a verifier and a bounded repair limit of at most two.');
   const events = []; const contextIds = new Set(); let changeIdentity = executionEvent.result.change_identity; let proofs = [];
   for (let attempt = 0; attempt <= maxRepairs; attempt += 1) {
-    const result = await runVerifier({ attempt, input: { contract: { contract_id: contract.contract_id, sha256: sha256(contract) }, authorization: { verification_categories: authorization.verification_categories, proof_categories: authorization.proof_categories }, capsule, execution_event: executionEvent, changed_files: executionEvent.file_changes, change_identity: changeIdentity } });
+    const result = await runVerifier({ attempt, input: { contract: { contract_id: contract.contract_id, sha256: sha256(contract) }, capsule: verifierContext({ capsule, authorization, executionEvent, changeIdentity }), execution_event: { event_id: executionEvent.event_id, task_id: executionEvent.task_id, base_revision: executionEvent.base_revision, file_changes: [...executionEvent.file_changes], result: { status: executionEvent.result.status, change_identity: changeIdentity } }, change_identity: changeIdentity } });
     const verificationEvent = checkEvent(result?.event, executionEvent, verifierAgentId, changeIdentity);
     if (contextIds.has(verificationEvent.verifier.fresh_context_id)) throw new Error('Every verification attempt requires a new fresh context.');
     contextIds.add(verificationEvent.verifier.fresh_context_id);

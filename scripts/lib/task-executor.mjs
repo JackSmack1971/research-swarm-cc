@@ -8,6 +8,7 @@ import Ajv2020 from 'ajv/dist/2020.js';
 import eventSchema from '../../engineering/schemas/execution-event.schema.json' with { type: 'json' };
 import { authorizeTaskExecution, validateExecutionAuthorization } from './execution-authorization.mjs';
 import { verifyAuthorizedTask } from './task-verifier.mjs';
+import { executorContext, repairContext } from './context-projections.mjs';
 
 const execFile = promisify(execute);
 const ajv = new Ajv2020({ allErrors: true, strict: true });
@@ -38,14 +39,14 @@ export async function executeAuthorizedTask({ authorization, contract, graph, ca
     commands.push({ argv: ['git', 'worktree', 'add', '--detach', worktreePath, base_revision], exit_code: 0 });
     const preflight = event('preflight', base_revision, capsule.task_id, worktree, commands, [], 'stopped');
     if (!validateExecutionEvent(preflight).valid) throw new Error('Execution preflight record is invalid.');
-    const result = await runExecutor({ worktreePath, capsule, model: 'sonnet', effort: authorization.classification.overall_level === 'medium' ? 'medium' : 'low' });
+    const result = await runExecutor({ worktreePath, capsule: executorContext(capsule, authorization), model: 'sonnet', effort: authorization.classification.overall_level === 'medium' ? 'medium' : 'low' });
     commands.push({ argv: result.argv, exit_code: result.exit_code });
     if (result.exit_code !== 0) return { events: [preflight, event('stop', base_revision, capsule.task_id, worktree, commands, [], 'stopped')], worktreePath };
     const file_changes = [...new Set([...(await git(worktreePath, ['diff', '--name-only'])).split(/\r?\n/), ...(await git(worktreePath, ['ls-files', '--others', '--exclude-standard'])).split(/\r?\n/)].filter(Boolean))].sort();
     if (!scope(file_changes, capsule.code_anchors, protectedPaths)) return { events: [preflight, event('scope_rejected', base_revision, capsule.task_id, worktree, commands, file_changes, 'rejected')], worktreePath };
     const change_identity = await changeIdentity(worktreePath);
     const complete = event('complete', base_revision, capsule.task_id, worktree, commands, file_changes, 'unverified_implementation', change_identity);
-    const verification = typeof runVerifier === 'function' ? await verifyAuthorizedTask({ contract, graph, capsule, authorization, executionEvent: complete, implementationAgentId, verifierAgentId, runVerifier: (input) => runVerifier({ ...input, worktreePath }), runRepair: typeof runRepair === 'function' ? (input) => runRepair({ ...input, worktreePath, capsule }) : undefined }) : null;
+    const verification = typeof runVerifier === 'function' ? await verifyAuthorizedTask({ contract, graph, capsule, authorization, executionEvent: complete, implementationAgentId, verifierAgentId, runVerifier: (input) => runVerifier({ ...input, worktreePath }), runRepair: typeof runRepair === 'function' ? (input) => runRepair({ ...input, worktreePath, capsule: repairContext({ capsule, defects: input.defects, authorization, attempt: input.attempt, changeIdentity: input.change_identity }) }) : undefined }) : null;
     return { events: [preflight, complete], verification, worktreePath };
   } finally { await git(targetPath, ['worktree', 'remove', '--force', worktreePath]).catch(() => {}); await rm(root, { recursive: true, force: true }); }
 }
