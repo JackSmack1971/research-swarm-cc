@@ -1,8 +1,8 @@
-# Engineering-knowledge path baseline
+# Historical engineering-knowledge path baseline
 
 ## Scope
 
-This is a pre-redesign audit of the current path. The benchmark is offline and deterministic: it exercises the existing uncertainty router against ten representative question classes and inventories the stages already documented in the repository. It does not run Claude Code, retrieve live sources, or claim quality, latency, or token savings.
+This is the pre-redesign historical baseline, not the current route. The benchmark is offline and deterministic: it exercises the former uncertainty router against ten representative question classes and inventories the stages documented before the tiered Evidence Router. It does not run Claude Code, retrieve live sources, or claim quality, latency, or token savings. The current comparison is in [`engineering-knowledge-architecture-benchmark.md`](engineering-knowledge-architecture-benchmark.md).
 
 Run it with:
 
@@ -32,7 +32,7 @@ The benchmark records `null` for model-facing payload bytes, source/claim counts
 
 ## Current architecture and duplication
 
-The route is deterministic in `scripts/lib/decision-router.mjs`. `external_fact` always enters `research_evidence`; the router does not distinguish a small current API lookup from a broad, high-consequence conflict. The workflow then owns planning, fan-out, normalization, verification selection, verification, adjudication, synthesis, semantic review, bounded repair, and persistence (`.claude/workflows/research-swarm.js`). The evidence bridge is a second deterministic step after a valid semantic archive: it selects confirmed retained claims and source metadata, preserves conflicts/gaps and archive identity, and deliberately excludes report prose, raw webpages, transcripts, discarded claims, and unrelated records (`scripts/lib/evidence-bridge.mjs`, `engineering/schemas/evidence-packet.schema.json`).
+The former route was deterministic in `scripts/lib/decision-router.mjs`: `external_fact` always entered `research_evidence`; it did not distinguish a small current API lookup from a broad, high-consequence conflict. The current adaptive route is implemented in `scripts/lib/adaptive-evidence-router.mjs` and benchmarked in `docs/engineering-knowledge-architecture-benchmark.md`. The historical workflow owned planning, fan-out, normalization, verification selection, verification, adjudication, synthesis, semantic review, bounded repair, and persistence (`.claude/workflows/research-swarm.js`).
 
 That makes the highest-duplication boundary clear: engineering consumes a scoped set of claims, source locators, verification references, conflicts, and gaps, while the current route also constructs and archives a standalone report, report map, discarded-claim ledger, full source/claim ledger, semantic report review, quality evaluation, and repair history. Archive validation and provenance are necessary guarantees; report synthesis and report-specific semantic review are not consumed by the evidence packet itself. They remain useful when a human explicitly asks for a research report, but the audit found no evidence that every engineering question needs them.
 

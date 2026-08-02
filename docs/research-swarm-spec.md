@@ -1374,3 +1374,9 @@ Version-2 archives must retain a fixed-rubric evaluation even when no useful les
 Generated learning state stays under ignored `artifacts/research-learning/`; it must never include live query, report, source, private-feedback, or untrusted-instruction text in directives. Automation may create only reviewable durable-change proposals and may not rewrite protected repository files. Version-1 archives remain read-only-valid and cannot enter learning.
 
 Production readiness requires separately recorded current Claude Code runtime evidence: one bounded Light and one bounded Deep version-2 archive must validate, with honest separation from deterministic fixture/replay evidence. Document behavioral, rather than hard permission, role isolation until the Claude Code interface documents named-agent routing or per-call restrictions.
+
+## 22. Engineering knowledge routing and pre-M64 review
+
+The engineering Evidence Router is repository-first and tiered: T0 repository intelligence, T1 bounded authoritative lookup, T2 focused research, T3 focused research with independent verification, and T4 full swarm escalation. T4 remains mandatory for broad, high-consequence, or unresolved material conflict. Each tier produces scoped evidence, not a decision, requirement, authorization, or learning directive; the existing Evidence/Intent/Delivery boundaries remain authoritative.
+
+The pre-M64 benchmark uses the established ten-case suite and compares the tiered route with the reproducible historical inventory. It proves deterministic route selection and planning-stage reduction only. Missing Claude Code telemetry is unavailable, never estimated. M64 remains responsible for comparable live retrieval quality, authoritative coverage, verification, context/tokens, agents, latency, human attention, downstream acceptance proof, repairs, and cost. Engineering learning remains dormant until its separate live attestation gate passes.

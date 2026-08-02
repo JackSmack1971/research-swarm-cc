@@ -57,6 +57,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+- Recorded the pre-M64 tiered engineering-knowledge benchmark and guarded GO decision, with live value telemetry explicitly deferred to Milestone 64.
 - Tier 0 structural repository evidence now routes away from Graphify after the current per-question-class benchmark found direct inspection cheaper and more precise.
 - Engineering evidence now has a capsule migration path across all tiers; the legacy evidence-packet shape and research archives remain read-only-compatible.
 - Updated the root README to describe the current Claude Code engineering-control flow, optional research evidence route, and dormant Milestone 62 engineering-learning boundary.
