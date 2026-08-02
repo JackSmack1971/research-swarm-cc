@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- Added a bounded Tier 2 fresh-context engineering researcher with scoped T0/T1 input projection, authoritative evidence contracts, hard source/claim/web budgets, and T3/T4 escalation.
 - Added a bounded Tier 1 authoritative lookup adapter for repository-scoped npm version, release, compatibility, and advisory facts with explicit provenance, freshness, escalation, and non-exploitability claims.
 - Added revision-stamped, non-authorizing Tier 0 repository intelligence for exact reads/searches, configured LSP lookup, dependency metadata, and explicit Graphify candidates before external evidence routing.
 - Added canonical Engineering Knowledge Need and adaptive Evidence Route contracts with deterministic T0–T4 routing, fail-closed underspecification, and offline escalation fixtures.

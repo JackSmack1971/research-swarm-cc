@@ -33,6 +33,7 @@ export function routeKnowledgeNeed(need, signals = {}) {
   let tier = 'T0';
   if (!f.repository_answerable) {
     if (f.security_or_high_consequence || f.evidence_conflict || f.breadth === 'broad') tier = 'T4';
+    else if (signals.focused_research === true) tier = 'T2';
     else if (f.independence_required) tier = 'T3';
     else if (f.external_lookup && (need.authority.level === 'official' || need.authority.level === 'primary' || f.time_sensitive)) tier = 'T1';
     else tier = 'T2';
