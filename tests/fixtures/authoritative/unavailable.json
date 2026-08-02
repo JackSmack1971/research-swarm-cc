@@ -1,0 +1,11 @@
+{
+  "status": "unavailable",
+  "source": {
+    "authority": "official",
+    "source_kind": "official-registry",
+    "locator": "https://registry.npmjs.org/ajv",
+    "retrieved_at": "2026-08-02T00:00:00.000Z",
+    "freshness": "unknown"
+  },
+  "records": []
+}
