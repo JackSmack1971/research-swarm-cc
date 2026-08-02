@@ -1,12 +1,13 @@
 # Research Swarm for Claude Code
 
-Research Swarm is a Claude Code dynamic workflow for people who need public-web research reported with traceable evidence, adversarial verification, and a machine-validatable archive.
+Research Swarm is a Claude Code engineering-control project for teams that need repository changes grounded in explicit decisions, independently verified acceptance criteria, and attributable delivery evidence; public-web research is an optional route when the Decision Router identifies a material external fact.
 
 - Keeps research orchestration in a JavaScript workflow and role instructions in project-local Claude Code assets.
 - Preserves sources, claims, conflicts, coverage gaps, verification events, repairs, and report-to-claim anchors in each archived run.
 - Uses deterministic Node.js validation so archive structure can be checked offline.
-- Includes a read-only project profiler for target repositories; it records metadata-backed commands, capability evidence, and a drift fingerprint without creating a repository map.
-- Includes a manual `/build` controller, disposable prototype lane, drift-aware task-capsule compiler, bounded executor, and independent verification plane; none merges or deploys.
+- Includes a read-only project profiler, decision router, accepted Change Contracts, drift-aware task capsules, conditional risk authorization, isolated execution, independent verification, and fresh-session delivery handoffs.
+- Includes a separate Milestone 62 engineering-learning plane. It is deterministic and auditable but dormant: synthetic fixtures and the plain-Claude baseline cannot activate policy, and final Claude Code project acceptance is still required.
+- Does not merge, deploy, convert evidence into requirements automatically, or add an external agent runtime, service, database, or GitHub Issues blackboard.
 
 ## Contents
 
@@ -82,22 +83,27 @@ Add `--dry-run` to inspect a plan. Ownership and SHA-256 hashes live in `.resear
 
 ```mermaid
 flowchart LR
-  Q[Research question] --> W[Dynamic workflow]
-  W --> R[Isolated research roles]
-  R --> N[Normalize and select verification]
-  N --> V[Adversarial verification]
-  V --> S[Synthesis and semantic review]
-  S --> P[Single persistence writer]
-  P --> A[Archived run + deterministic validation]
+  I[Engineering intent] --> D[Decision Router]
+  D --> C[Accepted Change Contract]
+  C --> T[Task graph + context capsule]
+  T --> Z[Risk authorization]
+  Z --> X[Isolated executor]
+  X --> V[Fresh-context verifier]
+  V --> H[Delivery handoff]
+  D -. material external fact .-> W[Research Swarm]
+  W --> E[Evidence packet]
+  E -. informs a decision .-> C
+  H -. attributable signals .-> L[Dormant engineering learning]
 ```
 
-The workflow owns fan-out, selection, bounded repairs, aggregation, and return values. Role documents provide behavioral instructions; canonical JSON Schemas and Node.js validation enforce archive contracts. See [the full workflow guide](research/README.md) for evidence standards, depth policy, archive layout, learning controls, and current runtime limitations. Use manual `/build` for interactive engineering routing: it inspects repository facts before asking questions, researches only material external facts, prototypes questions inspection cannot settle, and asks one high-value normative or consequential question when human judgment is required. It adds no executor or runtime surface.
+The Dynamic Workflow owns research fan-out, selection, bounded repairs, aggregation, and return values; it is not the engineering executor. The engineering path keeps Evidence, Intent, and Delivery separate: evidence can inform an explicit decision, but cannot become a requirement or authorization by itself. The executor returns an unverified implementation, the verifier independently proves criteria, and the handoff is a drift-checked derived view. Engineering learning consumes only eligible delivery signals and cannot influence policy while its final-acceptance gate is pending. Role write isolation in Dynamic Workflows remains behavioral where the documented interface does not provide named-agent or per-call restrictions. See [the research workflow guide](research/README.md) and [the engineering constitution](docs/engineering-constitution.md).
 
 ## Directory structure
 
 ```text
 .claude/       Claude Code workflow, role definitions, rules, commands, hooks, and skills
 research/      Archive schemas and the detailed workflow operating guide
+engineering/   Engineering schemas, benchmark evidence, and the learning constitution
 scripts/       Contract generation, archive validation/finalization, and learning utilities
 tests/         Offline deterministic node:test coverage and archive fixtures
 artifacts/     Ignored output roots for generated research archives and learning artifacts
@@ -107,6 +113,8 @@ docs/          Specification, progress record, and audit/remediation evidence
 ## Usage
 
 Use `/research-swarm` for a public-web research question. Use `light` for narrow, low-consequence questions, `standard` for normal multi-source work, and `deep` when every admitted claim needs verification. Deep always verifies every admitted canonical claim.
+
+Use `/build` for an engineering request. It routes uncertainties to repository inspection, a scoped research evidence packet, a disposable prototype, one human decision, or a reversible agent choice. After an accepted contract, the path is profile → task graph/capsule → risk authorization → isolated execution → fresh verification → delivery handoff. `/delivery-handoff` presents the result in a new session; it does not execute, approve, commit, merge, or deploy.
 
 ## Developer command center
 
@@ -130,6 +138,8 @@ Use `/research-swarm` for a public-web research question. Use `light` for narrow
 | `node scripts/finalize-research-run.mjs artifacts/research-runs/example-run` | Finalize a supplied archive; only the persistence writer should invoke this in normal workflow operation. | `research/README.md` |
 
 Claude Code commands for feedback, learning lifecycle operations, and review-only improvement proposals live in [`.claude/commands/`](.claude/commands/). The manual [`.claude/skills/build/SKILL.md`](.claude/skills/build/SKILL.md) provides `/build` decision routing, [`.claude/skills/prototype-lane/SKILL.md`](.claude/skills/prototype-lane/SKILL.md) runs one bounded disposable experiment, and [`.claude/skills/delivery-handoff/SKILL.md`](.claude/skills/delivery-handoff/SKILL.md) resumes a validated delivery handoff; none implements production work.
+
+Engineering learning is deliberately separate from research learning. It records explicit review, repair, runtime, and outcome signals under ignored `artifacts/engineering-learning/`; lessons are provisional before independent review, and active policy is bounded, reversible, and constitution-checked. Synthetic and plain-Claude evidence remains visible for mechanism/comparison tests but is never live delivery evidence.
 
 ## Configuration and safety
 
@@ -191,11 +201,11 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) before proposing changes, [CODE_OF_CONDU
 
 No license file was found. Add a license before publishing or accepting contributions.
 
-The forward-looking, outcome-led roadmap is [docs/ROADMAP.md](docs/ROADMAP.md). Implemented work and open runtime-acceptance limitations are recorded in [docs/research-swarm-progress.md](docs/research-swarm-progress.md). Research architecture and canonical contracts are defined in [docs/research-swarm-spec.md](docs/research-swarm-spec.md); engineering-system boundaries are defined in [docs/engineering-constitution.md](docs/engineering-constitution.md).
+The forward-looking, outcome-led roadmap is [ROADMAP.md](ROADMAP.md). Implemented work and open runtime-acceptance limitations are recorded in [docs/research-swarm-progress.md](docs/research-swarm-progress.md). Research architecture and canonical contracts are defined in [docs/research-swarm-spec.md](docs/research-swarm-spec.md); engineering-system boundaries are defined in [docs/engineering-constitution.md](docs/engineering-constitution.md).
 
 ## Roadmap
 
-Current-runtime Light and Deep acceptance, risk authorization with conditional production profiles, the plain-Claude engineering baseline harness, bounded executor, independent verification, and delivery handoff are complete. No executor value claim is allowed until Milestone 64 compares it against the recorded baseline.
+Current-runtime Light and Deep research acceptance, the engineering decision-to-handoff path, conditional risk profiles, the plain-Claude baseline harness, bounded executor, independent verification, and Milestone 62’s dormant learning mechanism are complete. Live engineering-learning activation remains deferred to final Claude Code project acceptance, and no executor value claim is allowed until Milestone 64 compares it against the recorded baseline.
 
 ## License
 

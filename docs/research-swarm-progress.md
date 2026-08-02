@@ -495,6 +495,12 @@ The hard provenance boundary is intentional. Synthetic fixture evidence and the 
 
 | 2026-08-02 | `node --test tests/engineering-learning.test.mjs`; `node --check` on engineering-learning scripts; synthetic/baseline handoff fixtures; repository contract and documentation inspection | Passed focused deterministic tests for provenance rejection, schema/state validity, duplicate registration, malicious and over-broad lessons, review/rejection, dormant policy, pause, rollback, research-plane isolation, and final-attestation rejection. Live activation remains deferred to final Claude Code project acceptance. |
 
+## README refresh after Milestone 62
+
+Updated the root README to reflect the repository's current identity as a Claude Code engineering-control project with an optional Research Swarm evidence route. The README now documents the Decision Router, Change Contract → task capsule → risk authorization → isolated execution → independent verification → delivery handoff path, and the separate dormant engineering-learning plane. It preserves the research workflow's archive/evidence description and states that learning activation, merge, deployment, and executor value claims remain gated.
+
+| 2026-08-02 | README evidence inventory; `python C:\Users\click\.codex\skills\generating-readmes\scripts\readme_quality_check.py --root . --readme README.md --min-score 24 --format markdown`; `git diff --check` | Passed: README quality score 25/30; the only quality penalty is the checker’s placeholder heuristic for documented command arguments. No runtime, install, network, or production execution was performed. |
+
 ## Milestone 63 — Distribution architecture
 
 Implemented the hybrid distribution lifecycle. `distribution/plugin/` is a versioned generic Claude Code plugin for reusable guidance. `scripts/distribute.mjs` bootstraps only the project-local workflow, research-role assets, deterministic scripts, schemas, and engineering records required by the product; `.claude/settings.json`, local settings, user hooks, archives, and learning state are not owned. The installer supports install, update, uninstall, rollback, status, and dry-run, records explicit ownership and SHA-256 hashes, refuses conflicts, source/target symlinks, path escape, changed owned files, and removed-source migrations, and keeps update backups and uninstalled metadata.
