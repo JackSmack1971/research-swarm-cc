@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "evidence-packet.schema.json",
-  "title": "Scoped engineering evidence packet",
+  "title": "Legacy scoped engineering evidence packet (read-only compatibility)",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema_version", "packet_id", "research_run", "scope", "claims", "sources", "conflicts", "coverage_gaps"],
