@@ -1,6 +1,7 @@
 import Ajv2020 from 'ajv/dist/2020.js';
 import classificationSchema from '../../engineering/schemas/risk-classification.schema.json' with { type: 'json' };
 import authorizationSchema from '../../engineering/schemas/execution-authorization.schema.json' with { type: 'json' };
+import profileGateSchema from '../../engineering/schemas/production-risk-profile.schema.json' with { type: 'json' };
 import profileSchema from '../../engineering/schemas/project-profile.schema.json' with { type: 'json' };
 import taskGraphSchema from '../../engineering/schemas/task-graph.schema.json' with { type: 'json' };
 import { detectChangeContractDrift, validateChangeContract } from './change-contract.mjs';
@@ -11,9 +12,23 @@ const rank = { none: 0, low: 1, medium: 2, high: 3 };
 const level = (values) => ['low', 'medium', 'high'][Math.max(0, ...values.map((item) => rank[item])) - 1] ?? 'low';
 const ajv = new Ajv2020({ allErrors: true, strict: true });
 ajv.addFormat('date-time', { type: 'string', validate: (value) => !Number.isNaN(Date.parse(value)) });
-ajv.addSchema(profileSchema); ajv.addSchema(taskGraphSchema); ajv.addSchema(classificationSchema);
+ajv.addSchema(profileSchema); ajv.addSchema(taskGraphSchema); ajv.addSchema(classificationSchema); ajv.addSchema(profileGateSchema);
 const validateClassification = ajv.compile(classificationSchema); const validateAuthorization = ajv.compile(authorizationSchema);
 const defaultDimension = () => ({ level: 'none', rationale: 'No material change is recorded for this dimension.' });
+const stable = (value) => JSON.stringify(value);
+const profileDefinitions = [
+  ['authentication_authorization_security', ['security_authentication_authorization'], ['least_privilege', 'negative_privilege_tests'], ['security_review'], ['security'], 'stop_and_restore'],
+  ['sensitive_data_privacy_integrity', ['privacy_sensitive_data', 'data_integrity'], ['data_classification', 'integrity_invariants'], ['data_integrity_proof'], ['security'], 'stop_and_restore'],
+  ['schema_data_migration', ['migrations'], ['compatibility', 'dry_run', 'rollback', 'partial_failure'], ['migration_proof'], ['command', 'runtime'], 'stop_and_roll_back'],
+  ['external_api_integration', ['external_apis'], ['current_documentation', 'timeout_retry', 'idempotency', 'error_behavior'], ['external_api_proof'], ['api'], 'stop_and_revert'],
+  ['ui_accessibility', ['ui_accessibility'], ['interaction_states', 'accessibility', 'error_state', 'loading_state'], ['accessibility_proof'], ['browser'], 'stop_and_revert'],
+  ['infrastructure_deployment_configuration', ['infrastructure_configuration'], ['configuration_validation', 'deployment_plan', 'rollback'], ['infrastructure_proof'], ['command', 'runtime'], 'stop_and_roll_back'],
+  ['dependency_supply_chain', ['dependency_introduction'], ['subtraction_ladder', 'maintenance_security_license'], ['dependency_review'], ['security'], 'stop_and_revert']
+];
+const profileGates = (classification) => profileDefinitions.flatMap(([profile_id, dimensions, planning_constraints, verification_categories, required_proof_kinds, failure_recovery]) => {
+  const activation_evidence = dimensions.map((key) => classification.dimensions[key]).filter(({ level: value }) => value !== 'none').map(({ rationale }) => rationale);
+  return activation_evidence.length ? [{ profile_id, activation_evidence: [...new Set(activation_evidence)].sort(), planning_constraints, verification_categories, required_proof_kinds, human_approval_boundaries: ['before_merge', 'before_deployment'], failure_recovery }] : [];
+});
 
 export function classifyRisk({ contract, graph, capsule, signals = {} }) {
   if (!validateChangeContract(contract).valid || contract.lifecycle_state !== 'accepted') throw new Error('Risk classification requires a valid accepted Change Contract.');
@@ -41,19 +56,16 @@ export function validateRiskClassification(record) {
 export function authorizeClassification(classification, capsule) {
   const checked = validateRiskClassification(classification); if (!checked.valid) throw new Error(`Risk classification validation failed: ${JSON.stringify(checked.errors)}`);
   const high = classification.overall_level === 'high'; const medium = classification.overall_level === 'medium';
-  const authorization = { schema_version: '1.0.0', status: 'authorized', classification, allowed_autonomy: high ? 'none' : 'bounded_agent', human_approval_boundaries: high ? ['before_execution', 'before_external_effect', 'before_merge', 'before_deployment'] : medium ? ['before_merge', 'before_deployment'] : ['before_merge', 'before_deployment'], verification_categories: ['task_verification'], proof_categories: capsule.verification.proofs, isolation: high || medium ? 'isolated_worktree' : 'current_worktree', tool_posture: high ? 'plan_only' : 'narrow_write', invalidation_reasons: ['contract_drift', 'profile_drift', 'base_revision_drift', 'task_graph_drift', 'capsule_drift', 'anchor_drift', 'unresolved_uncertainty'] };
+  const gates = profileGates(classification);
+  const authorization = { schema_version: '1.0.0', status: 'authorized', classification, profile_gates: gates, allowed_autonomy: high ? 'none' : 'bounded_agent', human_approval_boundaries: high ? ['before_execution', 'before_external_effect', 'before_merge', 'before_deployment'] : ['before_merge', 'before_deployment'], verification_categories: ['task_verification', ...gates.flatMap(({ verification_categories }) => verification_categories)], proof_categories: capsule.verification.proofs, isolation: high || medium ? 'isolated_worktree' : 'current_worktree', tool_posture: high ? 'plan_only' : 'narrow_write', invalidation_reasons: ['contract_drift', 'profile_drift', 'base_revision_drift', 'task_graph_drift', 'capsule_drift', 'anchor_drift', 'unresolved_uncertainty'] };
   if (high) authorization.verification_categories.push('independent_review');
-  if (classification.dimensions.security_authentication_authorization.level !== 'none') authorization.verification_categories.push('security_review');
-  if (classification.dimensions.migrations.level !== 'none') authorization.verification_categories.push('migration_proof');
-  if (classification.dimensions.ui_accessibility.level !== 'none') authorization.verification_categories.push('accessibility_proof');
-  if (classification.dimensions.dependency_introduction.level !== 'none') authorization.verification_categories.push('dependency_review');
-  if (classification.dimensions.external_apis.level !== 'none') authorization.verification_categories.push('external_api_proof');
   if (!validateExecutionAuthorization(authorization).valid) throw new Error('Execution authorization validation failed.'); return authorization;
 }
 
 export function validateExecutionAuthorization(record) {
   if (!validateAuthorization(record)) return { valid: false, errors: validateAuthorization.errors };
   const high = record.classification.overall_level === 'high';
+  if (stable(record.profile_gates) !== stable(profileGates(record.classification)) || record.profile_gates.some((gate) => gate.human_approval_boundaries.some((boundary) => !record.human_approval_boundaries.includes(boundary)) || gate.verification_categories.some((category) => !record.verification_categories.includes(category)))) return { valid: false, errors: ['Production risk-profile gates are missing, altered, or unenforced.'] };
   if (record.status === 'authorized' && record.allowed_autonomy === 'none' && record.tool_posture !== 'plan_only') return { valid: false, errors: ['No-autonomy authorization must be plan-only.'] };
   if (high && (record.allowed_autonomy !== 'none' || record.tool_posture !== 'plan_only' || !record.human_approval_boundaries.includes('before_execution') || record.isolation !== 'isolated_worktree' || !record.verification_categories.includes('independent_review'))) return { valid: false, errors: ['High-risk authorization lacks required controls.'] };
   if (record.human_approval_boundaries.includes('before_merge') === false || record.human_approval_boundaries.includes('before_deployment') === false) return { valid: false, errors: ['Merge and deployment always remain human boundaries.'] };

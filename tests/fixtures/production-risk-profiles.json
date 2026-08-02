@@ -1,0 +1,13 @@
+{
+  "profiles": [
+    ["security_authentication_authorization", "authentication_authorization_security"],
+    ["privacy_sensitive_data", "sensitive_data_privacy_integrity"],
+    ["data_integrity", "sensitive_data_privacy_integrity"],
+    ["migrations", "schema_data_migration"],
+    ["external_apis", "external_api_integration"],
+    ["ui_accessibility", "ui_accessibility"],
+    ["infrastructure_configuration", "infrastructure_deployment_configuration"],
+    ["dependency_introduction", "dependency_supply_chain"]
+  ],
+  "combination": ["schema_data_migration", "dependency_supply_chain"]
+}

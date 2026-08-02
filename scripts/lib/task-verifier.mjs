@@ -22,7 +22,7 @@ function checkedInput({ contract, graph, capsule, authorization, executionEvent,
   if (!implementationAgentId || !verifierAgentId || implementationAgentId === verifierAgentId) throw new Error('Implementation and verification identities must be distinct.');
 }
 
-function checkProofs({ proofs, capsule, executionEvent, verifierAgentId, changeIdentity, verificationEventId }) {
+function checkProofs({ proofs, capsule, authorization, executionEvent, verifierAgentId, changeIdentity, verificationEventId }) {
   const expected = new Map(capsule.acceptance_criteria.map((criterion) => [criterion.criterion_id, criterion]));
   if (!Array.isArray(proofs) || proofs.length !== expected.size) throw new Error('Every acceptance criterion requires exactly one terminal proof record.');
   const seen = new Set();
@@ -34,6 +34,8 @@ function checkProofs({ proofs, capsule, executionEvent, verifierAgentId, changeI
       if (requiredKinds(expected.get(proof.criterion_id)).some((kind) => !kinds.has(kind))) throw new Error(`Criterion ${proof.criterion_id} lacks required proof evidence.`);
     }
   }
+  const categories = new Set(proofs.flatMap((proof) => proof.status === 'proven' ? proof.evidence.map(({ category }) => category) : []));
+  for (const gate of authorization.profile_gates) if (proofs.every(({ status }) => status === 'proven') && gate.required_proof_kinds.some((kind) => !categories.has(kind))) throw new Error(`Production profile ${gate.profile_id} lacks required proof evidence.`);
   return freeze(proofs.map((proof) => ({ ...proof, evidence: proof.evidence.map((item) => ({ ...item })) })));
 }
 
@@ -53,7 +55,7 @@ export async function verifyAuthorizedTask({ contract, graph, capsule, authoriza
     const verificationEvent = checkEvent(result?.event, executionEvent, verifierAgentId, changeIdentity);
     if (contextIds.has(verificationEvent.verifier.fresh_context_id)) throw new Error('Every verification attempt requires a new fresh context.');
     contextIds.add(verificationEvent.verifier.fresh_context_id);
-    proofs = checkProofs({ proofs: result?.proofs, capsule, executionEvent, verifierAgentId, changeIdentity, verificationEventId: verificationEvent.verification_event_id });
+    proofs = checkProofs({ proofs: result?.proofs, capsule, authorization, executionEvent, verifierAgentId, changeIdentity, verificationEventId: verificationEvent.verification_event_id });
     if (verificationEvent.status !== outcome(proofs)) throw new Error('Verification event status contradicts its criterion proofs.');
     events.push(verificationEvent);
     if (proofs.every(({ status }) => status === 'proven')) return freeze({ status: 'verified', repair_rounds: attempt, events, proofs });

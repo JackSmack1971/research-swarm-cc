@@ -81,7 +81,7 @@ Current-runtime Light and Deep version-2 archive acceptance is complete by maint
 | **57 — Production executor** | **Complete:** Implement authorized bounded task slices in isolated worktrees using risk-appropriate tools and effort. | Deterministic controller tests prove pre-execution authorization drift rejection, anchor scope containment, planning-state mutation rejection, immutable events, and a representative authorized fixture change. | Follows 55 and 56. No autonomous merge, deployment, or self-verification. |
 | **58 — Independent verification plane** | **Complete:** Validate a change against its contract from fresh context, with bounded targeted repair. | Separate verifier events and criterion proofs reject self-approval, stale identities, unsupported criteria, insufficient runtime evidence, and repair exhaustion. | Follows 57. The executor event remains unverified; no merge or deploy path. |
 | **59 — Delivery and handoff** | **Complete:** Preserve a concise delivery manifest and resume path. | A fresh Claude session can validate canonical references and understand the decision, contract, change identity, proofs, and unresolved risks without replaying the prior conversation. | Follows 58. It cannot execute, approve, push, merge, or deploy. |
-| **60 — Production risk profiles** | Apply conditional gates for security, data, API, UI, migration, infrastructure, and dependency changes. | High-risk work cannot bypass its required evidence or checks. | Follows 58. It refines, rather than replaces, the basic pre-execution risk classification. |
+| **60 — Production risk profiles** | **Complete:** Apply conditional gates for security, data, API, UI, migration, infrastructure, and dependency changes. | Activated profile gates cannot bypass their required evidence or checks. | Follows 58. It refines, rather than replaces, the basic pre-execution risk classification. |
 
 The maintainer will manually test a representative chain from an evidence packet through independent proof and delivery handoff at final project acceptance. That pending test does not block Milestone 60 or later development; it is required before declaring the project complete.
 
@@ -126,4 +126,4 @@ Review this roadmap after each completed milestone and after any material platfo
 
 ## Near-term decision
 
-Milestones 46 and 54–59 are complete. The next action is **Milestone 60**: production risk profiles. The executor remains prohibited from merging or deploying, and Milestone 64 must compare it to the recorded plain-Claude baseline before making value claims.
+Milestones 46 and 54–60 are complete. The executor remains prohibited from merging or deploying, and Milestone 64 must compare it to the recorded plain-Claude baseline before making value claims.

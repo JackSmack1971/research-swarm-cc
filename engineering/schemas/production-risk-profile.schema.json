@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "production-risk-profile.schema.json",
+  "title": "Conditional production risk-profile gate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["profile_id", "activation_evidence", "planning_constraints", "verification_categories", "required_proof_kinds", "human_approval_boundaries", "failure_recovery"],
+  "properties": {
+    "profile_id": { "enum": ["authentication_authorization_security", "sensitive_data_privacy_integrity", "schema_data_migration", "external_api_integration", "ui_accessibility", "infrastructure_deployment_configuration", "dependency_supply_chain"] },
+    "activation_evidence": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+    "planning_constraints": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+    "verification_categories": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "enum": ["security_review", "data_integrity_proof", "migration_proof", "external_api_proof", "accessibility_proof", "infrastructure_proof", "dependency_review"] } },
+    "required_proof_kinds": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "enum": ["command", "runtime", "browser", "api", "lsp", "security"] } },
+    "human_approval_boundaries": { "type": "array", "minItems": 2, "uniqueItems": true, "items": { "enum": ["before_execution", "before_external_effect", "before_merge", "before_deployment"] } },
+    "failure_recovery": { "enum": ["stop_and_restore", "stop_and_roll_back", "stop_and_revert"] }
+  }
+}

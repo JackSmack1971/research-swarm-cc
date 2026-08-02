@@ -51,6 +51,6 @@ node scripts/validate-research-run.mjs tests/fixtures/valid-run-v2
 
 Security fixes must preserve provenance, validation, archive-safety, and bounded-repair controls. Do not disclose a proof of concept in a public pull request until coordinated disclosure permits it.
 
-Pre-execution authorization is a deterministic control record, not a runtime permission grant. Security-, privacy-, integrity-, migration-, dependency-, infrastructure-, or high-consequence changes must retain its required human boundaries and proof categories; no record authorizes automatic merge or deployment.
+Pre-execution authorization is a deterministic control record, not a runtime permission grant. Conditional security, privacy/integrity, migration, external-API, UI/accessibility, infrastructure, and dependency profiles retain activation evidence, relevant planning constraints, required proof kinds, failure recovery, and human boundaries; a missing or altered gate fails closed. No record authorizes automatic merge or deployment.
 
 The bounded executor rechecks authorization and drift before isolated execution, blocks planning-state paths and scope escape, and records an unverified diff only. A separate fresh-context verifier receives no executor reasoning, records terminal criterion proofs, and can request at most two identified-defect repairs; command-only evidence cannot pass a runtime, browser, API, LSP, or security criterion. Neither role may use force operations, nested delegation, merge, push, deployment, or production side effects.

@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- Added deterministic conditional production risk-profile gates with required proof evidence for security, data, migration, API, UI, infrastructure, and dependency changes.
 - Added a deterministic, digest-bound delivery manifest and `/delivery-handoff` fresh-session renderer that preserves independent proof status and fails closed on missing or drifted delivery records.
 - Added fresh-context independent verification with append-only criterion proof records, required runtime/browser/API/LSP/security evidence, and at most two targeted repair rounds; implementation events remain unverified and cannot merge or deploy.
 - Added a bounded isolated-worktree executor that rechecks authorization, records immutable unverified implementation events, and cannot merge or deploy.

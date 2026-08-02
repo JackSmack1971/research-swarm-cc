@@ -4,11 +4,12 @@
   "title": "Execution authorization",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "status", "classification", "allowed_autonomy", "human_approval_boundaries", "verification_categories", "proof_categories", "isolation", "tool_posture", "invalidation_reasons"],
+  "required": ["schema_version", "status", "classification", "profile_gates", "allowed_autonomy", "human_approval_boundaries", "verification_categories", "proof_categories", "isolation", "tool_posture", "invalidation_reasons"],
   "properties": {
     "schema_version": { "const": "1.0.0" }, "status": { "enum": ["authorized", "denied"] }, "classification": { "$ref": "risk-classification.schema.json" },
+    "profile_gates": { "type": "array", "items": { "$ref": "production-risk-profile.schema.json" }, "uniqueItems": true },
     "allowed_autonomy": { "enum": ["none", "bounded_agent"] }, "human_approval_boundaries": { "type": "array", "items": { "enum": ["before_execution", "before_external_effect", "before_merge", "before_deployment"] }, "uniqueItems": true },
-    "verification_categories": { "type": "array", "minItems": 1, "items": { "enum": ["task_verification", "independent_review", "security_review", "migration_proof", "accessibility_proof", "dependency_review", "external_api_proof"] }, "uniqueItems": true },
+    "verification_categories": { "type": "array", "minItems": 1, "items": { "enum": ["task_verification", "independent_review", "security_review", "data_integrity_proof", "migration_proof", "accessibility_proof", "infrastructure_proof", "dependency_review", "external_api_proof"] }, "uniqueItems": true },
     "proof_categories": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
     "isolation": { "enum": ["current_worktree", "isolated_worktree"] }, "tool_posture": { "enum": ["narrow_write", "plan_only"] },
     "invalidation_reasons": { "type": "array", "minItems": 4, "items": { "enum": ["contract_drift", "profile_drift", "base_revision_drift", "task_graph_drift", "capsule_drift", "anchor_drift", "unresolved_uncertainty"] }, "uniqueItems": true }
