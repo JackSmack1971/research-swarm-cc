@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "evidence-route.schema.json",
+  "title": "Adaptive engineering evidence route",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "route_id", "knowledge_need_id", "tier", "rationale", "factors", "escalation_intent"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "route_id": { "type": "string", "pattern": "^ert_[A-Za-z0-9][A-Za-z0-9_-]*$" },
+    "knowledge_need_id": { "type": "string", "pattern": "^kn_[A-Za-z0-9][A-Za-z0-9_-]*$" },
+    "tier": { "enum": ["T0", "T1", "T2", "T3", "T4"] },
+    "rationale": { "type": "string", "minLength": 1 },
+    "factors": { "type": "object", "additionalProperties": false, "required": ["repository_answerable", "time_sensitive", "security_or_high_consequence", "evidence_conflict", "independence_required", "breadth", "external_lookup", "cost_budget", "context_budget"], "properties": { "repository_answerable": { "type": "boolean" }, "time_sensitive": { "type": "boolean" }, "security_or_high_consequence": { "type": "boolean" }, "evidence_conflict": { "type": "boolean" }, "independence_required": { "type": "boolean" }, "breadth": { "enum": ["narrow", "moderate", "broad"] }, "external_lookup": { "type": "boolean" }, "cost_budget": { "enum": ["minimal", "bounded", "generous"] }, "context_budget": { "enum": ["minimal", "bounded", "generous"] } } },
+    "escalation_intent": { "enum": ["none", "authoritative_lookup", "focused_research", "independent_verification", "full_swarm"] }
+  }
+}

@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- Added canonical Engineering Knowledge Need and adaptive Evidence Route contracts with deterministic T0–T4 routing, fail-closed underspecification, and offline escalation fixtures.
 - Added a deterministic engineering-knowledge path baseline benchmark covering ten question classes, current routing, unavailable telemetry, evidence consumption, and ranked pre-redesign opportunities.
 - Added versioned hybrid distribution lifecycle commands with conflict-safe install/update/rollback/uninstall, ownership manifests, path protections, and disposable-target tests.
 - Added a separate dormant engineering-learning registry with delivery-bound provenance, bounded lesson lifecycle, deterministic safety controls, and deferred live activation pending final Claude Code project acceptance.
