@@ -108,11 +108,12 @@ Use `/research-swarm` for a public-web research question. Use `light` for narrow
 | `node scripts/prototype-worktree.mjs <create\|cleanup> <experiment.json> <repository-root>` | Create or dispose a revision-checked disposable prototype worktree. | `scripts/prototype-worktree.mjs` |
 | `npm run tasks:compile -- <contract.json> <task-drafts.json> <absolute-target-directory>` | Validate accepted intent, compile a dependency-aware task graph, and emit disposable minimal task capsules. | `scripts/compile-task-graph.mjs` |
 | `npm run authorization:check -- <contract.json> <graph.json> <capsule.json> <absolute-target-directory>` | Classify pre-execution risk and emit bounded controls; rejects stale or unresolved inputs. | `scripts/authorize-task-execution.mjs` |
+| `npm run delivery:handoff -- <delivery-manifest.json> <target-directory>` | Validate canonical delivery references and render a compact, drift-checked fresh-session handoff. | `scripts/render-delivery-handoff.mjs` |
 | `node scripts/benchmark-engineering.mjs <run.json> [candidate-run.json]` | Validate/collect a safe engineering benchmark run or compare aligned runs without authorizing work. | `docs/engineering-benchmark.md` |
 | `node scripts/validate-research-run.mjs artifacts/research-runs/example-run` | Validate an archived run without changing it. | `research/README.md` |
 | `node scripts/finalize-research-run.mjs artifacts/research-runs/example-run` | Finalize a supplied archive; only the persistence writer should invoke this in normal workflow operation. | `research/README.md` |
 
-Claude Code commands for feedback, learning lifecycle operations, and review-only improvement proposals live in [`.claude/commands/`](.claude/commands/). The manual [`.claude/skills/build/SKILL.md`](.claude/skills/build/SKILL.md) provides `/build` decision routing, while [`.claude/skills/prototype-lane/SKILL.md`](.claude/skills/prototype-lane/SKILL.md) runs one bounded disposable experiment; neither implements production work.
+Claude Code commands for feedback, learning lifecycle operations, and review-only improvement proposals live in [`.claude/commands/`](.claude/commands/). The manual [`.claude/skills/build/SKILL.md`](.claude/skills/build/SKILL.md) provides `/build` decision routing, [`.claude/skills/prototype-lane/SKILL.md`](.claude/skills/prototype-lane/SKILL.md) runs one bounded disposable experiment, and [`.claude/skills/delivery-handoff/SKILL.md`](.claude/skills/delivery-handoff/SKILL.md) resumes a validated delivery handoff; none implements production work.
 
 ## Configuration and safety
 
@@ -142,6 +143,8 @@ Prototype work uses an absolute, disposable Git worktree outside the production 
 Task graphs are derived from an accepted, current Change Contract plus explicit task drafts. Each task maps to observable criteria, names code anchors and verification, carries explicit dependencies, and rejects unordered anchor collisions. Broad migrations may use `expand`, `migrate`, and `contract` slices; reversed dependencies fail. Capsules include only the mapped criteria and decision evidence, non-goals, base revision, anchors, verification, risks, and stop conditions. They deliberately exclude the full contract, research archives, specifications, conversation history, and permanent repository maps; any revision, fingerprint, contract, or anchor drift fails closed and requires regeneration.
 
 `/build` records deterministic risk classification and bounded authorization for the accepted current contract, task graph, capsule, and profile. The executor then rechecks that authorization immediately before creating an isolated worktree and returns immutable command/change events as **unverified implementation**. A separate fresh-context verifier receives the criterion/capsule, authorization posture, changed worktree, and change identity—but never executor reasoning—and records one terminal proof per criterion. It may request at most two identified-defect repairs, each re-verified from fresh context. Command evidence cannot satisfy a criterion requiring runtime, browser, API, LSP, or security proof. Neither role commits, merges, pushes, or deploys.
+
+A delivery manifest is a compact derived index over the accepted contract, profile, graph, capsule, authorization, immutable execution event, verifier events, and criterion proofs. `/delivery-handoff` validates every referenced file digest and current target fingerprint before rendering the decision, final diff identity, changed files, proofs, unresolved risks, repair history, integration state, and next action. It needs no prior conversation and fails closed on missing or stale records; it does not re-execute, approve, commit, push, merge, or deploy.
 
 ## Troubleshooting
 
@@ -174,7 +177,7 @@ The forward-looking, outcome-led roadmap is [docs/ROADMAP.md](docs/ROADMAP.md). 
 
 ## Roadmap
 
-Current-runtime Light and Deep acceptance, risk authorization, the plain-Claude engineering baseline harness, bounded executor, and independent verification plane are complete. Milestone 59 delivery and handoff is next; no executor value claim is allowed until Milestone 64 compares it against the recorded baseline.
+Current-runtime Light and Deep acceptance, risk authorization, the plain-Claude engineering baseline harness, bounded executor, independent verification, and delivery handoff are complete. Milestone 60 production risk profiles is next; no executor value claim is allowed until Milestone 64 compares it against the recorded baseline.
 
 ## License
 
