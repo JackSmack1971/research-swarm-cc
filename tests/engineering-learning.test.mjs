@@ -6,7 +6,7 @@ import path from 'node:path';
 import { promisify } from 'node:util';
 import test from 'node:test';
 import { authorizeTaskExecution } from '../scripts/lib/execution-authorization.mjs';
-import { compileEngineeringPolicy, CONSTITUTION_HASH, engineeringLearningRoot, readState, registerEngineeringEvidence, registerLesson, reviewLesson, advanceEngineeringLearning, rollbackEngineeringLesson, validateEngineeringLearningState, withEngineeringLearningLock, writeState } from '../scripts/lib/engineering-learning.mjs';
+import { compileEngineeringPolicy, CONSTITUTION_HASH, engineeringLearningRoot, readState, registerEngineeringEvidence, registerLesson, reviewLesson, advanceEngineeringLearning, rollbackEngineeringLesson, validateEngineeringLearningEvidence, validateEngineeringLearningState, withEngineeringLearningLock, writeState } from '../scripts/lib/engineering-learning.mjs';
 import { profileProject } from '../scripts/lib/project-profiler.mjs';
 import { compileContextCapsules, compileTaskGraph, sha256 } from '../scripts/lib/task-graph.mjs';
 
@@ -40,3 +40,12 @@ test('final activation requires a real live-delivery attestation and matching ma
 });
 
 test('engineering learning has a distinct root and does not import research-learning state', async () => { assert.match(engineeringLearningRoot('/tmp/el-root'), /el-root$/); const source = await readFile('scripts/lib/engineering-learning.mjs', 'utf8'); assert.doesNotMatch(source, /research-learning\.mjs|RESEARCH_LEARNING_ROOT|artifacts\/research-learning/); });
+
+test('retrieval outcomes store bounded process telemetry without research truth and stay dormant', async (t) => {
+  const stateRoot = await mkdtemp(path.join(os.tmpdir(), 'engineering-retrieval-learning-')); t.after(() => rm(stateRoot, { recursive: true, force: true }));
+  const outcome = { schema_version: '1.0.0', evidence_id: 'elv_retrieval', provenance_kind: 'synthetic_fixture', signal_type: 'retrieval_outcome', signal_summary: 'T0 answered a repository need with one read.', signal_source: { kind: 'outcome_record', record_id: 'out_retrieval' }, retrieval_outcome: { knowledge_need_id: 'kn_repository', knowledge_need_sha256: 'a'.repeat(64), completed: true, need_class: 'repository', risk: 'low', freshness: 'none', route: { route_id: 'ert_repository', tier: 'T0' }, repository_mechanism: 'read', graphify: { used: false, why: 'Exact file read answered the need.' }, counts: { agents: 0, sources: 0 }, telemetry: { context_tokens: null, total_tokens: null, latency_ms: 4 }, decision: { entered_accepted_decision: false }, criteria: { linked: 0, independently_proven: 0 }, rework: { required: false, rounds: 0 }, feedback: { usefulness: 'high', dead_end: false }, evidence_quality: 'sufficient', provenance: { record_kind: 'outcome_record', record_id: 'out_retrieval', sha256: 'b'.repeat(64) } } };
+  assert.equal(validateEngineeringLearningEvidence(outcome).valid, true);
+  const result = await registerEngineeringEvidence({ root: stateRoot, evidence: outcome }); assert.equal(result.live_eligible, false);
+  const state = await readState(stateRoot); assert.equal(state.evidence[0].retrieval_outcome.route.tier, 'T0'); assert.equal(compileEngineeringPolicy(state, 'repository').dormant, true);
+  await assert.rejects(() => registerEngineeringEvidence({ root: stateRoot, evidence: { ...outcome, evidence_id: 'elv_conflict', retrieval_outcome: { ...outcome.retrieval_outcome, evidence_quality: 'conflicting' } } }), /fails closed/);
+});
